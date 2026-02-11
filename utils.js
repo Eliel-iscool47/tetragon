@@ -5,15 +5,15 @@ const utils = {
     randomInt(min, max) {
         return Math.floor(this.randomFloat(min, max))
     },
-    flround(num, percision) {
-        if (this.isNullish(percision)) percision = 0
-        return Math.floor(num * (10 ** percision) + 0.5) / (10 ** percision)
+    floatRound(num, precision) {
+        if (this.isNullish(precision)) precision = 0
+        return Math.floor(num * (10 ** precision) + 0.5) / (10 ** precision)
     },
-    slope(ln1, lat1, ln2, lat2) {
-        return Math.atan2(lat2 - lat1, ln2 - ln1)
+    angle(x1, y1, x2, y2) {
+        return Math.atan2(y1 - y2, x1 - x2)
     },
-    distance(ln1, lat1, ln2, lat2) {
-        return Math.sqrt((ln2 - ln1) ** 2 + (lat2 - lat1) ** 2)
+    distance(x1, y1, x2, y2) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     },
     polarCoords(r, theta) {
         return {
@@ -24,10 +24,19 @@ const utils = {
     now() {
         return Date.now() / 1000
     },
-    isNullish(val){
+    isNullish(val) {
         return val == null || val == undefined || val == '' || val == {} || val == []
     },
     redirect(url) {
-        window.location.replace(url)
-    }
+        window.location.src = url
+    },
+    clamp(num, min, max) {
+        return Math.min(Math.max(num, min), max)
+    },
+    lerp(a, b, t) {
+        return a + (b - a) * this.clamp(t, 0, 1)
+    },
+    toggle(bool) {
+        return !bool
+    },
 }

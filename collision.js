@@ -10,9 +10,14 @@ const collisions = {
         bottom: main.height - player.size / 2,
     },
     playerCollisions() {
-        if (!simulation.isPaused) mobs.list.forEach(mob => {
-            if (utils.distance(player.pos.long, player.pos.lat, mob.pos.x, mob.pos.y) < player.size / 2 && utils.distance(player.pos.long, player.pos.lat, mob.pos.x, mob.pos.y) < player.size / 2) {
-                player.health -= mob.damage * player.damageTaken
+        if (simulation.isPaused) return undefined
+        mobs.list.forEach(mob => {
+            if (utils.distance(player.pos.x, player.pos.y, mob.pos.x, mob.pos.y) < player.size / 2) player.dealDamage(mob.damage)
+            
+        })
+        powerUps.list.forEach(p => {
+            if (utils.distance(player.pos.x, player.pos.y, p.pos.x, p.pos.y) < player.size / 2) {
+                p.effect()
             }
         })
     },
@@ -20,11 +25,15 @@ const collisions = {
         mobs.list.forEach(mob => {
             if (mob.health <= 0) mobs.list.splice(mobs.list.indexOf(mob), 1)
             bullets.list.forEach(bullet => {
-                if (Math.abs(mob.pos.x - bullet.pos.x) < 10 && Math.abs(mob.pos.y - bullet.pos.y) < 10) {
-
-                    mob.health -= guns.equippedGun.damage
-                    bullets.list.splice(bullets.list.indexOf(bullet), 1)
-                }
+                if (utils.distance(mob.pos.x, mob.pos.y, bullet.pos.x, bullet.pos.y) > mob.size) return undefined
+                if (bullet.isExplode) bullets.explosion(bullet.pos.x, bullet.pos.y)
+                mob.health -= guns.equippedGun.damage
+                bullets.list.splice(bullets.list.indexOf(bullet), 1)
+            })
+            bullets.explosions.forEach(xpl => {
+                if (utils.distance(mob.pos.x, mob.pos.y, xpl.pos.x, xpl.pos.y) > mob.size) return undefined
+                mob.health -= 5
+                bullets.explosions.splice(bullets.explosions.indexOf(xpl), 1)
             })
         })
     }

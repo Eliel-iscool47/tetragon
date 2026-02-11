@@ -1,5 +1,10 @@
 const input = {
     pressedKeys: [],
+    toggleCooldown: 0,
+    paused: 0,
+    gunL: 0,
+    gunR: 0,
+    test: 0,
     keybinds: {
         up: 'KeyW',
         down: 'KeyS',
@@ -19,65 +24,94 @@ const input = {
     cursor: {
         x: collisions.center.x,
         y: collisions.center.y,
-        angle: Math.atan2(this.y - player.pos.lat, this.x - player.pos.long),
+        angle: utils.angle(this.x, this.y, player.pos.x, player.pos.y),
         update(posX, posY) {
             this.x = posX
             this.y = posY
-            if (!simulation.isPaused) this.angle = Math.atan2(this.y - player.pos.lat, this.x - player.pos.long)
+            if (!simulation.isPaused) this.angle = utils.angle(this.x, this.y, player.pos.x, player.pos.y)
         }
     },
     up() {
-        if (!simulation.isPaused) player.pos.lat -= player.velocity
+        if (!simulation.isPaused) player.pos.y -= player.velocity
     },
     down() {
-        if (!simulation.isPaused) player.pos.lat += player.velocity
+        if (!simulation.isPaused) player.pos.y += player.velocity
     },
     left() {
-        if (!simulation.isPaused) player.pos.long -= player.velocity
+        if (!simulation.isPaused) player.pos.x -= player.velocity
     },
     right() {
-        if (!simulation.isPaused) player.pos.long += player.velocity
+        if (!simulation.isPaused) player.pos.x += player.velocity
     },
     fire() {
-        if (simulation.isDead) return undefined
-        if (simulation.isMainMenu) return undefined
         if (utils.isNullish(guns.equippedGun)) {
-            console.log('guns.equippedGun == undefined')
+            simulation.log('guns.equippedGun == undefined')
             return undefined
         }
         if (simulation.isPaused) return undefined
-        //make the equipped gun unable to shoot if the last bulllet shot was shot before 1/the gun's fire rate
-        if (!simulation.isTesting && simulation.time - guns.lastBulletShot < 1 / guns.equippedGun.fireRate) return undefined
-        if (guns.equippedGun == guns.rifle || guns.equippedGun == guns.minigun || guns.equippedGun == guns.sniper || guns.equippedGun == guns.smg || guns.equippedGun == guns.pistol || guns.equippedGun == guns.shotgun) bullets.muzzleFlash()
+        if (!simulation.isTesting && guns.equippedGun.ammo > 0 && simulation.time - guns.lastBulletShot < 1 / guns.equippedGun.fireRate) return undefined
         guns.equippedGun.shoot()
+        if (guns.equippedGun.isMuzzleFlash) bullets.muzzleFlash()
         guns.lastBulletShot = simulation.time
     },
-    airStrike() {
-        if (simulation.isPaused) return undefined
-        guns.airStrike()
-    },
     rightClick() {
-        console.log('right click')
+        simulation.log('right click')
     },
     gunLeft() {
-        guns.equippedGun = guns.inventory.at((guns.inventory.indexOf(guns.equippedGun) - 1) % guns.inventory.length)
+        if (simulation.absTime - this.gunL >= this.toggleCooldown) {
+            this.gunL = simulation.absTime
+            guns.equippedGun = guns.inventory.at((guns.inventory.indexOf(guns.equippedGun) - 1) % guns.inventory.length)
+        }
     },
     gunRight() {
-        guns.equippedGun = guns.inventory.at((guns.inventory.indexOf(guns.equippedGun) + 1) % guns.inventory.length)
+        if (simulation.absTime - this.gunR >= this.toggleCooldown) {
+            this.gunR = simulation.absTime
+            guns.equippedGun = guns.inventory.at((guns.inventory.indexOf(guns.equippedGun) + 1) % guns.inventory.length)
+        }
     },
     reload() {
         if (!utils.isNullish(guns.equippedGun)) guns.equippedGun.reload()
     },
     allGuns() {
-        guns.allGuns()
+        if (simulation.isTesting) guns.allGuns()
     },
     respawn() {
-        simulation.wipe()
-        guns.equippedGun = undefined
+        simulation.isPaused = false
+        simulation.isDead = false
+        simulation.isTesting = false
+        simulation.time = 0
+        player.pos.x = collisions.center.x
+        player.pos.y = collisions.center.y
+        player.maxHealth = 100
+        player.health = player.maxHealth
+        mobs.list = []
+        level.current = 0
+        level.time = 0
+        bullets.list = []
+        bullets.explosions = []
+        powerUps.list = []
         guns.inventory = []
+        guns.equippedGun = undefined
         simulation.timeOffset = utils.now()
+        simulation.startTime = utils.now()
+        simulation.isMainMenu = false
+        simulation.isDead = false
+        player.pos.x = collisions.center.x
+        player.pos.y = collisions.center.y
+        player.maxHealth = 100
+        player.health = player.maxHealth
     },
     testing() {
+        if (simulation.absTime - this.paused >= this.toggleCooldown) {
+            simulation.isTesting = !simulation.isTesting
+            this.paused = simulation.absTime
+        }
+    },
+    pause() {
+        if (simulation.absTime - this.paused >= this.toggleCooldown) {
+            simulation.isPaused = !simulation.isPaused
+            this.paused = simulation.absTime
+        }
     },
     mainMenu() {
         if (!simulation.isMainMenu) simulation.mainMenu()
@@ -117,21 +151,22 @@ const input = {
                     this.fire()
                     break
                 case this.keybinds.gunLeft:
+                    if (this.gunL + simulation.time < this.toggleCooldown) return undefined
+                    this.gunL = simulation.time
                     this.gunLeft()
                     break
                 case this.keybinds.gunRight:
+                    if (this.gunR + simulation.time < this.toggleCooldown) return undefined
+                    this.gunR = simulation.time
                     this.gunRight()
                     break
                 case this.keybinds.testing:
-                    if (simulation.isTesting) simulation.exitTest()
-                    else simulation.test()
+                    if (this.test + simulation.time < this.toggleCooldown) return undefined
+                    this.test = simulation.time
+                    this.testing()
                     break
                 case this.keybinds.pause:
-                    if (simulation.isPaused) simulation.resume()
-                    else simulation.pause()
-                    break
-                case this.keybinds.heal:
-                    this.heal()
+                    this.pause()
                     break
                 case this.keybinds.respawn:
                     this.respawn()
@@ -142,9 +177,6 @@ const input = {
                 case this.keybinds.allGuns:
                     this.allGuns()
                     break
-                case this.keybinds.airStrike:
-                    this.airStrike()
-                    break
                 case this.keybinds.mainMenu:
                     if (simulation.isDead || simulation.isPaused) this.mainMenu()
                     break
@@ -152,6 +184,7 @@ const input = {
                     break
             }
         })
+        this.cursor.angle = utils.angle(this.cursor.x, this.cursor.y, player.pos.x, player.pos.y)
     }
 }
 //actually handling input
@@ -172,8 +205,8 @@ main.addEventListener('mousemove', (e) => {
     input.cursor.update(e.offsetX, e.offsetY)
 })
 document.addEventListener('keydown', (e) => {
-    if (!input.pressedKeys.includes(e.code)) input.pressedKeys.push(e.code)
-    input.keyLogic()
+    if (input.pressedKeys.includes(e.code)) return undefined
+    input.pressedKeys.push(e.code)
     if (simulation.isMainMenu || simulation.isTesting) console.log(e.code)
 })
 document.addEventListener('keyup', (e) => {

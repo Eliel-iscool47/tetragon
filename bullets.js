@@ -1,15 +1,16 @@
 const bullets = {
     explosionDuration: 0.3,
+    explosionSize: 20,
     duration: 1,
     list: [],
     explosions: [],
-    grenade(long, lat) {
+    grenade(x, y) {
         this.list.push({
             pos: {
-                x: long,
-                y: lat
+                x: x,
+                y: y
             },
-            angle: Math.atan2(input.cursor.y - lat, input.cursor.x - long),
+            angle: Math.atan2(input.cursor.y - y, input.cursor.x - x),
             speed: 10,
             timeSpawned: simulation.time,
             isHoming: false,
@@ -17,11 +18,11 @@ const bullets = {
             origin: guns.grenadeLauncher,
         })
     },
-    missile(long, lat) {
+    missile(x, y) {
         bullets.list.push({
             pos: {
-                x: long,
-                y: lat,
+                x: x,
+                y: y,
             },
             angle: input.cursor.angle,
             speed: 10,
@@ -31,13 +32,13 @@ const bullets = {
             origin: guns.missiles,
         })
     },
-    explode(long, lat, size) {
+    explosion(x, y, size) {
         this.explosions.push({
             pos: {
-                x: long,
-                y: lat
+                x: x,
+                y: y
             },
-            size: size,
+            size: size * this.explosionSize,
             time: simulation.time
         })
     },
@@ -47,12 +48,12 @@ const bullets = {
             draw.fillStyle = 'hsl(25, 100%, 50%)'
             draw.arc(xpl.pos.x, xpl.pos.y, xpl.size / 2, 0, Math.PI * 2)
             draw.fill()
-        });
+        })
     },
     kill() {
         this.list.forEach(bullet => {
             if (bullet.timeSpawned < simulation.time - this.duration * bullet.origin.bulletDuration) {
-                if (bullet.isExplode) this.explode(bullet.pos.x, bullet.pos.y, 20)
+                if (bullet.isExplode) this.explosion(bullet.pos.x, bullet.pos.y, 2)
                 this.list.splice(this.list.indexOf(bullet), 1)
             }
         })
@@ -65,7 +66,7 @@ const bullets = {
     muzzleFlash() {
         draw.beginPath()
         draw.fillStyle = 'hsl(30, 100%, 50%)'
-        draw.arc(player.pos.long + (Math.cos(input.cursor.angle) * player.size / 2), player.pos.lat + (Math.sin(input.cursor.angle) * player.size / 2), player.size * 0.2, 0, Math.PI * 2)
+        draw.arc(player.pos.x + (Math.cos(input.cursor.angle) * player.size / 2), player.pos.y + (Math.sin(input.cursor.angle) * player.size / 2), player.size * 0.2, 0, Math.PI * 2)
         draw.fill()
     },
     move() {
@@ -109,7 +110,7 @@ const bullets = {
                     draw.arc(0, 0, 5, 0, Math.PI * 2)
                     draw.fill()
                     break
-                case guns.minigun:
+                case guns.miniGun:
                     draw.fillStyle = 'hsl(0, 100%, 20%)'
                     draw.beginPath()
                     draw.arc(0, 0, 5, 0, Math.PI * 2)
