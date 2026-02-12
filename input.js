@@ -120,6 +120,30 @@ const input = {
         this.cursor.update(click.offsetX, click.offsetY)
         this.fire()
     },
+    keyToggleLogic() {
+        this.pressedKeys.forEach(key => {
+            switch(key) {
+                case this.keybinds.gunLeft:
+                    if (this.gunL + simulation.time < this.toggleCooldown) return undefined
+                    this.gunL = simulation.time
+                    this.gunLeft()
+                    break
+                case this.keybinds.gunRight:
+                    if (this.gunR + simulation.time < this.toggleCooldown) return undefined
+                    this.gunR = simulation.time
+                    this.gunRight()
+                    break
+                case this.keybinds.testing:
+                    if (this.test + simulation.time < this.toggleCooldown) return undefined
+                    this.test = simulation.time
+                    this.testing()
+                    break
+                case this.keybinds.pause:
+                    this.pause()
+                    break
+            }
+        })
+    },
     keyLogic() {
         this.pressedKeys.forEach(key => {
             switch (key) {
@@ -149,24 +173,6 @@ const input = {
                     break
                 case this.keybinds.fire:
                     this.fire()
-                    break
-                case this.keybinds.gunLeft:
-                    if (this.gunL + simulation.time < this.toggleCooldown) return undefined
-                    this.gunL = simulation.time
-                    this.gunLeft()
-                    break
-                case this.keybinds.gunRight:
-                    if (this.gunR + simulation.time < this.toggleCooldown) return undefined
-                    this.gunR = simulation.time
-                    this.gunRight()
-                    break
-                case this.keybinds.testing:
-                    if (this.test + simulation.time < this.toggleCooldown) return undefined
-                    this.test = simulation.time
-                    this.testing()
-                    break
-                case this.keybinds.pause:
-                    this.pause()
                     break
                 case this.keybinds.respawn:
                     this.respawn()
@@ -207,8 +213,10 @@ main.addEventListener('mousemove', (e) => {
 document.addEventListener('keydown', (e) => {
     if (input.pressedKeys.includes(e.code)) return undefined
     input.pressedKeys.push(e.code)
+    input.ketToggleLogic()
     if (simulation.isMainMenu || simulation.isTesting) console.log(e.code)
 })
 document.addEventListener('keyup', (e) => {
     if (input.pressedKeys.includes(e.code)) input.pressedKeys.splice(input.pressedKeys.indexOf(e.code), 1)
+
 })
