@@ -444,6 +444,7 @@ const guns = {
         return undefined
     },
     random(mags) {
+        if (this.inventory.length >= 8) return undefined
         switch (utils.randomInt(1, 8)) {
             case 1:
                 if (this.inventory.includes(guns.rifle)) this.random(mags)
@@ -483,3 +484,4 @@ const guns = {
         }
     }
 }
+
