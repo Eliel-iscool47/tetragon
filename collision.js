@@ -15,8 +15,10 @@ const collisions = {
         if (simulation.isPaused) return undefined
         mobs.list.forEach(mob => {
             if (utils.distance(player.pos.x, player.pos.y, mob.pos.x, mob.pos.y) < player.size / 2 && simulation.time - mob.timeSinceLastAttack > mob.attackCooldown) {
-                player.dealDamage(mob.damage)
-                if (mob.attackType == 'melee') mob.timeSinceLastAttack = simulation.time
+                player.health -= mob.damage * player.damageTaken
+                mob.timeSinceLastAttack = simulation.time
+                mob.pos.x += Math.cos(utils.angle(input.cursor.x, input.cursor.y, player.pos.x, player.pos.y)) * player.size
+                mob.pos.y += Math.sin(utils.angle(input.cursor.x, input.cursor.y, player.pos.x, player.pos.y)) * player.size
             }
         })
     },
