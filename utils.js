@@ -36,7 +36,11 @@ const utils = {
     lerp(a, b, t) {
         return a + (b - a) * this.clamp(t, 0, 1)
     },
-    toggle(bool) {
-        return !bool
-    },
+    avg(args) {
+        let sum = 0
+        args.forEach(arg => {
+            sum += arg
+        })
+        return sum / args.length
+    }
 }

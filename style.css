@@ -1,13 +1,132 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: Consolas;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 50px;
     margin: 0;
     padding: 0;
 }
 
-.canvas {
+#container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+#main {
     position: absolute;
     top: 0;
     left: 0;
     overflow: hidden;
     cursor: default;
+    margin: 0;
+    padding: 0;
+}
+
+#start {
+    font-family: 'Consolas';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 50px;
+    position: absolute;
+    background-color: hsl(210, 100%, 40%);
+    color: #ffffff;
+    border-radius: 5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black;
+    cursor: pointer;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+#settings {
+    font-family: 'Consolas';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 50px;
+    position: absolute;
+    background-color: hsl(0, 0%, 45%);
+    color: #ffffff;
+    border-radius: 5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+#controls {
+    font-family: 'Consolas';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 50px;
+    position: absolute;
+    background-color: hsl(0, 100%, 30%);
+    color: #ffffff;
+    border-radius: 5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+#credits {
+    font-family: 'Consolas';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 50px;
+    position: absolute;
+    background-color: hsl(0, 0%, 60%);
+    color: #ffffff;
+    border-radius: 5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+#control-doc {
+    font-family: 'Consolas';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 50px;
+    position: absolute;
+    background-color: hsl(0, 0%,0);
+    color: #000000;
+    border-radius: 5px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: black;
+    cursor: text;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    display: none;
+}
+
+#pause-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items:flex-start;
+    color: white;
+    font-size: 100px;
+    font-family: 'Consolas';
+    font-style: normal;
+    font-weight: 600;
+    z-index: 10;
 }

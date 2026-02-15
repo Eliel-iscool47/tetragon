@@ -6,7 +6,7 @@ const guns = {
         name: 'rifle',
         ammo: 30,
         magSize: 30,
-        magazines: 5,
+        magazines: 3,
         damage: 1.5,
         fireRate: 20,
         bulletDuration: 1,
@@ -96,7 +96,11 @@ const guns = {
                 this.reload()
                 return undefined
             }
-            for (let index = 0; index < 20; index++) {
+            for (
+                let index = 0;
+                index < 20;
+                index++
+            ) {
                 bullets.list.push({
                     pos: {
                         x: player.pos.x + (Math.cos(input.cursor.angle) * player.size / 2),
@@ -117,7 +121,7 @@ const guns = {
     sniper: {
         name: 'sniper',
         ammo: 5,
-        magSize: 5,
+        magSize: 3,
         magazines: 3,
         damage: 8,
         bulletDuration: 4,
@@ -172,9 +176,9 @@ const guns = {
     },
     smg: {
         name: 'SMG',
-        ammo: 30,
-        magSize: 30,
-        magazines: 5,
+        ammo: 50,
+        magSize: 50,
+        magazines: 2,
         damage: 1.2,
         fireRate: 35,
         bulletDuration: 1,
@@ -228,8 +232,8 @@ const guns = {
     },
     pistol: {
         name: 'pistol',
-        ammo: 30,
-        magSize: 30,
+        ammo: 10,
+        magSize: 10,
         magazines: 5,
         damage: 1.4,
         fireRate: 6,
@@ -283,11 +287,11 @@ const guns = {
         }
     },
     miniGun: {
-        name: 'miniGun',
+        name: 'minigun',
         ammo: 300,
         magSize: 300,
-        magazines: 3,
-        damage: 0.7,
+        magazines: 0,
+        damage: 0.1,
         fireRate: 100,
         bulletDuration: 1,
         spread: 0,
@@ -342,7 +346,7 @@ const guns = {
         name: 'grenade launcher',
         ammo: 6,
         magSize: 6,
-        magazines: 50,
+        magazines: 10,
         damage: 1.3,
         fireRate: 2,
         bulletDuration: 1.5,
@@ -494,7 +498,7 @@ const guns = {
                 break
             case 5:
                 if (this.inventory.includes(guns.pistol)) this.random(mags)
-                else guns.pistol.get(mags)
+                else guns.pistol.get(mags * 0.5)
                 break
             case 6:
                 if (this.inventory.includes(guns.miniGun)) this.random(mags)
@@ -506,7 +510,7 @@ const guns = {
                 break
             case 8:
                 if (this.inventory.includes(guns.missiles)) this.random(mags)
-                else guns.missiles.get(mags)
+                else guns.missiles.get(mags * 5)
                 break
             default:
                 document.location.href = 'error.html'

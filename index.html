@@ -1,24 +1,40 @@
 <!DOCTYPE html>
-<html>
+<img>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <title>Tetragon</title>
     <link rel="stylesheet" href="style.css">
     </link>
     <link rel="icon" href="./assets/favicon.ico">
     </link>
-</head>
 
+</head>
 <body>
-    <canvas class="canvas" id="main"></canvas>
-    <script src="main.js"></script>
-    <script src="utils.js"></script>
-    <script src="sprites.js"></script>
-    <script src="upgrades.js"></script>
-    <script src="powerups.js"></script>
-    <script src="player.js"></script>
-    <script src="mobs.js"></script>
-    <script src="bullets.js"></script>
+
+    <canvas id="screen"></canvas>
+    <div id="pause-screen">
+        <h1>PAUSED</h1>
+        <p>Press P to resume or M to return to the main menu.</p>
+    </div>
+    <div id="container">
+        <button id="start">Start Game</button>
+        <button id="settings">Settings</button>
+        <button id="controls">Controls</button>
+        <div id="control-doc"></div>
+        <button id="credits">Credits</button>
+    </div>
+    <script src="main.js">
+    </script><script src="utils.js">
+
+    </script><script src="upgrades.js">
+
+    </script><script src="sprites.js">
+</script><script src="powerups.js"></script><script src="player.js"></script><script src="mobs.js"></script><script src="spawn.js"></script>
+	<script src="bullets.js"></script>
     <script src="sound.js"></script>
     <script src="hud.js"></script>
     <script src="guns.js"></script>

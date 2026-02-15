@@ -17,12 +17,12 @@ const hud = {
     },
     damageBar() {
         draw.fillStyle = 'hsl(0, 100%, 40%)'
-        draw.fillRect(main.width - 12, 0, 20, player.damage * 150)
+        draw.fillRect(main.width - 12, 0, 20, player.damageDone * 150)
     },
     upgradeList() {
         draw.fillStyle = 'hsl(0, 0%, 70%)'
         draw.fillRect(main.width * 0.9, 0, main.width * 0.1, main.height * 0.4)
-        
+
     },
     inventory() {
         draw.fillStyle = 'hsl(0, 0%, 70%)'
@@ -39,6 +39,15 @@ const hud = {
             draw.textAlign = 'left'
             draw.fillText(`${gun.name}: ${`${(gun.ammo + (gun.magazines * gun.magSize))}`.replaceAll('Infinity', '∞')}`, 10, 70 + index * 30)
         })
+    },
+    levelCounter() {
+        draw.fillStyle = 'hsl(0, 0%, 70%)'
+        draw.fillRect(main.width - 200, 0, 180, 50)
+        draw.font = '20px Consolas'
+        draw.textAlign = 'left'
+        draw.fillStyle = 'black'
+        if (mobs.list.length > 0) draw.fillText(`level ${level.current}`, main.width - 165, 30)
+        else draw.fillText(`level ${level.current + 1} in ${level.intermission - Math.floor(simulation.time - level.time)}s`, main.width - 165, 30)
     },
     elapsedTime() {
         draw.fillStyle = 'hsl(0, 0%, 60%)'
@@ -65,6 +74,7 @@ const hud = {
         this.damageBar()
         this.inventory()
         this.elapsedTime()
-        this.upgradeList()
+        this.levelCounter()
+        // this.upgradeList()
     }
 }
