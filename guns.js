@@ -441,42 +441,7 @@ const guns = {
         guns.grenadeLauncher.get(Infinity)
     },
     drawGun() {
-        draw.save()
-        draw.translate(player.pos.x, player.pos.y)
-        draw.rotate(input.cursor.angle)
-        switch (guns.equippedGun) {
-            case guns.rifle:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.rifle.left, player.size * 0.7, player.size * -0.25, player.size * 1.6, player.size * 0.5)
-                else draw.drawImage(sprites.rifle.right, player.size * 0.7, player.size * -0.25, player.size * 1.6, player.size * 0.5)
-                break
-            case guns.shotgun:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.shotgun.left, player.size * 0.7, player.size * -0.25, player.size * 2, player.size * 0.6)
-                else draw.drawImage(sprites.shotgun.right, player.size * 0.7, player.size * -0.25, player.size * 2, player.size * 0.6)
-                break
-            case guns.sniper:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.sniper.left, player.size * 0.7, player.size * -0.25, player.size * 2.5, player.size * 0.6)
-                else draw.drawImage(sprites.sniper.right, player.size * 0.7, player.size * -0.25, player.size * 2, player.size * 0.6)
-                break
-            case guns.smg:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.smg.left, player.size * 0.7, player.size * -0.25, player.size * 1.2, player.size * 0.8)
-                else draw.drawImage(sprites.smg.right, player.size * 0.7, player.size * -0.25, player.size * 1.2, player.size * 0.8)
-                break
-            case guns.pistol:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.pistol.left, player.size * 0.7, player.size * -0.25, player.size * 0.8, player.size * 0.6)
-                else draw.drawImage(sprites.pistol.right, player.size * 0.7, player.size * -0.25, player.size * 0.8, player.size * 0.6)
-                break
-            case guns.miniGun:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.miniGun.left, player.size * 0.7, player.size * -0.25, player.size * 1.8, player.size * 0.8)
-                else draw.drawImage(sprites.miniGun.right, player.size * 0.7, player.size * -0.25, player.size * 1.8, player.size * 0.8)
-                break
-            case guns.grenadeLauncher:
-                if (input.cursor.angle < Math.PI / -2 || input.cursor.angle > Math.PI / 2) draw.drawImage(sprites.grenadeLauncher.left, player.size * 0.7, player.size * -0.45, player.size * 2.6, player.size * 1.3)
-                else draw.drawImage(sprites.grenadeLauncher.right, player.size * 0.7, player.size * -0.45, player.size * 2.6, player.size * 1.3)
-                break
-            default:
-                break
-        }
-        draw.restore()
+        return undefined
     },
     random(mags) {
         switch (utils.randomInt(1, 8)) {

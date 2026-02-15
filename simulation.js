@@ -122,7 +122,6 @@ const simulation = {
 					collisions.border.right = main.width - player.size / 2
 					collisions.border.top = player.size / 2
 					collisions.border.bottom = main.height - player.size / 2
-					guns.drawGun()
 					mobs.drawMobs()
 					powerUps.draw()
 					powerUps.logic()
