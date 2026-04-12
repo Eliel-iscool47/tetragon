@@ -5,7 +5,11 @@ const simulation = {
 
 	_consoleMessage: ``,
 	get consoleMessage() { return this._consoleMessage },
-	set consoleMessage(val) { this._consoleMessage = val },
+	set consoleMessage(val) {
+		this._consoleMessage = `
+${val}
+${this._consoleMessage}
+` },
 
 	_isDead: false,
 	get isDead() { return this._isDead },
@@ -39,7 +43,6 @@ const simulation = {
 		style ??= 'color: black; font-size: 14px;'
 		this.consoleMessage = `<p>
 <span style="${style}">${msg}</span><br>
-${this.consoleMessage}
 </p>
 		`
 	},
@@ -72,7 +75,6 @@ ${this.consoleMessage}
 		document.title = 'Tetragon: Main Menu'
 		simulation.startTime = now()
 		simulation.timeOffset = now()
-		simulation.absOffset = now()
 		simulation.time = 0
 		dc.style.display = 'block'
 		this.wipe()
@@ -156,7 +158,7 @@ ${this.consoleMessage}
 		mobs.healthBars()
 		powerUps.draw()
 		powerUps.logic()
-		if (!mobs.list.some(m => m.class == 'boss')) {
+		if (!mobs.list.some(function (m) { return m.class == 'boss' }.bind(this))) {
 			mobs.list = []
 			if (level.current <= 0 || this.time - level.time >= level.intermission) {
 				level.next()
@@ -191,9 +193,7 @@ ${this.consoleMessage}
 		this.isTesting = false
 		this.time = 0
 		this.timeOffset = now()
-		this.absOffset = now()
 		this.startTime = now()
-		this.absTime = 0
 		dc.style.display = 'none'
 		main.style.cursor = 'default'
 		pauseScreen.style.display = 'none'
@@ -241,7 +241,7 @@ ${this.consoleMessage}
 				draw.strokeRect(-s * 0.5, -s * 0.5, s, s)
 				break
 			case guns.equippedGun == guns.bouncyBalls:
-				u.polygon(0, 0, s * 0.5, 8, Math.PI / 8)
+				draw.arc(0, 0, s * 0.5, 0, Math.PI * 2, false)
 				draw.stroke()
 				break
 			case guns.equippedGun == undefined:

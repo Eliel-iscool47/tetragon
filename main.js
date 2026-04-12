@@ -136,10 +136,10 @@ credits.style.display = 'none'
 
 //button logic
 
-start.onclick = () => {
+start.onclick = function () {
 	simulation.init()
-}
-controls.onclick = () => {
+}.bind(this)
+controls.onclick = function () {
 	controlDoc.innerHTML = `
 Controls<br>
 ${input.keybinds.up.replace('Key', '').replace('Digit', '')}, ${input.keybinds.down.replace('Key', '').replace('Digit', '')}, ${input.keybinds.left.replace('Key', '').replace('Digit', '')}, ${input.keybinds.right.replace('Key', '').replace('Digit', '')} or Arrow Keys: Move<br>
@@ -149,18 +149,18 @@ ${input.keybinds.respawn.replace('Key', '').replace('Digit', '')}: Respawn<br>
 ${input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')}: Go to the Main Menu<br>
 Tab: Toggle this menu<br>
 Escape or ${input.keybinds.pause.replace('Key', '').replace('Digit', '')}: Pause<br>
-${input.keybinds.cycleGun.replace('Key', '').replace('Digit', '')}: Cycle gun left<br>
-${input.keybinds.cycleGunRight.replace('Key', '').replace('Digit', '')}: Cycle gun right<br>
+${input.keybinds.gunLeft.replace('Key', '').replace('Digit', '')}: Cycle gun left<br>
+${input.keybinds.gunRight.replace('Key', '').replace('Digit', '')}: Cycle gun right<br>
 `
 	controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
-}
-settings.onclick = () => {
+}.bind(this)
+settings.onclick = function () {
 	settingsMenu.style.display = settingsMenu.style.display == 'block' ? 'none' : 'block'
 	renderSettings()
-}
-creditsButton.onclick = () => {
+}.bind(this)
+creditsButton.onclick = function () {
 	credits.style.display = credits.style.display == 'block' ? 'none' : 'block'
-}
+}.bind(this)
 start.style.display = 'block'
 controls.style.display = 'block'
 settings.style.display = 'block'
@@ -191,10 +191,10 @@ function renderSettings() {
 	const closeBtn = document.createElement('button')
 	closeBtn.innerText = 'Close'
 	closeBtn.style.fontSize = '20px'
-	closeBtn.onclick = () => {
+	closeBtn.onclick = function () {
 		settingsMenu.style.display = 'none'
 		remappingAction = null
-	}
+	}.bind(this)
 	settingsMenu.appendChild(closeBtn)
 	settingsMenu.appendChild(document.createElement('hr'))
 
@@ -207,16 +207,16 @@ function renderSettings() {
 		btn.style.fontSize = '18px'
 		btn.style.width = '400px'
 		btn.style.textAlign = 'left'
-		btn.onclick = () => {
+		btn.onclick = function () {
 			remappingAction = action
 			renderSettings()
-		}
+		}.bind(this)
 		container.appendChild(btn)
 		settingsMenu.appendChild(container)
 	}
 }
 
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', function (e) {
 	if (remappingAction && settingsMenu.style.display === 'block') {
 		e.preventDefault()
 		if (e.code !== 'Escape') {
@@ -227,4 +227,4 @@ document.addEventListener('keydown', (e) => {
 		remappingAction = null
 		renderSettings()
 	}
-})
+}.bind(this))

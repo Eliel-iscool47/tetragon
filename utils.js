@@ -1,4 +1,6 @@
-//  A collection of utilities, made for game development. Change 'drawCTX' to be the canvas's draw context.
+/**
+ * A collection of utilities, made for game development. Change 'drawCTX' to be the canvas's draw context
+ */
 
 /**
  * The context for the drawing methods. Change it if your canvas rendering context has a different name.
@@ -93,9 +95,9 @@ function lerp(start, end, time) {
  */
 function avg(args) {
 	let sum = 0
-	args.forEach(a => {
+	args.forEach(function(a) {
 		sum += a
-	})
+	}.bind(this))
 	return sum / args.length
 }
 function root(value, root) {

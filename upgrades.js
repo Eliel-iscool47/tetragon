@@ -68,13 +68,13 @@ const upgrades = {
 	randomizeOptions() {
 		this.options = []
 		const tempPool = [...this.pool]
-		repeat(() => {
+		repeat(function () {
 			if (tempPool.length <= 0) return undefined
 			const r = randInt(0, tempPool.length - 1)
 			const key = tempPool.at(r)
 			this.options.push(this[key])
 			tempPool.splice(r, 1)
-		}, this.optionsPerPowerUp)
+		}.bind(this), this.optionsPerPowerUp)
 	},
 	/**
 	 * This method shows the choice menu to choose an upgrade.
@@ -102,7 +102,8 @@ const upgrades = {
 		${Math.ceil(this.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
 		${buttons.cancel}
 			<br><br>
-		${this.options.filter(u => u != undefined).map(upg => `<button class="upgrade-button"
+		${this.options.filter(function (u) { return u != undefined }.bind(this)).map(function (upg) {
+			return `<button class="upgrade-button"
 			style="
 			width: ${parseFloat(chooseScreen.style.width) * 0.6}px; 
 			height: ${parseFloat(chooseScreen.style.height) / Math.floor(this.optionsPerPowerUp * 1.5) + 50}px; 
@@ -110,7 +111,8 @@ const upgrades = {
 			top: ${(this.options.indexOf(upg) * 1.1 * parseFloat(chooseScreen.style.height) / this.optionsPerPowerUp) + 200}px;
 			" 
 			onclick='upgrades.get("${upg.id}"); simulation.isChoosing = false;'>${upg.name}:<br>
-		${upg.description}</button>`).join('<br>')}
+		${upg.description}</button>`
+		}.bind(this)).join('<br>')}
 		`
 	},
 	apply() {
@@ -119,10 +121,10 @@ const upgrades = {
 	check() {
 		this.unlocked = [...new Set(this.unlocked)]
 		const counts = {}
-		this.collected.forEach(upg => {
+		this.collected.forEach(function (upg) {
 			counts[upg.id] = (counts[upg.id] || 0) + 1
-		})
-		this.pool = this.pool.filter(id => (counts[id] || 0) < this[id].stackSize)
+		}.bind(this))
+		this.pool = this.pool.filter(function (id) { return (counts[id] || 0) < this[id].stackSize }.bind(this))
 		if (this.unlocked.includes('explosions')) {
 			if (!this.pool.includes('pyrotechnics') && (counts['pyrotechnics'] || 0) < this.pyrotechnics.stackSize) {
 				this.pool.push('pyrotechnics')
@@ -255,9 +257,6 @@ const upgrades = {
 		name: 'Accelerated Healing',
 		stackSize: 3,
 		description: `1.5x ${text.health} regeneration speed`,
-		requirements: [
-			'regen'
-		],
 		effect() {
 			upgrades.regenSpeed *= 1.5
 		}
@@ -276,7 +275,6 @@ const upgrades = {
 		name: 'Logistics',
 		stackSize: 2,
 		description: `3x <span class="styled-text ammo">ammo yield</span>`,
-		requirements: [],
 		effect() {
 			upgrades.ammoYield *= 3
 		}
@@ -286,9 +284,6 @@ const upgrades = {
 		name: 'Pyrotechnics',
 		stackSize: 1,
 		description: `1.2x ${text.explosionDamage} and <span class="styled-text explosion">size</span> <br> <span class="styled-text explosion">Explosions</span> are colorful.`,
-		requirements: [
-			'explosions'
-		],
 		effect() {
 			bullets.explosions.damageDone *= 1.2
 			bullets.explosions.size *= 1.2
@@ -300,9 +295,6 @@ const upgrades = {
 		name: 'Incendiary Munitions',
 		stackSize: 1,
 		description: 'Shotgun pellets, Bouncy Balls, SMG bullets, and Rifle bullets <span class="styled-text explosion">explode</span> upon contact',
-		requirements: [
-			'bullets'
-		],
 		effect() {
 			upgrades.isBulletExplode = true
 			upgrades.unlocked.push('explosions')
@@ -313,9 +305,6 @@ const upgrades = {
 		name: 'Nitroglycerin',
 		stackSize: 3,
 		description: `2x ${text.explosionDamage}<br>0.8x <span class="styled-text explosion">explosion size</span>`,
-		requirements: [
-			'explosions'
-		],
 		effect() {
 			bullets.explosions.damageDone *= 2
 			bullets.explosions.size *= 0.8

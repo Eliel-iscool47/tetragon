@@ -4,34 +4,21 @@ const bullets = {
 	/**
 	 * The class responsible for handling bullet graphics and movement.
 	 */
-	Bullet: class {
+	Bullet: class extends Entity {
 		constructor(x, y, config) {
-			this.pos = { x, y }
-			this.timeSpawned = simulation.time
-			this.angle = 0
-			this.speed = 0
-			this.piercing = 0
-			this.isHoming = false
-			this.isExplode = false
-			this.type = ''
-			this.damage = 1
-			Object.assign(this, config)
+			super(x, y, {
+				timeSpawned: simulation.time,
+				piercing: 0,
+				isHoming: false,
+				isExplode: false,
+				type: '',
+				damage: 1,
+				...config
+			})
 		}
 		update() {
 			this.pos.x += Math.cos(this.angle) * this.speed
 			this.pos.y += Math.sin(this.angle) * this.speed
-		}
-		/**
-		 * A helper to handle standard canvas transformations for bullets.
-		 * @param {Function} callback The drawing logic for the specific bullet shape.
-		 */
-		drawSelf(callback) {
-			draw.save()
-			draw.beginPath()
-			draw.translate(this.pos.x, this.pos.y)
-			draw.rotate(this.angle)
-			callback()
-			draw.restore()
 		}
 	},
 	explosions: {
@@ -56,11 +43,11 @@ const bullets = {
 			speed: 10,
 			piercing: 2,
 			damage: 2.5,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "black"
 					draw.fillRect(-5, -2, 10, 4)
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -71,11 +58,11 @@ const bullets = {
 			speed: 30,
 			piercing: 4,
 			damage: 12,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(0, 100%, 35%)"
 					draw.fillRect(-7.5, -2.5, 15, 5)
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -86,13 +73,13 @@ const bullets = {
 			speed: 10,
 			piercing: 1,
 			damage: 1.5,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(0, 100%, 50%)"
 					draw.fillRect(-5, -2, 10, 4)
 					draw.arc(5, 0, 2, 0, Math.PI * 2)
 					draw.fill()
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -102,12 +89,12 @@ const bullets = {
 			angle: input.cursor.angle + (rand(-guns.shotgun.spread, guns.shotgun.spread) / 100),
 			speed: 10,
 			piercing: 1,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(30, 100%, 50%)"
 					draw.arc(0, 0, 3, 0, Math.PI * 2)
 					draw.fill()
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -117,12 +104,12 @@ const bullets = {
 			angle: input.cursor.angle,
 			speed: 12,
 			piercing: 1,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(0, 100%, 50%)"
 					draw.arc(0, 0, 5, 0, Math.PI * 2)
 					draw.fill()
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -132,12 +119,12 @@ const bullets = {
 			angle: input.cursor.angle,
 			speed: 10,
 			piercing: 1,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(0, 100%, 20%)"
 					draw.arc(0, 0, 5, 0, Math.PI * 2)
 					draw.fill()
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -149,12 +136,12 @@ const bullets = {
 			isExplode: true,
 			piercing: 1,
 			damage: 10,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(110, 100%, 30%)"
 					draw.arc(0, 0, 8, 0, Math.PI * 2)
 					draw.fill()
-				})
+				}.bind(this))
 			},
 		}))
 	},
@@ -167,23 +154,23 @@ const bullets = {
 			isExplode: true,
 			piercing: 1,
 			damage: 5,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(220, 50%, 25%)"
 					draw.fillRect(-15, -5, 30, 10)
-				})
+				}.bind(this))
 			},
-			onCollision() {
+			onCollision: function () {
 				bullets.explosion(this.pos.x, this.pos.y, 2)
 			},
-			update() {
+			update: function () {
 				this.angle = angle(input.cursor.x, input.cursor.y, this.pos.x, this.pos.y)
-				mobs.list.forEach((mob) => {
+				mobs.list.forEach(function (mob) {
 					if (
 						distance(this.pos.x, this.pos.y, mob.pos.x, mob.pos.y) < mob.size * 8 &&
 						mob.class != 'projectile'
 					) this.angle = angle(mob.pos.x, mob.pos.y, this.pos.x, this.pos.y)
-				})
+				}.bind(this))
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed
 			}
@@ -195,36 +182,36 @@ const bullets = {
 			angle: input.cursor.angle,
 			speed: 8,
 			piercing: 3,
-			update() {
+			update: function () {
 				if (this.pos.x < 0 || this.pos.x > main.width || this.pos.y < 0 || this.pos.y > main.height) {
-					this.angle += Math.PI * 0.5 + u.rand(-0.1, 0.1)
+					this.angle += Math.PI * 0.5 + rand(-0.1, 0.1)
 				}
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed
 			},
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillStyle = "hsl(35, 100%, 50%)"
 					draw.arc(0, 0, 10, 0, Math.PI * 2)
 					draw.fill()
 					draw.strokeStyle = 'black'
 					draw.stroke()
-				})
+				}.bind(this))
 			}
 		}))
 	},
-	flame(x, y, angle = u.rand(-guns.flamethrower.spread, guns.flamethrower.spread) / 100) {
+	flame(x, y, angle = rand(-guns.flamethrower.spread, guns.flamethrower.spread) / 100) {
 		bullets.list.push(new bullets.Bullet(x, y, {
 			type: 'flamethrower',
 			angle: input.cursor.angle + angle,
 			speed: 11,
 			piercing: 5,
-			draw() {
-				this.drawSelf(() => {
-					draw.fillStyle = `hsl(${u.rand(0, 40)}, 100%, 50%)`
-					draw.arc(0, 0, u.rand(bullets.flames.size * 0.8, bullets.flames.size * 3), 0, Math.PI * 2)
+			draw: function () {
+				this.drawSelf(function () {
+					draw.fillStyle = `hsl(${rand(0, 40)}, 100%, 50%)`
+					draw.arc(0, 0, rand(bullets.flames.size * 0.8, bullets.flames.size * 3), 0, Math.PI * 2)
 					draw.fill()
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -235,14 +222,14 @@ const bullets = {
 			speed: 0,
 			piercing: 1,
 			damage: 3,
-			draw() {
-				this.drawSelf(() => {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.lineWidth = bullets.laserWidth
 					draw.strokeStyle = bullets.laserColor
 					draw.moveTo(0, 0)
 					draw.lineTo(Math.max(main.width, main.height) * Math.sqrt(1.5), 0)
 					draw.stroke()
-				})
+				}.bind(this))
 			}
 		}))
 	},
@@ -263,15 +250,15 @@ const bullets = {
 		})
 	},
 	drawExplosions() {
-		this.explosionList.forEach((xpl) => {
+		this.explosionList.forEach(function (xpl) {
 			draw.beginPath()
 			draw.fillStyle = xpl.color
 			draw.arc(xpl.pos.x, xpl.pos.y, xpl.size / 2, 0, Math.PI * 2)
 			draw.fill()
-		})
+		}.bind(this))
 	},
 	kill() {
-		this.list.forEach((b) => {
+		this.list.forEach(function (b) {
 			if (
 				b.timeSpawned <
 				simulation.time - this.duration * guns[b.type].bulletDuration ||
@@ -279,15 +266,15 @@ const bullets = {
 			) {
 				if (b.isExplode) this.explosion(b.pos.x, b.pos.y, 2)
 				if (upgrades.isBulletExplode && upgrades.bulletExplosionTypes.includes(b.type)) this.explosion(b.pos.x, b.pos.y, 2)
-				this.list = this.list.filter((bullet) => bullet != b)
+				this.list = this.list.filter(function (bullet) { return bullet != b }.bind(this))
 			}
-		})
+		}.bind(this))
 	},
 	killExplosions() {
-		this.explosionList.forEach((xpl) => {
+		this.explosionList.forEach(function (xpl) {
 			if (xpl.time + this.explosions.duration < simulation.time)
 				this.explosionList.splice(this.explosionList.indexOf(xpl), 1)
-		})
+		}.bind(this))
 	},
 	muzzleFlash() {
 		draw.beginPath()
@@ -303,9 +290,9 @@ const bullets = {
 	},
 	move() {
 		if (simulation.isPaused) return undefined
-		this.list.forEach(b => b.update())
+		this.list.forEach(function (b) { return b.update() }.bind(this))
 	},
 	do() {
-		this.list.forEach(b => b.draw())
+		this.list.forEach(function (b) { return b.draw() }.bind(this))
 	},
 }

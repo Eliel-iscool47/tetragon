@@ -30,7 +30,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.rifle.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('rifle'), 1)
@@ -60,7 +60,6 @@ const guns = {
 			}
 			bullets.rifleBullet(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	shotgun: {
@@ -82,7 +81,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.shotgun.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('shotgun'), 1)
@@ -111,11 +110,10 @@ const guns = {
 				this.reload()
 				return undefined
 			}
-			repeat(() => {
+			repeat(function() {
 				bullets.shotgunBullet(player.pos.x, player.pos.y)
-			}, 20)
+			}.bind(this), 20)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	sniper: {
@@ -137,7 +135,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.sniper.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('sniper'), 1)
@@ -168,7 +166,6 @@ const guns = {
 			}
 			bullets.sniperBullet(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	smg: {
@@ -190,7 +187,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.smg.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('smg'), 1)
@@ -221,13 +218,12 @@ const guns = {
 			}
 			bullets.smgBullet(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		},
 	},
 	pistol: {
 		id: 'pistol',
 		name: 'pistol',
-		description: `It\'s a pistol, I don\'t know what else to tell you.<br>10 ${text.ammo} per ${text.powerUp.ammo}`,
+		description: `It\'s a pistol, I don\'t know what else to tell yo<br>10 ${text.ammo} per ${text.powerUp.ammo}`,
 		ammo: 0,
 		defaultAmmo: 180,
 		magSize: 10,
@@ -243,7 +239,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.pistol.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('pistol'), 1)
@@ -274,7 +270,6 @@ const guns = {
 			}
 			bullets.pistolBullet(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	minigun: {
@@ -297,7 +292,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.minigun.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('minigun'), 1)
@@ -328,7 +323,6 @@ const guns = {
 			}
 			bullets.minigunBullet(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	grenadeLauncher: {
@@ -350,7 +344,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.grenadeLauncher.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('explosions'), 1)
@@ -381,7 +375,6 @@ const guns = {
 			}
 			bullets.grenade(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	missiles: {
@@ -403,7 +396,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.missiles.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('explosions'), 1)
@@ -431,11 +424,10 @@ const guns = {
 				this.reload()
 				return undefined
 			}
-			u.repeat(() => {
+			repeat(function() {
 				bullets.missile(player.pos.x, player.pos.y)
-			}, upgrades.missilesPerShot)
+			}.bind(this), upgrades.missilesPerShot)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	bouncyBalls: {
@@ -457,7 +449,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.bouncyBalls.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('bouncy balls'), 1)
@@ -484,11 +476,10 @@ const guns = {
 				this.reload()
 				return undefined
 			}
-			repeat(() => {
+			repeat(function() {
 				bullets.bouncyBall(player.pos.x + rand(-player.size / 2, player.size / 2), player.pos.y + rand(-player.size / 2, player.size / 2))
-			}, 3)
+			}.bind(this), 3)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	flamethrower: {
@@ -510,7 +501,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.flamethrower.get(${mags})`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('flamethrower'), 1)
@@ -540,7 +531,6 @@ const guns = {
 			}
 			bullets.flame(player.pos.x, player.pos.y)
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	laser: {
@@ -562,7 +552,7 @@ const guns = {
 			this.magazines = mags - 1
 			this.ammo = this.magSize
 			guns.inventory.push(this)
-			guns.pool = guns.pool.filter(g => g != this)
+			guns.pool = guns.pool.filter(function(g) { return g != this; }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.laser.get(Infinity)`)
 			upgrades.unlocked.splice(upgrades.unlocked.indexOf('laser'), 1)
@@ -594,13 +584,13 @@ const guns = {
 			bullets.laserBeam(player.pos.x, player.pos.y)
 			// apply damage along the ray: check perpendicular distance to line
 			const maxRange = Math.max(main.width, main.height)
-			mobs.list.forEach(mob => {
+			mobs.list.forEach(function(mob) {
 				// const dx = mob.pos.x - player.pos.x
 				// const dy = mob.pos.y - player.pos.y
 				// const dist = Math.hypot(dx, dy)
 				// if (dist <= maxRange) {
 				// 	const angleToMob = Math.atan2(dy, dx)
-				// 	const angleDiff = u.diffAngle(angleToMob, input.cursor.angle)
+				// 	const angleDiff = diffAngle(angleToMob, input.cursor.angle)
 				// 	const perp = Math.abs(Math.sin(angleDiff) * dist)
 				// 	if (perp <= mob.size / 2) {
 				// 		mob.health -= this.damage * player.damageDone
@@ -609,9 +599,8 @@ const guns = {
 				if (lineCircleCollision(player.pos.x, player.pos.y, player.pos.x + Math.cos(input.cursor.angle) * maxRange, player.pos.y + Math.sin(input.cursor.angle) * maxRange, mob.pos.x, mob.pos.y, mob.size / 2)) {
 					mob.health -= this.damage * player.damageDone
 				}
-			})
+			}.bind(this))
 			this.ammo--
-			this.lastBullet = simulation.time
 		}
 	},
 	get(g, mags) {
@@ -640,13 +629,13 @@ const guns = {
 	randomizeOptions() {
 		guns.options = []
 		const tempPool = [...this.pool]
-		repeat(() => {
+		repeat(function() {
 			if (tempPool.length <= 0) return undefined
 			const r = randInt(0, tempPool.length - 1)
 			const key = tempPool.at(r)
 			this.options.push(key)
 			tempPool.splice(r, 1)
-		}, upgrades.optionsPerPowerUp)
+		}.bind(this), upgrades.optionsPerPowerUp)
 	},
 	choose() {
 		if (this.pool.length <= 0) return undefined
@@ -673,7 +662,7 @@ const guns = {
 		${Math.ceil(upgrades.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
 		${buttons.cancel}
 			<br><br>
-		${this.options.filter(g => g != undefined).map(g => `<button class="gun-button"
+		${this.options.filter(function(g) { return g != undefined; }.bind(this)).map(function(g) { return `<button class="gun-button"
 			style="
 			width: ${parseFloat(chooseScreen.style.width) * 0.6}px; 
 			height: ${parseFloat(chooseScreen.style.height) / Math.floor(upgrades.optionsPerPowerUp * 1.5)}px; 
@@ -682,7 +671,7 @@ const guns = {
 			" 
 			onclick='
 				guns.${g.id}.get(); 	
-				simulation.isChoosing = false'>${g.name}: ${g.description}</button>`).join('<br>')}
+				simulation.isChoosing = false'>${g.name}: ${g.description}</button>`; }.bind(this)).join('<br>')}
 		`
 	}
 }

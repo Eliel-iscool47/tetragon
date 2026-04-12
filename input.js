@@ -13,11 +13,6 @@ const input = {
 		"Escape",
 		"Slash",
 	],
-	toggleCooldown: 0,
-	paused: 0,
-	gunL: 0,
-	gunR: 0,
-	test: 0,
 	keybinds: {
 		up: "KeyW",
 		down: "KeyS",
@@ -102,7 +97,6 @@ const input = {
 		simulation.isTesting = false
 		simulation.startTime = now()
 		simulation.timeOffset = now()
-		simulation.absOffset = now()
 		simulation.time = 0
 		dc.style.display = 'block'
 		main.style.display = 'none'
@@ -150,7 +144,7 @@ const input = {
 		mobs.list = []
 		level.current = 0
 		level.time = 0
-		bullets.list = []
+		bullets.list = [] 
 		bullets.explosionList = []
 		powerUps.list = []
 		guns.inventory = []
@@ -183,7 +177,7 @@ const input = {
 		}
 	},
 	lilKeyLogic() {
-		this.pressedKeys.forEach((k) => {
+		this.pressedKeys.forEach(function(k) {
 			switch (k) {
 				case this.keybinds.gunLeft:
 					this.gunLeft()
@@ -204,7 +198,7 @@ const input = {
 					controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
 					break
 			}
-		})
+		}.bind(this))
 	},
 	gamepadLogic() {
 		const gamepad = navigator.getGamepads()[0]
@@ -243,7 +237,8 @@ const input = {
 				player.pos.y += normalizedY * player.velocity * Math.min(1, magnitude)
 			}
 		}
-		this.pressedKeys.forEach((k) => {
+		this.pressedKeys.forEach(function(k) {
+			console.log(k)
 			switch (k) {
 				case this.keybinds.fire:
 					this.fire()
@@ -256,7 +251,7 @@ const input = {
 					this.mainMenu()
 					break
 			}
-		})
+		}.bind(this))
 		this.cursor.angle = angle(
 			this.cursor.x,
 			this.cursor.y,
@@ -266,18 +261,18 @@ const input = {
 	},
 }
 //actually handling input
-window.addEventListener("resize", r => {
+window.addEventListener("resize", function(r) {
 	main.width = window.innerWidth
 	main.height = window.innerHeight
 	collisions.border.right = main.width - player.size / 2
 	collisions.border.bottom = main.height - player.size / 2
 	draw.clearRect(0, 0, main.width, main.height)
-})
-main.addEventListener("contextmenu", cxm => {
+}.bind(this))
+main.addEventListener("contextmenu", function(cxm) {
 	cxm.preventDefault()
 	input.rightClick()
-})
-main.addEventListener("click", c => {
+}.bind(this))
+main.addEventListener("click", function(c) {
 	input.clickLogic(c)
 	switch (c.button) {
 		case 0:
@@ -290,17 +285,17 @@ main.addEventListener("click", c => {
 			input.rightClick()
 			break
 	}
-})
-main.addEventListener("mousemove", m => {
+}.bind(this))
+main.addEventListener("mousemove", function(m) {
 	input.cursor.update(m.offsetX, m.offsetY)
-})
-document.addEventListener("keydown", k => {
+}.bind(this))
+document.addEventListener("keydown", function(k) {
 	if (input.preventDefaultList.includes(k.code)) k.preventDefault()
 	if (input.pressedKeys.includes(k.code)) return undefined
 	input.pressedKeys.push(k.code)
 	input.lilKeyLogic()
-})
-document.addEventListener("keyup", k => {
-	if (input.pressedKeys.includes(k.code)) input.pressedKeys = input.pressedKeys.filter(key => key != k.code)
+}.bind(this))
+document.addEventListener("keyup", function(k) {
+	if (input.pressedKeys.includes(k.code)) input.pressedKeys = input.pressedKeys.filter(function(key) { return key != k.code; }.bind(this))
 	input.lilKeyLogic()
-})
+}.bind(this))

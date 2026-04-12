@@ -31,15 +31,15 @@ const hud = {
 	set displayDefense(val) { this._displayDefense = val },
 
 	healthBar() {
-		this.displayHealth = u.lerp(this.displayHealth, player.health, 0.1)
-		this.displayMaxHealth = u.lerp(this.displayMaxHealth, player.maxHealth, 0.1)
+		this.displayHealth = lerp(this.displayHealth, player.health, 0.1)
+		this.displayMaxHealth = lerp(this.displayMaxHealth, player.maxHealth, 0.1)
 		this.health.style.width = `${this.displayHealth * 2}px`
 		this.health.style.backgroundColor = `hsl(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%)`
 		this.health.innerText = `${Math.round(player.health * 1000) / 1000}`
 		this.maxHealth.style.width = `${this.displayMaxHealth * 2}px`
 	},
 	damageTakenBar() {
-		this.displayDefense = u.lerp(this.displayDefense, player.damageTaken, 0.1)
+		this.displayDefense = lerp(this.displayDefense, player.damageTaken, 0.1)
 		if (this.displayDefense <= 1) {
 			this.damageTaken.style.backgroundColor = 'hsl(190, 100%, 75%)'
 			this.damageTaken.style.width = `${(1 - this.displayDefense) * this.displayMaxHealth * 2}px`
@@ -75,9 +75,9 @@ const hud = {
 		this.upgrades.style.fontSize = '15px'
 		this.upgrades.style.textAlign = 'left'
 		this.upgrades.innerHTML = `
-		${upgrades.uniqueCollected.map(upg => {
+		${upgrades.uniqueCollected.map(function (upg) {
 			return countOccurrences(upgrades.collected, upg) > 1 ? `${upg.name} (${countOccurrences(upgrades.collected, upg)})` : `${upg.name}`
-		}).join('<br>')}
+		}.bind(this)).join('<br>')}
 		`
 	},
 	console() {
@@ -109,7 +109,7 @@ const hud = {
 		this.inv.style.textAlign = 'left'
 		this.inv.innerHTML = `
 		Inventory: <br>
-		${guns.inventory.map(g => `${g.name}: ${g.ammo + (g.magazines * g.magSize)} ${g == guns.equippedGun ? '(equipped)' : ''}`).join('<br>')}
+		${guns.inventory.map(function (g) { return `${g.name}: ${g.ammo + (g.magazines * g.magSize)} ${g == guns.equippedGun ? '(equipped)' : ''}` }.bind(this)).join('<br>')}
 		`
 	},
 	levelCounter() {
@@ -189,24 +189,24 @@ hud.criticalOverlay.style.pointerEvents = 'none'
 hud.criticalOverlay.style.boxShadow = 'inset 0 0 150px red'
 hud.criticalOverlay.style.zIndex = '-1'
 hud.Obj.appendChild(hud.criticalOverlay)
-hud.health.addEventListener('mousemove', (m) => {
+hud.health.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.health.offsetLeft, m.offsetY + hud.health.offsetTop)
-})
-hud.inv.addEventListener('mousemove', (m) => {
+}.bind(this))
+hud.inv.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.inv.offsetLeft, m.offsetY + hud.inv.offsetTop)
-})
-hud.damageTaken.addEventListener('mousemove', (m) => {
+}.bind(this))
+hud.damageTaken.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.damageTaken.offsetLeft, m.offsetY + hud.damageTaken.offsetTop)
-})
-hud.damage.addEventListener('mousemove', (m) => {
+}.bind(this))
+hud.damage.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.damage.offsetLeft, m.offsetY + hud.damage.offsetTop)
-})
-hud.levels.addEventListener('mousemove', (m) => {
+}.bind(this))
+hud.levels.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.levels.offsetLeft, m.offsetY + hud.levels.offsetTop)
-})
-hud.upgrades.addEventListener('mousemove', (m) => {
+}.bind(this))
+hud.upgrades.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.upgrades.offsetLeft, m.offsetY + hud.upgrades.offsetTop)
-})
-hud.inGameConsole.addEventListener('mousemove', (m) => {
+}.bind(this))
+hud.inGameConsole.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.inGameConsole.offsetLeft, m.offsetY + hud.inGameConsole.offsetTop)
-})
+}.bind(this))

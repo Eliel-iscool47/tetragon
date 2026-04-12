@@ -1,34 +1,43 @@
 const mobs = {
-	Mob: class {
+	Mob: class extends Entity {
 		/**
 		 * 
 		 * @param {number} x the x-position of the mob
-		 * @param {number} y the y-position o the mob
+		 * @param {number} y the y-position of the mob
 		 * @param {object} config Properties that vary from mob to mob
 		 */
 		constructor(x, y, config) {
-			this.pos = { x, y }
-			this.timeSpawned = simulation.time
-			this.angle = 0
-			this.timeSinceLastAttack = 0
-			this.lastDamageTime = 0
-			Object.assign(this, {
+			super(x, y, {
 				class: 'mob',
 				health: 10,
 				damage: 5,
 				damageTaken: 1,
 				size: 25,
 				speed: 3,
+				isInvulnerable: false,
 				dropChance: 1,
 				attackRate: 1,
 				attackType: 'melee',
 				color: 'black',
 				...config
 			})
+			this.timeSpawned = simulation.time
+			this.timeSinceLastAttack = 0
+			this.lastDamageTime = 0
 			this.maxHealth = config.maxHealth || this.health
 		}
-		onCollide() {
+		onCollide() { }
+
+		/**
+		 * Reduces mob health, accounting for invulnerability and damage multipliers.
+		 * @param {number} amount Raw damage amount.
+		 */
+		takeDamage(amount) {
+			if (this.isInvulnerable) return
+			this.health -= amount * this.damageTaken
+			this.lastDamageTime = simulation.time
 		}
+
 		update() {
 			this.moveTowardsPlayer()
 		}
@@ -42,12 +51,7 @@ const mobs = {
 			if (this.class !== 'projectile') {
 				draw.globalAlpha = lerp(0, 1, (simulation.time - this.timeSpawned) * 2.5)
 			}
-			draw.translate(this.pos.x, this.pos.y)
-			draw.rotate(this.angle)
-			draw.fillStyle = this.color
-			draw.strokeStyle = "black"
-			draw.lineWidth = 3
-			callback()
+			super.drawSelf(callback)
 			draw.restore()
 		}
 		moveTowardsPlayer() {
@@ -60,15 +64,13 @@ const mobs = {
 			this.pos.y -= Math.sin(this.angle) * this.speed
 		}
 	},
-	maxHealth: 1,
-	damage: 1,
 	list: [],
-	drawMobs() {
-		this.list.forEach(mob => mob.draw())
+	drawMobs: function() {
+		this.list.forEach(function(mob) { return mob.draw(); }.bind(this))
 	},
-	kill() {
+	kill: function() {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach((mob) => {
+		this.list.forEach(function(mob) {
 			if (mob.health <= 0) {
 				this.list.splice(this.list.indexOf(mob), 1)
 				if (upgrades.isKillDefense) upgrades.lastKill = simulation.time
@@ -96,11 +98,11 @@ const mobs = {
 				) powerUps.upgrade.new(mob.pos.x, mob.pos.y)
 			}
 			if (mob.health > mob.maxHealth) mob.health = mob.maxHealth
-		})
+		}.bind(this))
 	},
-	healthBars() {
+	healthBars: function() {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach((mob) => {
+		this.list.forEach(function(mob) {
 			draw.save()
 			if (mob.class != "projectile") {
 				draw.globalAlpha = clamp(
@@ -133,13 +135,13 @@ const mobs = {
 					)
 			}
 			draw.restore()
-		})
+		}.bind(this))
 	},
-	loop() {
+	loop: function() {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach((mob) => {
+		this.list.forEach(function(mob) {
 			if (mob.health > mob.maxHealth) mob.health = mob.maxHealth
 			mob.update()
-		})
+		}.bind(this))
 	},
 }

@@ -20,39 +20,39 @@ const level = {
 		document.title = `Tetragon: level ${this.current}`
 		switch (true) {
 			case this.current <= 0:
-				repeat(() => {
+				repeat(function () {
 					spawn.archer(player.pos.x, player.pos.y)
 					spawn.tank(player.pos.x, player.pos.y)
 					spawn.runner(player.pos.x, player.pos.y)
 					spawn.default(player.pos.x, player.pos.y)
-				}, 100)
+				}.bind(this), 100)
 			case this.current <= 1:
 				powerUps.gun.new(
 					randInt(0, collisions.border.right),
 					randInt(0, collisions.border.bottom),
 				)
-				repeat(() => {
+				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
-				}, 3)
+				}.bind(this), 3)
 				break
 			case this.current <= 5:
-				repeat(() => {
+				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
-				}, 5)
+				}.bind(this), 5)
 				break
 			case this.current <= 10:
-				repeat(() => {
+				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
-				}, 8)
+				}.bind(this), 8)
 				spawn.runner(
 					randInt(collisions.border.left, collisions.border.right),
 					randInt(collisions.border.top, collisions.border.bottom),
@@ -63,7 +63,7 @@ const level = {
 				)
 				break
 			case this.current <= 15:
-				repeat(() => {
+				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
@@ -76,10 +76,10 @@ const level = {
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
-				}, 8)
+				}.bind(this), 8)
 				break
 			case this.current <= 20:
-				repeat(() => {
+				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
@@ -96,10 +96,10 @@ const level = {
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
-				}, 8)
+				}.bind(this), 8)
 				break
 			case this.current <= 30:
-				repeat(() => {
+				repeat(function () {
 					spawn.archer(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
@@ -120,9 +120,9 @@ const level = {
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
-				}, 12)
+				}.bind(this), 12)
 			default:
-				repeat(() => {
+				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
@@ -143,10 +143,10 @@ const level = {
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom)
 					)
-				}, this.current - 10)
+				}.bind(this), this.current - 10)
 				break
 		}
-		repeat(() => {
+		repeat(function () {
 			powerUps.ammo.new(
 				randInt(collisions.border.left, collisions.border.right),
 				randInt(collisions.border.top, collisions.border.bottom),
@@ -159,7 +159,7 @@ const level = {
 				randInt(collisions.border.left, collisions.border.right),
 				randInt(collisions.border.top, collisions.border.bottom),
 			)
-		}, 2)
+		}.bind(this), 2)
 	},
 	next() {
 		this.current++

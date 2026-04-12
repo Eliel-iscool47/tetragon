@@ -1,8 +1,7 @@
 const powerUps = {
-	PowerUp: class {
+	PowerUp: class extends Entity {
 		constructor(x, y, config) {
-			this.pos = { x, y }
-			Object.assign(this, config)
+			super(x, y, config)
 		}
 		draw() { }
 		/**
@@ -11,14 +10,9 @@ const powerUps = {
 		 */
 		drawSelf(callback) {
 			draw.save()
-			draw.translate(this.pos.x, this.pos.y)
-			const pulse = 1 + Math.sin(simulation.time * 8) * 0.15
-			draw.scale(pulse, pulse)
-			draw.fillStyle = this.color
-			draw.strokeStyle = 'black'
-			draw.lineWidth = 3
-			draw.beginPath()
-			callback()
+			const pulse =  1 + Math.sin(simulation.time * 8)
+			// draw.scale(pulse, pulse)
+			super.drawSelf(callback)
 			draw.restore()
 		}
 	},
@@ -35,12 +29,12 @@ const powerUps = {
 			guns.choose()
 			powerUps.list = powerUps.list.filter(p => p != this)
 		},
-		draw() {
-			this.drawSelf(() => {
+		draw: function() {
+			this.drawSelf(function() {
 				draw.arc(0, 0, this.size, 0, Math.PI * 2)
 				draw.fill()
 				draw.stroke()
-			})
+			}.bind(this))
 		}
 	},
 	heal: {
@@ -53,14 +47,14 @@ const powerUps = {
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing || player.health >= player.maxHealth) return undefined
 			player.health += upgrades.healEffect * 8
-			powerUps.list = powerUps.list.filter(p => p != this)
+			powerUps.list = powerUps.list.filter(function(p) { return p != this; }.bind(this))
 		},
-		draw() {
-			this.drawSelf(() => {
+		draw: function() {
+			this.drawSelf(function() {
 				draw.arc(0, 0, this.size, 0, Math.PI * 2)
 				draw.fill()
 				draw.stroke()
-			})
+			}.bind(this))
 		}
 	},
 	ammo: {
@@ -72,10 +66,10 @@ const powerUps = {
 		},
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
-			guns.inventory.forEach(g => {
+			guns.inventory.forEach(function(g) {
 				switch (g) {
 					case guns.missiles:
-						if (u.percentChance(upgrades.ammoYield - Math.floor(upgrades.ammoYield))) g.magazines += Math.ceil(upgrades.ammoYield) * 3
+						if (percentChance(upgrades.ammoYield - Math.floor(upgrades.ammoYield))) g.magazines += Math.ceil(upgrades.ammoYield) * 3
 						else g.magazines += Math.floor(upgrades.ammoYield) * 3
 						break
 					default:
@@ -83,15 +77,15 @@ const powerUps = {
 						else g.magazines += Math.floor(upgrades.ammoYield)
 						break
 				}
-			})
-			powerUps.list = powerUps.list.filter(p => p != this)
+			}.bind(this))
+			powerUps.list = powerUps.list.filter(function(p) { return p != this; }.bind(this))
 		},
-		draw() {
-			this.drawSelf(() => {
+		draw: function() {
+			this.drawSelf(function() {
 				draw.arc(0, 0, this.size, 0, Math.PI * 2)
 				draw.fill()
 				draw.stroke()
-			})
+			}.bind(this))
 		}
 	},
 	upgrade: {
@@ -104,14 +98,14 @@ const powerUps = {
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
 			upgrades.choose()
-			powerUps.list = powerUps.list.filter(p => p != this)
+			powerUps.list = powerUps.list.filter(function(p) { return p != this; }.bind(this))
 		},
-		draw() {
-			this.drawSelf(() => {
+		draw: function() {
+			this.drawSelf(function() {
 				draw.arc(0, 0, this.size, 0, Math.PI * 2)
 				draw.fill()
 				draw.stroke()
-			})
+			}.bind(this))
 		}
 	},
 	reroll: {
@@ -124,24 +118,24 @@ const powerUps = {
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
 			upgrades.rerolls++
-			powerUps.list = powerUps.list.filter(p => p != this)
+			powerUps.list = powerUps.list.filter(function(p) { return p != this; }.bind(this))
 		},
-		draw() {
-			this.drawSelf(() => {
+		draw: function() {
+			this.drawSelf(function() {
 				draw.arc(0, 0, this.size, 0, Math.PI * 2)
 				draw.fill()
 				draw.stroke()
-			})
+			}.bind(this))
 		}
 	},
-	draw() {
-		this.list.forEach(p => p.draw())
+	draw: function() {
+		this.list.forEach(function(p) { return p.draw(); }.bind(this))
 	},
-	logic() {
-		powerUps.list.forEach(p => {
+	logic: function() {
+		powerUps.list.forEach(function(p) {
 			if (distance(player.pos.x, player.pos.y, p.pos.x, p.pos.y) < player.size / 2) {
 				p.effect()
 			}
-		})
+		}.bind(this))
 	}
 }

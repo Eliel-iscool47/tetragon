@@ -50,7 +50,7 @@ const collisions = {
 			this.grid.add(bullets.explosionList[i])
 		}
 
-		mobs.list.forEach(mob => {
+		mobs.list.forEach(function (mob) {
 			if (mob.health <= 0 || (!inCanvas(mob.pos.x, mob.pos.y, main) && mob.class == 'projectile' && mob.type != 'hexagon minion')) {
 				mobs.list.splice(mobs.list.indexOf(mob), 1)
 				if (upgrades.isKillDefense) upgrades.lastKill = simulation.time
@@ -62,27 +62,24 @@ const collisions = {
 			}
 			mob.health = Math.min(mob.health, mob.maxHealth)
 			if (distance(mob.pos.x, mob.pos.y, player.pos.x, player.pos.y) <= Math.max(player.size, mob.size) / 2) {
-				if (!player.isInvulnerable) {
-					player.health -= mob.damage * player.damageTaken
-					player.lastDamageTime = simulation.time
-				}
+				player.takeDamage(mob.damage)
 				upgrades.lastHealthRegen = simulation.time
 				mob.timeSinceLastAttack = simulation.time
 				if (mob.class != 'projectile') {
 					mob.pos.x += Math.cos(input.cursor.angle) * mob.speed * mob.size
 					mob.pos.y += Math.sin(input.cursor.angle) * mob.speed * mob.size
 					mob.onCollide()
-				} else mobs.list = mobs.list.filter(m => m != mob)
+				} else mobs.list = mobs.list.filter(function (m) { return m != mob }.bind(this))
 			}
-			this.grid.query(mob.pos.x, mob.pos.y, (e) => {
+			this.grid.query(mob.pos.x, mob.pos.y, function (e) {
 				if (e.isExplosion) {
 					if (distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size * 0.5 && e.timeSinceLastAttack <= simulation.time - 0.05) {
-						mob.health -= bullets.explosions.damageDone * player.damageDone
+						mob.takeDamage(bullets.explosions.damageDone * player.damageDone)
 						e.timeSinceLastAttack = simulation.time
 					}
 				} else {
 					if (e.piercing > 0 && distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size / 2) {
-						mob.health -= e.damage * player.damageDone
+						mob.takeDamage(e.damage * player.damageDone)
 						if (e.type == 'bouncyBalls') {
 							e.angle += rand(Math.PI * -0.05, Math.PI * 0.05)
 							if (upgrades.isBulletExplode) {
@@ -93,15 +90,14 @@ const collisions = {
 						e.piercing--
 					}
 				}
-			})
-		})
-		bullets.explosionList.forEach(xp => {
+			}.bind(this))
+		}.bind(this))
+		bullets.explosionList.forEach(function (xp) {
 			if (distance(player.pos.x, player.pos.y, xp.pos.x, xp.pos.y) <= xp.size / 2 + player.size / 2 && xp.timeSinceLastAttack < simulation.time - 0.05) {
-				player.health -= bullets.explosions.damageDone * player.damageTaken
-				player.lastDamageTime = simulation.time
+				player.takeDamage(bullets.explosions.damageDone)
 				xp.timeSinceLastAttack = simulation.time
 				upgrades.lastHealthRegen = simulation.time
 			}
-		})
+		}.bind(this))
 	},
 }
