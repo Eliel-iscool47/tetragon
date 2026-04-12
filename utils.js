@@ -1,4 +1,4 @@
-//  A collection of utilities, made for game development. Change 'drawCTX' to be the canvas's draw contex.
+//  A collection of utilities, made for game development. Change 'drawCTX' to be the canvas's draw context.
 
 /**
  * The context for the drawing methods. Change it if your canvas rendering context has a different name.
