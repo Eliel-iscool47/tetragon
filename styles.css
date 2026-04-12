@@ -1,0 +1,336 @@
+body {
+	font-family: 'DM Sans';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 32px;
+	margin: 0;
+	padding: 0;
+}
+
+br {
+	display: block;
+	content: "";
+	margin: 0px;
+}
+
+#container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	font: 36px "DM Sans"
+}
+
+#main {
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+	cursor: none;
+	margin: 0;
+	padding: 0;
+}
+
+#start {
+	/* font-style: normal; */
+	font-weight: 400;
+	font-size: 24px;
+	position: absolute;
+	background-color: hsl(210, 100%, 40%);
+	color: #ffffff;
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black;
+	cursor: pointer;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	font: 48px "DM Sans"
+}
+
+#settings {
+	font-style: normal;
+	font-weight: 400;
+	font-size: 24px;
+	position: absolute;
+	background-color: hsl(0, 0%, 45%);
+	color: #ffffff;
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black;
+	cursor: pointer;
+	overflow: hidden;
+	font: 60px "DM Sans"
+}
+
+#controls {
+	font-style: normal;
+	font-weight: 400;
+	position: absolute;
+	background-color: hsl(0, 100%, 30%);
+	color: #ffffff;
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black;
+	cursor: pointer;
+	overflow: hidden;
+	font: 36px "DM Sans"
+}
+
+#HUD {
+	display: none;
+}
+
+#level-counter {
+	font-size: 20px;
+	font-weight: 600;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#timer {
+	font-size: 16px;
+	top: 0;
+	left: 0;
+	background-color: hsla(0, 0%, 55%, 0.65);
+}
+
+#console {
+	background-color: hsla(0, 0%, 55%, 0.65);
+	overflow: hidden;
+	font-size: 10px;
+	text-wrap-mode: wrap;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+	scrollbar-color: hsla(0,0,0,0);
+	scrollbar-width: none;
+}
+
+.hud {
+	display: block;
+	position: absolute;
+	text-align: center;
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+#damage-bar {
+	background-color: hsl(0, 100%, 50%);
+	height: 200px;
+}
+
+#inventory {
+	top: 50px;
+	left: 0;
+	width: 200px;
+	height: 30px;
+	background-color: hsla(0, 0%, 80%, 0.65);
+}
+
+#health-bar {
+	background-color: hsl(115, 100%, 50%);
+	top: 10px;
+	left: 0;
+	width: 200px;
+	height: 40px;
+	font-size: 32px;
+	font-weight: 500;
+	overflow: visible;
+}
+
+#max-health {
+	background-color: hsl(0, 0%, 50%);
+	top: 10px;
+	left: 0;
+	width: 200px;
+	height: 40px;
+}
+
+#damage-taken-bar {
+	background-color: hsl(200, 100%, 85%);
+	top: 0;
+	left: 0;
+	width: 200px;
+	height: 10px;
+}
+
+#credits-button {
+	font-style: normal;
+	font-weight: 400;
+	font-size: 24px;
+	position: absolute;
+	background-color: hsl(0, 0%, 60%);
+	color: #ffffff;
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black;
+	cursor: pointer;
+	overflow: hidden;
+	text-align: center;
+	border-radius: 5px;
+	font: 36px "DM Sans"
+}
+
+#control-doc {
+	font-style: normal;
+	font-weight: 400;
+	font-size: 24px;
+	position: absolute;
+	background-color: hsl(0, 0%, 0);
+	color: #000000;
+	border-radius: 5px;
+	border-width: 2px;
+	border-style: solid;
+	border-color: black;
+	cursor: text;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	display: none;
+}
+
+#pause-screen {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.65);
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	color: white;
+	font-size: 40px;
+	font-style: normal;
+	z-index: 10;
+}
+
+#choice-screen {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+	background-color: hsla(0, 0%, 30%, 0.6);
+	display: none;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-size: 24px;
+	font-style: normal;
+	z-index: -10;
+}
+
+.styled-text {
+	border-radius: 5px;
+	font: 24px 'DM sans', sans-serif;
+	text-align: center;
+	display: inline-block;
+	padding: 0 4px;
+}
+
+.styled-text.health {
+	background-color: hsl(115, 100%, 30%);
+	color: hsl(0, 0%, 100%);
+}
+
+.styled-text.damage {
+	background-color: hsl(0, 100%, 30%);
+	color: hsl(0, 0%, 100%);
+}
+
+.styled-text.damage-taken {
+	background-color: hsl(200, 100%, 60%);
+	color: hsl(0, 0%, 100%);
+}
+
+.styled-text.explosion {
+	background-color: hsl(25, 100%, 50%);
+	color: hsl(0, 0%, 100%);
+}
+
+.styled-text.ammo {
+	background-color: hsl(235, 50%, 25%);
+	color: hsl(0, 0%, 100%);
+}
+
+.styled-text.gun {
+	background-color: hsl(115, 100%, 20%);
+	color: hsl(0, 0%, 100%);
+	text-decoration: solid;
+}
+
+.styled-text.laser {
+	background-color: hsl(0, 100%, 55%);
+	color: hsl(0, 0%, 100%);
+	text-decoration: solid;
+}
+
+.upgrade-button,
+.gun-button,
+.reroll-button,
+.cancel-button {
+	position: absolute;
+	border-radius: 10px;
+	text-align: left;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+	font: 24px 'DM Sans', sans-serif;
+	cursor: pointer;
+}
+
+.upgrade-button {
+	color: hsl(0, 0%, 100%);
+	background-color: hsl(0, 0%, 35%);
+	border: none;
+	text-decoration: none;
+	margin: 0;
+	padding: 0;
+}
+
+.upgrade-button:hover {
+	background-color: hsl(215, 100%, 50%);
+	color: hsl(0, 0%, 100%);
+	border: none;
+}
+
+.gun-button {
+	background-color: hsl(0, 0%, 0%);
+	color: hsl(115, 100%, 35%);
+	border: none;
+	text-decoration: none;
+	margin: 0;
+	padding: 0;
+	font-size: 24px;
+}
+
+.gun-button:hover {
+	background-color: hsl(115, 100%, 35%);
+	color: hsl(0, 0%, 100%);
+	text-decoration: solid;
+	margin: 0;
+	padding: 0;
+	font-size: 24px;
+}
+
+.reroll-button {
+	color: hsl(0, 0%, 100%);
+	background-color: hsl(300, 100%, 50%);
+	border: none;
+	padding: 10px;
+}
+
+.cancel-button {
+	color: hsl(0, 0%, 100%);
+	background-color: hsl(200, 100%, 80%);
+	border: none;
+	padding: 10px;
+}

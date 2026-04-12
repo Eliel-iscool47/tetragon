@@ -1,0 +1,306 @@
+const input = {
+	pressedKeys: [],
+	preventDefaultList: [
+		"KeyW",
+		"KeyS",
+		"KeyA",
+		"KeyD",
+		"ArrowUp",
+		"ArrowDown",
+		"ArrowLeft",
+		"ArrowRight",
+		"Tab",
+		"Escape",
+		"Slash",
+	],
+	toggleCooldown: 0,
+	paused: 0,
+	gunL: 0,
+	gunR: 0,
+	test: 0,
+	keybinds: {
+		up: "KeyW",
+		down: "KeyS",
+		left: "KeyA",
+		right: "KeyD",
+		fire: "KeyF",
+		testing: "KeyT",
+		pause: "KeyP",
+		gunLeft: "KeyQ",
+		gunRight: "KeyE",
+		respawn: "KeyR",
+		mainMenu: "KeyM",
+		...JSON.parse(localStorage.getItem('tetragon-keybinds') || "{}"),
+	},
+	cursor: {
+		_x: collisions.center.x,
+		get x() { return this._x },
+		set x(val) { this._x = val },
+
+		_y: collisions.center.y,
+		get y() { return this._y },
+		set y(val) { this._y = val },
+
+		_angle: 0,
+		get angle() { return this._angle },
+		set angle(val) { this._angle = val },
+
+		update(posX, posY) {
+			this._x = posX
+			this._y = posY
+			if (!simulation.isPaused)
+				this._angle = angle(this._x, this._y, player.pos.x, player.pos.y)
+		},
+	},
+	fire() {
+		if (isNullish(guns.equippedGun)) {
+			simulation.log("guns.equippedGun == undefined")
+			return undefined
+		}
+		if ((!simulation.isTesting &&
+			guns.equippedGun.ammo > 0 &&
+			simulation.time - guns.lastBulletShot < 1 / (guns.equippedGun.fireRate * upgrades.fireRate)
+		) || (simulation.isPaused || simulation.isChoosing)) return undefined
+		guns.equippedGun.shoot()
+		if (guns.equippedGun.isMuzzleFlash && guns.equippedGun.ammo > 0) bullets.muzzleFlash()
+		guns.lastBulletShot = simulation.time
+	},
+	rightClick() {
+		simulation.log("right click")
+	},
+	middleClick() {
+		simulation.log("middle click")
+	},
+	gunLeft() {
+		if (simulation.isPaused || simulation.isChoosing || isNullish(guns.equippedGun)) return undefined
+		guns.equippedGun = guns.inventory.at(
+			(guns.inventory.indexOf(guns.equippedGun) - 1) % guns.inventory.length,
+		)
+	},
+	gunRight() {
+		if (simulation.isPaused || simulation.isChoosing || isNullish(guns.equippedGun)) return undefined
+		guns.equippedGun = guns.inventory.at(
+			(guns.inventory.indexOf(guns.equippedGun) + 1) % guns.inventory.length,
+		)
+	},
+	reload() {
+		if (!isNullish(guns.equippedGun)) guns.equippedGun.reload()
+	},
+	allGuns() {
+		if (simulation.isTesting) guns.allGuns()
+	},
+	testing() {
+		simulation.isTesting = !simulation.isTesting
+	},
+	pause() {
+		simulation.isPaused = !simulation.isPaused
+	},
+	mainMenu() {
+		simulation.isMainMenu = true
+		simulation.isPaused = false
+		simulation.isDead = false
+		simulation.isTesting = false
+		simulation.startTime = now()
+		simulation.timeOffset = now()
+		simulation.absOffset = now()
+		simulation.time = 0
+		dc.style.display = 'block'
+		main.style.display = 'none'
+		document.title = 'Tetragon: Main Menu'
+		hud.Obj.style.display = 'none'
+		pauseScreen.style.display = 'none'
+	},
+	respawn() {
+		if (!simulation.isPaused && !simulation.isChoosing && !simulation.isDead && !simulation.isMainMenu) return undefined
+		simulation.isPaused = false
+		simulation.consoleMessage = ``
+		simulation.isDead = false
+		simulation.isTesting = false
+		simulation.isChoosing = false
+		simulation.time = 0
+		level.time = 0
+		hud.Obj.style.display = 'block'
+		dc.style.display = 'none'
+		main.style.display = 'block'
+		document.title = 'Tetragon'
+		player.pos.x = collisions.center.x
+		player.pos.y = collisions.center.y
+		player.maxHealth = 100
+		player.health = player.maxHealth
+		player.velocity = 5
+		player.damageDone = 1
+		player.damageTaken = 1
+		player.lastDamageTime = -(10 ** 299)
+		upgrades.healEffect = 1
+		upgrades.ammoYield = 1
+		upgrades.powerUpSpawnChance = 1
+		upgrades.collected = []
+		upgrades.unlocked = []
+		upgrades.pool = [...upgrades.defaultPool]
+		upgrades.lastHealthRegen = (-10) ** 299
+		upgrades.fireRate = 1
+		upgrades.isBulletExplode = false
+		upgrades.isExplosionColorful = false
+		upgrades.isHealthRegen = false
+		bullets.explosions.size = 25
+		upgrades.fireRate = 1
+		upgrades.ammoYield = 1
+		upgrades.optionsPerPowerUp = 3
+		bullets.explosions.damageDone = 8
+		mobs.list = []
+		level.current = 0
+		level.time = 0
+		bullets.list = []
+		bullets.explosionList = []
+		powerUps.list = []
+		guns.inventory = []
+		guns.pool = [...guns.defaultPool]
+		upgrades.rerolls = 0
+		upgrades.options = []
+		guns.equippedGun = undefined
+		simulation.timeOffset = now()
+		simulation.startTime = now()
+		simulation.isMainMenu = false
+		simulation.isDead = false
+		guns.lastBulletShot = (-10) ** 299
+		player.pos.x = collisions.center.x
+		player.pos.y = collisions.center.y
+		player.maxHealth = 100
+		player.health = player.maxHealth
+	},
+	clickLogic(click) {
+		this.cursor.update(click.offsetX, click.offsetY)
+		switch (click.button) {
+			case 0:
+				this.fire()
+				break
+			case 1:
+				this.middleClick()
+				break
+			default:
+				this.rightClick()
+				break
+		}
+	},
+	lilKeyLogic() {
+		this.pressedKeys.forEach((k) => {
+			switch (k) {
+				case this.keybinds.gunLeft:
+					this.gunLeft()
+					break
+				case this.keybinds.gunRight:
+					this.gunRight()
+					break
+				case this.keybinds.testing:
+					this.testing()
+					break
+				case this.keybinds.pause:
+					this.pause()
+					break
+				case 'Escape':
+					this.pause()
+					break
+				case 'Tab':
+					controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
+					break
+			}
+		})
+	},
+	gamepadLogic() {
+		const gamepad = navigator.getGamepads()[0]
+		if (!gamepad) return
+		if (Math.abs(gamepad.axes[2]) > 0.1 || Math.abs(gamepad.axes[3]) > 0.1) {
+			this.cursor.update(player.pos.x + gamepad.axes[2] * 100, player.pos.y + gamepad.axes[3] * 100)
+		}
+		if (gamepad.buttons[7].pressed) this.fire()
+	},
+	keyLogic() {
+		this.gamepadLogic()
+		if (!simulation.isPaused && !simulation.isChoosing) {
+			let moveX = 0
+			let moveY = 0
+
+			// Keyboard
+			if (this.pressedKeys.includes(this.keybinds.up) || this.pressedKeys.includes("ArrowUp")) moveY--
+			if (this.pressedKeys.includes(this.keybinds.down) || this.pressedKeys.includes("ArrowDown")) moveY++
+			if (this.pressedKeys.includes(this.keybinds.left) || this.pressedKeys.includes("ArrowLeft")) moveX--
+			if (this.pressedKeys.includes(this.keybinds.right) || this.pressedKeys.includes("ArrowRight")) moveX++
+
+			// Gamepad
+			const gamepad = navigator.getGamepads()[0]
+			if (gamepad) {
+				if (Math.abs(gamepad.axes[0]) > 0.1) moveX += gamepad.axes[0]
+				if (Math.abs(gamepad.axes[1]) > 0.1) moveY += gamepad.axes[1]
+			}
+
+			// Normalize and apply movement
+			const magnitude = Math.sqrt(moveX * moveX + moveY * moveY)
+			if (magnitude > 0) {
+				// Use magnitude to prevent faster diagonal movement and allow for analog stick sensitivity
+				const normalizedX = moveX / magnitude
+				const normalizedY = moveY / magnitude
+				player.pos.x += normalizedX * player.velocity * Math.min(1, magnitude)
+				player.pos.y += normalizedY * player.velocity * Math.min(1, magnitude)
+			}
+		}
+		this.pressedKeys.forEach((k) => {
+			switch (k) {
+				case this.keybinds.fire:
+					this.fire()
+					break
+				case this.keybinds.respawn:
+					this.respawn()
+					break
+				case this.keybinds.mainMenu:
+					simulation.isMainMenu = true
+					this.mainMenu()
+					break
+			}
+		})
+		this.cursor.angle = angle(
+			this.cursor.x,
+			this.cursor.y,
+			player.pos.x,
+			player.pos.y,
+		)
+	},
+}
+//actually handling input
+window.addEventListener("resize", r => {
+	main.width = window.innerWidth
+	main.height = window.innerHeight
+	collisions.border.right = main.width - player.size / 2
+	collisions.border.bottom = main.height - player.size / 2
+	draw.clearRect(0, 0, main.width, main.height)
+})
+main.addEventListener("contextmenu", cxm => {
+	cxm.preventDefault()
+	input.rightClick()
+})
+main.addEventListener("click", c => {
+	input.clickLogic(c)
+	switch (c.button) {
+		case 0:
+			input.clickLogic(c)
+			break
+		case 1:
+			input.middleClick()
+			break
+		default:
+			input.rightClick()
+			break
+	}
+})
+main.addEventListener("mousemove", m => {
+	input.cursor.update(m.offsetX, m.offsetY)
+})
+document.addEventListener("keydown", k => {
+	if (input.preventDefaultList.includes(k.code)) k.preventDefault()
+	if (input.pressedKeys.includes(k.code)) return undefined
+	input.pressedKeys.push(k.code)
+	input.lilKeyLogic()
+})
+document.addEventListener("keyup", k => {
+	if (input.pressedKeys.includes(k.code)) input.pressedKeys = input.pressedKeys.filter(key => key != k.code)
+	input.lilKeyLogic()
+})

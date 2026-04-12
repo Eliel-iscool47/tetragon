@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+	<head>
+		<meta charset="UTF-8" />
+		<title>Tetragon</title>
+		<link rel="stylesheet" href="styles.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+		<link rel="icon" href="./assets/favicon.ico" />
+	</head>
+
+	<body>
+		<canvas id="main"></canvas>
+		<div id="pause-screen">
+			<h1>PAUSED</h1>
+			<p>Press Escape or P to resume or M to return to the main menu.</p>
+		</div>
+		<div id="container">
+			<button id="start">Start Game</button>
+			<button id="settings">Settings</button>
+			<button id="controls">Controls</button>
+			<div id="control-doc"></div>
+			<button id="credits-button">Credits</button>
+			<div id="credits"></div>
+		</div>
+		<div id="HUD">
+			<!-- <div id="fade-out"></div> -->
+			<!---->
+			<div id="max-health" class="hud"></div>
+			<!--done-->
+			<div id="health-bar" class="hud"></div>
+			<!--done-->
+			<div id="damage-taken-bar" class="hud"></div>
+			<!--done-->
+			<div id="damage-bar" class="hud"></div>
+			<!--done-->
+			<div id="inventory" class="hud"></div>
+			<!--done-->
+			<div id="level-counter" class="hud"></div>
+			<!--done-->
+			<div id="timer" class="hud"></div>
+			<!--done-->
+			<div id="console" class="hud"></div>
+			<!--done-->
+			<div id="upgrade-list" class="hud"></div>
+		</div>
+		<div id="choice-screen">
+			<h1 id="choice-header"></h1>
+		</div>
+		<script src="main.js"></script>
+		<script src="utils.js"></script>
+		<script src="sprites.js"></script>
+		<script src="text.js"></script>
+		<script src="upgrades.js"></script>
+		<script src="buttons.js"></script>
+		<script src="powerups.js"></script>
+		<script src="player.js"></script>
+		<script src="mobs.js"></script>
+		<script src="spawn.js"></script>
+		<script src="bullets.js"></script>
+		<script src="hud.js"></script>
+		<script src="guns.js"></script>
+		<script src="collision.js"></script>
+		<script src="input.js"></script>
+		<script src="level.js"></script>
+		<script src="simulation.js"></script>
+	</body>
+</html>
