@@ -273,7 +273,7 @@ const bullets = {
 	killExplosions() {
 		this.explosionList.forEach(function (xpl) {
 			if (xpl.time + this.explosions.duration < simulation.time)
-				this.explosionList.splice(this.explosionList.indexOf(xpl), 1)
+				this.explosionList = this.explosionList.filter(x => x !== xpl)
 		}.bind(this))
 	},
 	muzzleFlash() {

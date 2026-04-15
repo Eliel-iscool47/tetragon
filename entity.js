@@ -34,4 +34,8 @@ class Entity {
 	takeDamage(amount) {
 		if (this.health !== undefined) this.health -= amount
 	}
+
+	checkCollision(other) {
+		return distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) <= Math.max(this.size + other.size)
+	}
 }

@@ -1,6 +1,6 @@
 const spawn = {
 	randomBoss(x, y) {
-		switch (randInt(1, 10)) {
+		switch (randInt(5, 5)) {
 			case 1:
 				this.voidBoss(x, y)
 				break
@@ -49,8 +49,8 @@ const spawn = {
 			damage: 8,
 			attackRate: 2,
 			color: 'hsl(120, 100%, 35%)',
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 				}.bind(this))
@@ -67,8 +67,8 @@ const spawn = {
 			dropChance: 1.2,
 			attackRate: 2.5,
 			color: 'hsl(0, 100%, 50%)',
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
@@ -88,8 +88,8 @@ const spawn = {
 			dropChance: 2,
 			attackRate: 0.8,
 			color: 'hsl(190, 100%, 45%)',
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.75, this.size * -0.75, this.size * 1.5, this.size * 1.5)
 				}.bind(this))
@@ -107,7 +107,7 @@ const spawn = {
 			attackRate: 1.5,
 			attackType: 'ranged',
 			color: 'hsl(300, 100%, 50%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.arrow(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
@@ -117,8 +117,8 @@ const spawn = {
 					this.moveTowardsPlayer()
 				}
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
@@ -139,9 +139,9 @@ const spawn = {
 			angle: angle(x, y, player.pos.x, player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 0%, 0%)',
-			update: function() { this.moveInAngle() },
-			draw: function() {
-				this.drawSelf(function() {
+			update: function () { this.moveInAngle() },
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -3, this.size * -0.35, this.size * 6, this.size * 0.7)
 					draw.strokeRect(this.size * -3, this.size * -0.35, this.size * 6, this.size * 0.7)
 				}.bind(this))
@@ -160,7 +160,7 @@ const spawn = {
 			attackRate: 0.6,
 			attackType: 'ranged',
 			color: 'hsl(90, 100%, 50%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.grenade(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
@@ -170,8 +170,8 @@ const spawn = {
 					this.moveTowardsPlayer()
 				}
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 8, 0)
 					draw.fill()
@@ -193,7 +193,7 @@ const spawn = {
 			attackRate: 0.5,
 			attackType: 'summon',
 			color: 'hsl(0, 0%, 35%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.default(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
@@ -203,14 +203,19 @@ const spawn = {
 					this.moveTowardsPlayer()
 				}
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 				}.bind(this))
 			}
 		}))
 	},
+	/**
+	 * The pentagon boss spins and occasionally shoots lasers at its corners
+	 * @param {number} x 
+	 * @param {number} y 
+	 */
 	pentagonBoss(x, y) {
 		mobs.list.push(new mobs.Mob(x, y, {
 			type: 'pentagon boss',
@@ -218,18 +223,111 @@ const spawn = {
 			health: 30,
 			damage: 10,
 			size: 50,
-			speed: 6,
-			attackRate: 0.8,
-			attackType: 'summon',
+			speed: 2,
+			attackRate: 0.4,
+			telegraphDuration: 0.8,
 			color: 'hsl(170, 100%, 70%)',
-			lastLaserTime: 0,
-			draw: function() {
-				this.drawSelf(function() {
+			update: function () {
+				// Spin the boss over time
+				this.angle += 0.02
+
+				// Move towards the player
+				const moveDir = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
+				this.pos.x -= Math.cos(moveDir) * this.speed
+				this.pos.y -= Math.sin(moveDir) * this.speed
+
+				// Fire lasers from each of the 5 corners occasionally
+				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
+					for (let i = 0; i < 5; i++) {
+						const cornerAngle = this.angle + (i * Math.PI * 2) / 5
+						spawn.pentagonLaser(this.pos.x, this.pos.y, cornerAngle)
+					}
+					this.timeSinceLastAttack = simulation.time
+				}
+			},
+			draw: function () {
+				this.drawSelf(function () {
+					// Warning telegraph lines
+					const timeToAttack = (1 / this.attackRate) - (simulation.time - this.timeSinceLastAttack)
+					if (timeToAttack > 0 && timeToAttack < this.telegraphDuration) {
+						draw.save()
+						// Calculate intensity: fades in and pulses quickly
+						const alpha = (1 - timeToAttack / this.telegraphDuration) * (0.4 + 0.2 * Math.sin(simulation.time * 25))
+						draw.strokeStyle = `hsla(0, 100%, 50%, ${alpha})`
+						draw.lineWidth = 1
+						draw.setLineDash([10, 5]) // Dashed line for a "charging" look
+
+						for (let i = 0; i < 5; i++) {
+							draw.save()
+							draw.rotate((i * Math.PI * 2) / 5)
+							draw.beginPath()
+							draw.moveTo(0, 0)
+							draw.lineTo(-2000, 0) // Direction matches the laser's firing logic
+							draw.stroke()
+							draw.restore()
+						}
+						draw.restore()
+					}
+
 					draw.beginPath()
-					polygon(0, 0, this.size / 2, 5)
+					// Rotate polygon by PI to align vertices with the lasers (-size direction)
+					polygon(0, 0, this.size / 2, 5, Math.PI)
 					draw.fill()
+					draw.stroke()
+				}.bind(this))
+			}
+		}))
+		// Initialize attack timer to current time to ensure the first attack is telegraphed
+		const boss = mobs.list[mobs.list.length - 1]
+		if (boss && boss.type === 'pentagon boss') {
+			boss.timeSinceLastAttack = simulation.time
+		}
+	},
+	pentagonLaser(x, y, angle, target) {
+		mobs.list.push(new mobs.Mob(x, y, {
+			type: 'pentagon laser',
+			class: 'projectile',
+			health: 1,
+			damage: 6,
+			size: 1,
+			length: 2000,
+			speed: 0,
+			angle: angle,
+			timeSpawned: simulation.time,
+			duration: 0.5,
+			color: 'hsl(176, 100%, 50%)',
+			update: function () {
+				if (simulation.time - this.timeSpawned > this.duration) {
+					this.health = 0
+					return
+				}
+				// Apply damage once per spawn
+				if (this.timeSinceLastAttack === 0) {
+					const endX = this.pos.x - Math.cos(this.angle) * this.length
+					const endY = this.pos.y - Math.sin(this.angle) * this.length
+					if (lineCircleCollision(this.pos.x, this.pos.y, endX, endY, player.pos.x, player.pos.y, player.size / 2)) {
+						player.takeDamage(this.damage)
+						upgrades.lastHealthRegen = simulation.time
+					}
+					this.timeSinceLastAttack = simulation.time
+				}
+			},
+			draw: function () {
+				this.drawSelf(function () {
+					draw.strokeStyle = this.color
+					draw.lineWidth = 10
+					draw.lineCap = 'round'
 					draw.beginPath()
-					polygon(0, 0, this.size / 2, 5)
+					draw.moveTo(0, 0)
+					draw.lineTo(-this.length, 0)
+					draw.stroke()
+
+					// Add a bright core to the laser
+					draw.strokeStyle = 'white'
+					draw.lineWidth = 4
+					draw.beginPath()
+					draw.moveTo(0, 0)
+					draw.lineTo(-this.length, 0)
 					draw.stroke()
 				}.bind(this))
 			}
@@ -246,7 +344,7 @@ const spawn = {
 			attackRate: 2,
 			attackType: 'summon',
 			color: 'hsl(25, 100%, 45%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let i = 0; i < 3; i++) {
@@ -256,8 +354,8 @@ const spawn = {
 				}
 				if (distance(this.pos.x, this.pos.y, player.pos.x, player.pos.y) >= this.size * 4) this.moveTowardsPlayer()
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 6)
 					draw.fill()
@@ -277,13 +375,13 @@ const spawn = {
 			speed: 7,
 			dropChance: 0.3,
 			color: 'hsl(30, 100%, 50%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
 				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 6)
 					draw.fill()
@@ -304,7 +402,7 @@ const spawn = {
 			attackRate: 0.8,
 			attackType: 'ranged',
 			color: 'hsl(150, 100%, 45%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let index = 0; index < 8; index++) {
@@ -314,8 +412,8 @@ const spawn = {
 				}
 				if (distance(this.pos.x, this.pos.y, player.pos.x, player.pos.y) >= this.size * 4) this.moveTowardsPlayer()
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 8)
 					draw.fill()
@@ -336,12 +434,12 @@ const spawn = {
 			dropChance: 0.3,
 			angle: angle,
 			color: 'hsl(30, 100%, 50%)',
-			update: function() {
+			update: function () {
 				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
 				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 				}.bind(this))
@@ -359,13 +457,13 @@ const spawn = {
 			speed: 8,
 			attackRate: 5,
 			color: 'hsl(0, 100%, 35%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
 				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 3)
 					draw.fill()
@@ -384,7 +482,7 @@ const spawn = {
 			speed: 0.9,
 			attackRate: 0.5,
 			color: 'hsl(0, 0%, 10%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (distance(this.pos.x, this.pos.y, player.pos.x, player.pos.y) <= this.size * 5) {
 					player.pos.x += Math.cos(this.angle + 0.4) * 1.5
@@ -392,8 +490,8 @@ const spawn = {
 				}
 				this.moveTowardsPlayer()
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
@@ -417,7 +515,7 @@ const spawn = {
 			attackRate: 0.5,
 			attackType: 'ranged',
 			color: 'hsl(260, 100%, 30%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.sniperBullet(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
@@ -425,8 +523,8 @@ const spawn = {
 				}
 				if (distance(this.pos.x, this.pos.y, player.pos.x, player.pos.y) >= this.size * 10) this.moveTowardsPlayer()
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 3)
 					draw.fill()
@@ -447,9 +545,9 @@ const spawn = {
 			angle: angle(x, y, player.pos.x, player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 100%, 15%)',
-			update: function() { this.moveInAngle() },
-			draw: function() {
-				this.drawSelf(function() {
+			update: function () { this.moveInAngle() },
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.beginPath()
@@ -470,9 +568,9 @@ const spawn = {
 			speed: 4,
 			attackRate: 0.8,
 			color: 'hsl(205, 100%, 35%)',
-			update: function() {
+			update: function () {
 				this.moveTowardsPlayer()
-				mobs.list.forEach(function(other) {
+				mobs.list.forEach(function (other) {
 					if (other == this || other.type != "twin boss") return undefined
 					if (distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) < 300) {
 						this.health += 0.05
@@ -485,8 +583,8 @@ const spawn = {
 					}
 				}.bind(this))
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
@@ -505,7 +603,7 @@ const spawn = {
 			speed: 3,
 			attackRate: 0.5,
 			color: 'hsl(0, 42%, 36%)',
-			update: function() {
+			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
 				if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.mine(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
@@ -513,8 +611,8 @@ const spawn = {
 				}
 				if (distance(this.pos.x, this.pos.y, player.pos.x, player.pos.y) >= this.size) this.moveTowardsPlayer()
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 				}.bind(this))
@@ -533,8 +631,8 @@ const spawn = {
 			angle: angle(x, y, player.pos.x, player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 100%, 25%)',
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
@@ -554,14 +652,14 @@ const spawn = {
 			dropChance: 0,
 			color: 'hsl(320, 100%, 50%)',
 			timeSinceLastShift: (-10) ** 299,
-			update: function() {
+			update: function () {
 				if (simulation.time - this.timeSinceLastShift < 1) return undefined
 				this.pos.x = randInt(0, main.width)
 				this.pos.y = randInt(0, main.height)
 				this.timeSinceLastShift = simulation.time
 			},
-			draw: function() {
-				this.drawSelf(function() {
+			draw: function () {
+				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
@@ -571,8 +669,3 @@ const spawn = {
 		}))
 	}
 }
-
-/**
-Boss Ideas:
-10. The Shifter: Teleports around the arena.
-*/

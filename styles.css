@@ -334,3 +334,23 @@ br {
 	border: none;
 	padding: 10px;
 }
+
+.gun-hud.equipped {
+	color: #ffffff;
+	background-color: hsl(205, 100%, 35%);
+	border: none;
+	text-decoration: none;
+	margin: 0;
+	padding: 0;
+	font-size: 24px;
+}
+
+.gun-hud.unequipped {
+	color: #000000;
+	background-color: hsla(0, 0%, 35%, 0);
+	border: none;
+	text-decoration: none;
+	margin: 0;
+	padding: 0;
+	font-size: 24px;
+}

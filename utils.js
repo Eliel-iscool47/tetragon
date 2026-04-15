@@ -5,15 +5,15 @@
 /**
  * The context for the drawing methods. Change it if your canvas rendering context has a different name.
  */
-let drawCTX = draw;
+let drawCTX = draw
 /**
  * Short-form for undefined.
  */
-const n = undefined;
+const n = undefined
 /**
  * Multiply an angle in degrees by this to convert it to radians.
  */
-const degree = Math.PI / 180;
+const degree = Math.PI / 180
 /**
  * Returns a pseudorandom number within the bounds selected
  * @param {number} min the minimum value
@@ -95,7 +95,7 @@ function lerp(start, end, time) {
  */
 function avg(args) {
 	let sum = 0
-	args.forEach(function(a) {
+	args.forEach(function (a) {
 		sum += a
 	}.bind(this))
 	return sum / args.length
@@ -146,7 +146,7 @@ function chooseRandom(array, amount) {
 		if (array.length == 0) return undefined
 		const r = randInt(0, array.length - 1)
 		chosen.push(array.at(r))
-		array.splice(r, 1)
+		array = array.filter((_, i) => i !== r)
 	}, amount)
 	return chosen
 }
@@ -249,15 +249,17 @@ function lineCircleCollision(x1, y1, x2, y2, cx, cy, r) {
 	cx ??= 0
 	cy ??= 0
 	r ??= 0
+
 	const dx = x2 - x1
 	const dy = y2 - y1
-	const a = dx * dx + dy * dy
-	const b = 2 * (dx * (x1 - cx) + dy * (y1 - cy))
-	const c = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy) - r * r
-	const discriminant = b * b - 4 * a * c
-	if (discriminant < 0) {
-		return false
-	} else {
-		return true
-	}
+	const lengthSq = dx * dx + dy * dy
+	if (lengthSq == 0) return distance(x1, y1, cx, cy) <= r
+
+	// Project the circle center onto the line segment to find the closest point
+	let t = ((cx - x1) * dx + (cy - y1) * dy) / lengthSq
+	t = Math.max(0, Math.min(1, t)) // Clamp t to the segment bounds [0, 1]
+
+	const closestX = x1 + t * dx
+	const closestY = y1 + t * dy
+	return distance(cx, cy, closestX, closestY) <= r
 }

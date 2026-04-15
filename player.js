@@ -16,6 +16,13 @@ class Player extends Entity {
 		})
 	}
 
+	takeDamage(amount) {
+		if (this.isInvulnerable) return
+		this.health -= amount
+		this.lastDamageTime = simulation.time
+		upgrades.lastHealthRegen = simulation.time
+	}
+
 	get health() { return this._health }
 	set health(val) { this._health = Math.min(val, this.maxHealth) }
 

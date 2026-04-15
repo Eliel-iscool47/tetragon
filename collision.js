@@ -52,13 +52,13 @@ const collisions = {
 
 		mobs.list.forEach(function (mob) {
 			if (mob.health <= 0 || (!inCanvas(mob.pos.x, mob.pos.y, main) && mob.class == 'projectile' && mob.type != 'hexagon minion')) {
-				mobs.list.splice(mobs.list.indexOf(mob), 1)
+				mobs.list = mobs.list.filter(m => m !== mob)
 				if (upgrades.isKillDefense) upgrades.lastKill = simulation.time
-				if (percentChance(upgrades.powerUpSpawnChance * 0.15 * mob.dropChance) && mob.class != 'projectile') powerUps.ammo.new(mob.pos.x, mob.pos.y)
-				if (percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) && mob.class != 'projectile') powerUps.heal.new(mob.pos.x, mob.pos.y)
-				if (percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) && mob.class != 'projectile') powerUps.reroll.new(mob.pos.x, mob.pos.y)
-				if (percentChance(upgrades.powerUpSpawnChance * 0.03 * mob.dropChance) && mob.class != 'projectile') powerUps.gun.new(mob.pos.x, mob.pos.y)
-				if ((percentChance(upgrades.powerUpSpawnChance * 0.01 * mob.dropChance) || mob.class == 'boss') && mob.class != 'projectile') powerUps.upgrade.new(mob.pos.x, mob.pos.y)
+				if (percentChance(upgrades.powerUpSpawnChance * 0.15 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.ammo)
+				if (percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.heal)
+				if (percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.reroll)
+				if (percentChance(upgrades.powerUpSpawnChance * 0.03 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.gun)
+				if ((percentChance(upgrades.powerUpSpawnChance * 0.01 * mob.dropChance) || mob.class == 'boss') && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.upgrade)
 			}
 			mob.health = Math.min(mob.health, mob.maxHealth)
 			if (distance(mob.pos.x, mob.pos.y, player.pos.x, player.pos.y) <= Math.max(player.size, mob.size) / 2) {

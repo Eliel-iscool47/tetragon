@@ -48,14 +48,18 @@ const input = {
 		},
 	},
 	fire() {
-		if (isNullish(guns.equippedGun)) {
+		if (!guns.equippedGun) {
 			simulation.log("guns.equippedGun == undefined")
 			return undefined
 		}
 		if ((!simulation.isTesting &&
 			guns.equippedGun.ammo > 0 &&
-			simulation.time - guns.lastBulletShot < 1 / (guns.equippedGun.fireRate * upgrades.fireRate)
-		) || (simulation.isPaused || simulation.isChoosing)) return undefined
+			simulation.time - guns.lastBulletShot < 1 / (
+				guns.equippedGun.fireRate * upgrades.fireRate
+			)
+		) || simulation.isPaused || 
+		simulation.isChoosing
+	) return undefined
 		guns.equippedGun.shoot()
 		if (guns.equippedGun.isMuzzleFlash && guns.equippedGun.ammo > 0) bullets.muzzleFlash()
 		guns.lastBulletShot = simulation.time
@@ -106,6 +110,7 @@ const input = {
 	},
 	respawn() {
 		if (!simulation.isPaused && !simulation.isChoosing && !simulation.isDead && !simulation.isMainMenu) return undefined
+		player.lastDamageTime = 0-10 ** 299
 		simulation.isPaused = false
 		simulation.consoleMessage = ``
 		simulation.isDead = false

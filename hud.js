@@ -105,11 +105,11 @@ const hud = {
 		this.inv.style.padding = '0'
 		this.inv.style.height = `${guns.inventory.length * 40 + 55}px`
 		this.inv.style.color = 'black'
-		this.inv.style.fontSize = '25px'
+		this.inv.style.fontSize = '24px'
 		this.inv.style.textAlign = 'left'
 		this.inv.innerHTML = `
 		Inventory: <br>
-		${guns.inventory.map(function (g) { return `${g.name}: ${g.ammo + (g.magazines * g.magSize)} ${g == guns.equippedGun ? '(equipped)' : ''}` }.bind(this)).join('<br>')}
+		${guns.inventory.map(function (g) { return `<span class="gun-hud ${g == guns.equippedGun ? 'equipped' : 'unequipped'}">${g.name}: ${g.ammo}/${g.magazines * g.magSize}</span>`}.bind(this)).join('<br>').replace('Infinity', 'inf')}
 		`
 	},
 	levelCounter() {

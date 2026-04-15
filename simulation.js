@@ -123,7 +123,7 @@ ${this._consoleMessage}
 			return undefined
 		}
 		main.style.cursor = 'none'
-		if (this.time - player.lastDamageTime < 0.08 && !this.isDead && !this.isPaused) {
+		if (this.time - player.lastDamageTime < 0.1 && !this.isDead && !this.isPaused) {
 			main.style.top = `${rand(-10, 10)}px`
 			main.style.left = `${rand(-10, 10)}px`
 		} else {
@@ -131,7 +131,7 @@ ${this._consoleMessage}
 			main.style.left = '0px'
 		}
 		dc.style.display = 'none'
-		main.style.filter = `saturate(${this.isDead ? 100 : 100 * player.health / player.maxHealth}%)`
+		main.style.filter = `saturate(${this.isDead ? 100 : (50 * player.health / player.maxHealth) + 50}%)`
 		if (this.isDead) {
 			main.style.cursor = 'default'
 			player.deathScreen()
@@ -146,10 +146,12 @@ ${this._consoleMessage}
 		}
 		player.health = Math.min(player.health, player.maxHealth)
 		upgrades.applyRegen()
+		if (!this.isPaused && !this.isChoosing) guns.logic()
 		pauseScreen.style.display = this.isPaused ? 'block' : 'none'
 		chooseScreen.style.display = this.isChoosing ? 'block' : 'none'
 		if (!this.isPaused && !this.isChoosing) this.time += 1 / this.fps
 		player.draw()
+		guns.equippedGun?.drawReload()
 		collisions.border.left = player.size / 2
 		collisions.border.right = main.width - player.size / 2
 		collisions.border.top = player.size / 2

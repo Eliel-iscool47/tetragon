@@ -65,44 +65,44 @@ const mobs = {
 		}
 	},
 	list: [],
-	drawMobs: function() {
-		this.list.forEach(function(mob) { return mob.draw(); }.bind(this))
+	drawMobs: function () {
+		this.list.forEach(function (mob) { return mob.draw() }.bind(this))
 	},
-	kill: function() {
+	kill: function () {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach(function(mob) {
+		this.list.forEach(function (mob) {
 			if (mob.health <= 0) {
-				this.list.splice(this.list.indexOf(mob), 1)
+				this.list = this.list.filter(m => m !== mob)
 				if (upgrades.isKillDefense) upgrades.lastKill = simulation.time
 				if (
 					percentChance(upgrades.powerUpSpawnChance * 0.3 * mob.dropChance) &&
 					mob.class != "projectile"
-				) powerUps.ammo.new(mob.pos.x, mob.pos.y)
+				) powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.ammo)
 				if (
 					percentChance(upgrades.powerUpSpawnChance * 0.2 * mob.dropChance) &&
 					mob.class != "projectile"
-				) powerUps.heal.new(mob.pos.x, mob.pos.y)
+				) powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.heal)
 				if (
 					percentChance(upgrades.powerUpSpawnChance * 0.2 * mob.dropChance) &&
 					mob.class != "projectile"
-				) powerUps.reroll.new(mob.pos.x, mob.pos.y)
+				) powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.reroll)
 				if (
 					percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) &&
 					mob.class != "projectile"
-				) powerUps.gun.new(mob.pos.x, mob.pos.y)
+				) powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.gun)
 				if (
 					percentChance(
 						upgrades.powerUpSpawnChance * 0.08 * mob.dropChance,
 					) ||
 					mob.class == "boss"
-				) powerUps.upgrade.new(mob.pos.x, mob.pos.y)
+				) powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.upgrade)
 			}
 			if (mob.health > mob.maxHealth) mob.health = mob.maxHealth
 		}.bind(this))
 	},
-	healthBars: function() {
+	healthBars: function () {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach(function(mob) {
+		this.list.forEach(function (mob) {
 			draw.save()
 			if (mob.class != "projectile") {
 				draw.globalAlpha = clamp(
@@ -137,9 +137,9 @@ const mobs = {
 			draw.restore()
 		}.bind(this))
 	},
-	loop: function() {
+	loop: function () {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach(function(mob) {
+		this.list.forEach(function (mob) {
 			if (mob.health > mob.maxHealth) mob.health = mob.maxHealth
 			mob.update()
 		}.bind(this))

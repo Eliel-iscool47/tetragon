@@ -27,9 +27,10 @@ const level = {
 					spawn.default(player.pos.x, player.pos.y)
 				}.bind(this), 100)
 			case this.current <= 1:
-				powerUps.gun.new(
-					randInt(0, collisions.border.right),
-					randInt(0, collisions.border.bottom),
+				powerUps.spawn(
+					randInt(collisions.border.left, collisions.border.right),
+					randInt(collisions.border.top, collisions.border.bottom),
+					powerUps.gun
 				)
 				repeat(function () {
 					spawn.default(
@@ -147,17 +148,20 @@ const level = {
 				break
 		}
 		repeat(function () {
-			powerUps.ammo.new(
+			powerUps.spawn(
 				randInt(collisions.border.left, collisions.border.right),
 				randInt(collisions.border.top, collisions.border.bottom),
-			), 3
-			powerUps.heal.new(
-				randInt(collisions.border.left, collisions.border.right),
-				randInt(collisions.border.top, collisions.border.bottom),
+				powerUps.ammo
 			)
-			powerUps.reroll.new(
+			powerUps.spawn(
 				randInt(collisions.border.left, collisions.border.right),
 				randInt(collisions.border.top, collisions.border.bottom),
+				powerUps.heal
+			)
+			powerUps.spawn(
+				randInt(collisions.border.left, collisions.border.right),
+				randInt(collisions.border.top, collisions.border.bottom),
+				powerUps.reroll
 			)
 		}.bind(this), 2)
 	},
