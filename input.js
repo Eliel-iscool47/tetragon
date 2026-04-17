@@ -25,6 +25,7 @@ const input = {
 		gunRight: "KeyE",
 		respawn: "KeyR",
 		mainMenu: "KeyM",
+		reload: "KeyV",
 		...JSON.parse(localStorage.getItem('tetragon-keybinds') || "{}"),
 	},
 	cursor: {
@@ -57,9 +58,9 @@ const input = {
 			simulation.time - guns.lastBulletShot < 1 / (
 				guns.equippedGun.fireRate * upgrades.fireRate
 			)
-		) || simulation.isPaused || 
-		simulation.isChoosing
-	) return undefined
+		) || simulation.isPaused ||
+			simulation.isChoosing
+		) return undefined
 		guns.equippedGun.shoot()
 		if (guns.equippedGun.isMuzzleFlash && guns.equippedGun.ammo > 0) bullets.muzzleFlash()
 		guns.lastBulletShot = simulation.time
@@ -109,8 +110,13 @@ const input = {
 		pauseScreen.style.display = 'none'
 	},
 	respawn() {
-		if (!simulation.isPaused && !simulation.isChoosing && !simulation.isDead && !simulation.isMainMenu) return undefined
-		player.lastDamageTime = 0-10 ** 299
+		if (
+			!simulation.isPaused &&
+			!simulation.isChoosing &&
+			!simulation.isDead &&
+			!simulation.isMainMenu
+		) return undefined
+		player.lastDamageTime = 0 - 10 ** 299
 		simulation.isPaused = false
 		simulation.consoleMessage = ``
 		simulation.isDead = false
@@ -129,7 +135,7 @@ const input = {
 		player.velocity = 5
 		player.damageDone = 1
 		player.damageTaken = 1
-		player.lastDamageTime = -(10 ** 299)
+		// player.lastDamageTime = (-10) ** 299
 		upgrades.healEffect = 1
 		upgrades.ammoYield = 1
 		upgrades.powerUpSpawnChance = 1
@@ -149,7 +155,7 @@ const input = {
 		mobs.list = []
 		level.current = 0
 		level.time = 0
-		bullets.list = [] 
+		bullets.list = []
 		bullets.explosionList = []
 		powerUps.list = []
 		guns.inventory = []
@@ -182,7 +188,7 @@ const input = {
 		}
 	},
 	lilKeyLogic() {
-		this.pressedKeys.forEach(function(k) {
+		this.pressedKeys.forEach(function (k) {
 			switch (k) {
 				case this.keybinds.gunLeft:
 					this.gunLeft()
@@ -201,6 +207,9 @@ const input = {
 					break
 				case 'Tab':
 					controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
+					break
+				case this.keybinds.reload:
+					this.reload()
 					break
 			}
 		}.bind(this))
@@ -242,8 +251,8 @@ const input = {
 				player.pos.y += normalizedY * player.velocity * Math.min(1, magnitude)
 			}
 		}
-		this.pressedKeys.forEach(function(k) {
-			console.log(k)
+		this.pressedKeys.forEach(function (k) {
+			// console.log(k)
 			switch (k) {
 				case this.keybinds.fire:
 					this.fire()
@@ -266,18 +275,18 @@ const input = {
 	},
 }
 //actually handling input
-window.addEventListener("resize", function(r) {
+window.addEventListener("resize", function (r) {
 	main.width = window.innerWidth
 	main.height = window.innerHeight
 	collisions.border.right = main.width - player.size / 2
 	collisions.border.bottom = main.height - player.size / 2
 	draw.clearRect(0, 0, main.width, main.height)
 }.bind(this))
-main.addEventListener("contextmenu", function(cxm) {
+main.addEventListener("contextmenu", function (cxm) {
 	cxm.preventDefault()
 	input.rightClick()
 }.bind(this))
-main.addEventListener("click", function(c) {
+main.addEventListener("click", function (c) {
 	input.clickLogic(c)
 	switch (c.button) {
 		case 0:
@@ -291,16 +300,16 @@ main.addEventListener("click", function(c) {
 			break
 	}
 }.bind(this))
-main.addEventListener("mousemove", function(m) {
+main.addEventListener("mousemove", function (m) {
 	input.cursor.update(m.offsetX, m.offsetY)
 }.bind(this))
-document.addEventListener("keydown", function(k) {
+document.addEventListener("keydown", function (k) {
 	if (input.preventDefaultList.includes(k.code)) k.preventDefault()
 	if (input.pressedKeys.includes(k.code)) return undefined
 	input.pressedKeys.push(k.code)
 	input.lilKeyLogic()
 }.bind(this))
-document.addEventListener("keyup", function(k) {
-	if (input.pressedKeys.includes(k.code)) input.pressedKeys = input.pressedKeys.filter(function(key) { return key != k.code; }.bind(this))
+document.addEventListener("keyup", function (k) {
+	if (input.pressedKeys.includes(k.code)) input.pressedKeys = input.pressedKeys.filter(function (key) { return key != k.code }.bind(this))
 	input.lilKeyLogic()
 }.bind(this))

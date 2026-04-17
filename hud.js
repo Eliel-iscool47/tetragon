@@ -109,7 +109,11 @@ const hud = {
 		this.inv.style.textAlign = 'left'
 		this.inv.innerHTML = `
 		Inventory: <br>
-		${guns.inventory.map(function (g) { return `<span class="gun-hud ${g == guns.equippedGun ? 'equipped' : 'unequipped'}">${g.name}: ${g.ammo}/${g.magazines * g.magSize}</span>`}.bind(this)).join('<br>').replace('Infinity', 'inf')}
+		${guns.inventory.map(function (g) {
+			return g.HUDEntry
+		}.bind(this)
+		)
+				.join('<br>').replaceAll('Infinity', '∞')}
 		`
 	},
 	levelCounter() {

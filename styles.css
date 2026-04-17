@@ -335,14 +335,20 @@ br {
 	padding: 10px;
 }
 
+.gun-hud {
+	transition: all 0.2s ease;
+}
+
 .gun-hud.equipped {
 	color: #ffffff;
-	background-color: hsl(205, 100%, 35%);
+	background-color: hsl(215, 100%, 45%);
 	border: none;
 	text-decoration: none;
 	margin: 0;
 	padding: 0;
 	font-size: 24px;
+	font-weight: bold;
+	display: inline-block;
 }
 
 .gun-hud.unequipped {

@@ -30,9 +30,15 @@ const guns = {
 			this.isReloading = false
 			this.reloadStartTime = 0
 			this.unlockables = [...config.unlockables || []]
+			this._customHUDEntry = config.HUDEntry
 			// Custom unique logic
 			this._shoot = config.shoot
 			this._get = config.get
+		}
+
+		get HUDEntry() {
+			return this._customHUDEntry || `<span class="gun-hud ${this == guns.equippedGun ? 'equipped' : 'unequipped'
+				}">${this.name}: ${this.ammo}/${this.magazines * this.magSize}</span>`
 		}
 
 		equip() {
@@ -47,7 +53,7 @@ const guns = {
 		}
 
 		reload() {
-			if (this.isReloading || this.magazines <= 0 || (this.ammo > 0 && this.magSize !== Infinity)) return undefined
+			if (this.isReloading || this.magazines <= 0 || (this.ammo >= this.magSize && this.magSize !== Infinity)) return undefined
 			this.isReloading = true
 			this.reloadStartTime = simulation.time
 		}
@@ -61,7 +67,7 @@ const guns = {
 			guns.pool = guns.pool.filter(function (g) { return g != this }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.get(${this.id}, ${mags === Infinity ? 'Infinity' : Math.round(mags)})`)
-			// if (this._get) this._get()
+			if (this._get) this._get()
 			upgrades.unlocked.push(...this.unlockables)
 		}
 
@@ -126,7 +132,7 @@ guns.shotgun = new guns.Gun({
 	bulletDuration: 0.4,
 	spread: 30,
 	get() {
-		upgrades.unlocked.splice(upgrades.unlocked.indexOf('shotgun'), 1)
+		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'shotgun')
 		upgrades.unlocked.push('shotgun', 'bullets')
 	},
 	shoot() {
@@ -330,7 +336,7 @@ Object.assign(guns, {
 		this[g]?.equip()
 	},
 	logic() {
-		this.inventory.forEach(function(g) {
+		this.inventory.forEach(function (g) {
 			if (g.isReloading && simulation.time - g.reloadStartTime >= g.reloadTime) {
 				g.isReloading = false
 				g.magazines--

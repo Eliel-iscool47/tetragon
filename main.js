@@ -151,6 +151,7 @@ Tab: Toggle this menu<br>
 Escape or ${input.keybinds.pause.replace('Key', '').replace('Digit', '')}: Pause<br>
 ${input.keybinds.gunLeft.replace('Key', '').replace('Digit', '')}: Cycle gun left<br>
 ${input.keybinds.gunRight.replace('Key', '').replace('Digit', '')}: Cycle gun right<br>
+${input.keybinds.reload.replace('Key', '').replace('Digit', '')}: Reload<br>
 `
 	controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
 }.bind(this)
@@ -199,7 +200,7 @@ function renderSettings() {
 	settingsMenu.appendChild(document.createElement('hr'))
 
 	for (const [action, key] of Object.entries(input.keybinds)) {
-		if (key == input.keybinds.testing || key == input.keybinds.reload || key == input.keybinds.allGuns || key == input.keybinds.mainMenu) continue
+		if (key == input.keybinds.testing || key == input.keybinds.allGuns || key == input.keybinds.mainMenu) continue
 		const container = document.createElement('div')
 		container.style.margin = '10px 0'
 		const btn = document.createElement('button')

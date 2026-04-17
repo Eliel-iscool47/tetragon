@@ -132,7 +132,7 @@ const spawn = {
 			type: 'arrow',
 			class: 'projectile',
 			health: 1,
-			damage: 1,
+			damage: 5,
 			size: 8,
 			speed: 12,
 			dropChance: 0,
@@ -144,6 +144,41 @@ const spawn = {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -3, this.size * -0.35, this.size * 6, this.size * 0.7)
 					draw.strokeRect(this.size * -3, this.size * -0.35, this.size * 6, this.size * 0.7)
+				}.bind(this))
+			}
+		}))
+	},
+	grenade(x, y) {
+		mobs.list.push(new mobs.Mob(x, y, {
+			type: 'grenade',
+			class: 'projectile',
+			health: 1,
+			damage: 5,
+			size: 15,
+			speed: 5,
+			dropChance: 0,
+			angle: angle(x, y, player.pos.x, player.pos.y),
+			duration: 1.5,
+			color: 'hsl(90, 100%, 30%)',
+			update: function () {
+				this.moveInAngle()
+				if (simulation.time - this.timeSpawned > this.duration) {
+					this.health = 0
+					bullets.explosion(this.pos.x, this.pos.y, 2.5)
+				}
+			},
+			onCollide: function () {
+				bullets.explosion(this.pos.x, this.pos.y, 2.5)
+			},
+			draw: function () {
+				this.drawSelf(function () {
+					draw.beginPath()
+					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
+					draw.fill()
+					draw.stroke()
+					// Draw a small "fuse" or detail
+					draw.fillStyle = 'black'
+					draw.fillRect(-2, -this.size / 2 - 2, 4, 4)
 				}.bind(this))
 			}
 		}))
@@ -252,9 +287,9 @@ const spawn = {
 					if (timeToAttack > 0 && timeToAttack < this.telegraphDuration) {
 						draw.save()
 						// Calculate intensity: fades in and pulses quickly
-						const alpha = (1 - timeToAttack / this.telegraphDuration) * (0.4 + 0.2 * Math.sin(simulation.time * 25))
+						const alpha = (1 - timeToAttack / this.telegraphDuration) * (0.6 + 0.2 * Math.sin(simulation.time * 40))
 						draw.strokeStyle = `hsla(0, 100%, 50%, ${alpha})`
-						draw.lineWidth = 1
+						draw.lineWidth = 4
 						draw.setLineDash([10, 5]) // Dashed line for a "charging" look
 
 						for (let i = 0; i < 5; i++) {
@@ -293,6 +328,7 @@ const spawn = {
 			length: 2000,
 			speed: 0,
 			angle: angle,
+			attackRate: 5, // Hits every 0.2 seconds
 			timeSpawned: simulation.time,
 			duration: 0.5,
 			color: 'hsl(176, 100%, 50%)',
@@ -301,15 +337,17 @@ const spawn = {
 					this.health = 0
 					return
 				}
-				// Apply damage once per spawn
-				if (this.timeSinceLastAttack === 0) {
-					const endX = this.pos.x - Math.cos(this.angle) * this.length
-					const endY = this.pos.y - Math.sin(this.angle) * this.length
-					if (lineCircleCollision(this.pos.x, this.pos.y, endX, endY, player.pos.x, player.pos.y, player.size / 2)) {
+
+				const endX = this.pos.x - Math.cos(this.angle) * this.length
+				const endY = this.pos.y - Math.sin(this.angle) * this.length
+				
+				// Continuous damage check: check collision every frame, but apply damage on a cooldown
+				if (lineCircleCollision(this.pos.x, this.pos.y, endX, endY, player.pos.x, player.pos.y, player.size / 2)) {
+					if (simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 						player.takeDamage(this.damage)
 						upgrades.lastHealthRegen = simulation.time
+						this.timeSinceLastAttack = simulation.time
 					}
-					this.timeSinceLastAttack = simulation.time
 				}
 			},
 			draw: function () {
@@ -330,7 +368,10 @@ const spawn = {
 					draw.lineTo(-this.length, 0)
 					draw.stroke()
 				}.bind(this))
-			}
+			},
+			// checkCollision: function (other) {
+			// 	return lineCircleCollision(this.pos.x, this.pos.y, this.pos.x - Math.cos(this.angle) * this.length, this.pos.y - Math.sin(this.angle) * this.length, other.pos.x, other.pos.y, other.size / 2)
+			// }
 		}))
 	},
 	hexagonBoss(x, y) {
@@ -662,6 +703,42 @@ const spawn = {
 				this.drawSelf(function () {
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
+					draw.fill()
+					draw.stroke()
+				}.bind(this))
+			}
+		}))
+	},
+	sentry(x, y) {
+		mobs.list.push(new mobs.Mob(x, y, {
+			type: 'sentry',
+			health: 40,
+			damage: 5,
+			size: 35,
+			speed: 0, /* Turrets are stationary */
+			attackRate: 0.8,
+			attackType: 'ranged',
+			color: 'hsl(250, 100%, 30%)',
+			update: function () {
+				this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
+				const dist = distance(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
+				
+				// Only fire if the player is within range
+				if (dist < 800 && simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
+					spawn.arrow(this.pos.x, this.pos.y)
+					this.timeSinceLastAttack = simulation.time
+				}
+			},
+			draw: function () {
+				this.drawSelf(function () {
+					// Draw the armored square base
+					draw.fillRect(-this.size / 2, -this.size / 2, this.size, this.size)
+					draw.strokeRect(-this.size / 2, -this.size / 2, this.size, this.size)
+					
+					// Draw a rotating core to indicate it is active
+					draw.fillStyle = 'white'
+					draw.beginPath()
+					polygon(0, 0, this.size / 3, 4, simulation.time * 4)
 					draw.fill()
 					draw.stroke()
 				}.bind(this))

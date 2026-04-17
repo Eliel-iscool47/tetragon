@@ -1,11 +1,19 @@
 const level = {
 	_intermission: 15,
-	get intermission() { return this._intermission },
-	set intermission(val) { this._intermission = val },
+	get intermission() {
+		return this._intermission
+	},
+	set intermission(val) {
+		this._intermission = val
+	},
 
 	_time: 0,
-	get time() { return this._time },
-	set time(val) { this._time = val },
+	get time() {
+		return this._time
+	},
+	set time(val) {
+		this._time = val
+	},
 
 	_current: 0,
 	get current() { return this._current },
@@ -18,20 +26,18 @@ const level = {
 		)
 		this.time = simulation.time
 		document.title = `Tetragon: level ${this.current}`
+		if (guns.inventory.length <= 0) powerUps.spawn(
+			randInt(collisions.border.left, collisions.border.right),
+			randInt(collisions.border.top, collisions.border.bottom),
+			powerUps.gun
+		)
 		switch (true) {
 			case this.current <= 0:
-				repeat(function () {
-					spawn.archer(player.pos.x, player.pos.y)
-					spawn.tank(player.pos.x, player.pos.y)
-					spawn.runner(player.pos.x, player.pos.y)
-					spawn.default(player.pos.x, player.pos.y)
-				}.bind(this), 100)
+				while (this.current <= 0) {
+					this.next()
+				}
+				break
 			case this.current <= 1:
-				powerUps.spawn(
-					randInt(collisions.border.left, collisions.border.right),
-					randInt(collisions.border.top, collisions.border.bottom),
-					powerUps.gun
-				)
 				repeat(function () {
 					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
@@ -41,7 +47,7 @@ const level = {
 				break
 			case this.current <= 5:
 				repeat(function () {
-					spawn.default(
+					spawn.sentry(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
@@ -54,11 +60,11 @@ const level = {
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
 				}.bind(this), 8)
-				spawn.runner(
+				spawn.sentry(
 					randInt(collisions.border.left, collisions.border.right),
 					randInt(collisions.border.top, collisions.border.bottom),
 				)
-				spawn.runner(
+				spawn.sentry(
 					randInt(collisions.border.left, collisions.border.right),
 					randInt(collisions.border.top, collisions.border.bottom),
 				)
@@ -97,6 +103,10 @@ const level = {
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
+					spawn.sentry(
+						randInt(collisions.border.left, collisions.border.right),
+						randInt(collisions.border.top, collisions.border.bottom),
+					)
 				}.bind(this), 8)
 				break
 			case this.current <= 30:
@@ -118,6 +128,10 @@ const level = {
 						randInt(collisions.border.top, collisions.border.bottom)
 					)
 					spawn.default(
+						randInt(collisions.border.left, collisions.border.right),
+						randInt(collisions.border.top, collisions.border.bottom),
+					)
+					spawn.sentry(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
@@ -143,6 +157,10 @@ const level = {
 					spawn.grenadier(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom)
+					)
+					spawn.sentry(
+						randInt(collisions.border.left, collisions.border.right),
+						randInt(collisions.border.top, collisions.border.bottom),
 					)
 				}.bind(this), this.current - 10)
 				break

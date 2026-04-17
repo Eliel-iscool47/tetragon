@@ -12,7 +12,7 @@ class Player extends Entity {
 			_isInvulnerable: false,
 			_size: 50,
 			_velocity: 5,
-			color: 'hsl(215, 100%, 35%)',
+			color: 'hsl(215, 100%, 45%)',
 		})
 	}
 
