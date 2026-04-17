@@ -1,6 +1,6 @@
 const spawn = {
 	randomBoss(x, y) {
-		switch (randInt(5, 5)) {
+		switch (randInt(1, 10)) {
 			case 1:
 				this.voidBoss(x, y)
 				break

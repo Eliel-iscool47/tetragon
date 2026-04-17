@@ -1,6 +1,6 @@
 const powerUps = {
 	PowerUp: class extends Entity {
-		static new(x, y, config) {
+		static spawn(x, y, config) {
 			powerUps.list.push(new this(x, y, config))
 		}
 		constructor(x, y, config) {
@@ -35,7 +35,7 @@ const powerUps = {
 			spawnX += Math.cos(dir) * minGap
 			spawnY += Math.sin(dir) * minGap
 		}
-		this.PowerUp.new(spawnX, spawnY, type)
+		this.PowerUp.spawn(spawnX, spawnY, type)
 	},
 	list: [],
 	gun: {
