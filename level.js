@@ -47,7 +47,7 @@ const level = {
 				break
 			case this.current <= 5:
 				repeat(function () {
-					spawn.sentry(
+					spawn.default(
 						randInt(collisions.border.left, collisions.border.right),
 						randInt(collisions.border.top, collisions.border.bottom),
 					)
