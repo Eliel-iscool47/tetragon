@@ -55,7 +55,7 @@ class Player extends Entity {
 	setInvulnerable(duration = Number.MAX_VALUE / 1000) {
 		duration ??= Number.MAX_VALUE / 1000
 		this.isInvulnerable = true
-		setTimeout(function() {
+		setTimeout(function () {
 			this.isInvulnerable = false
 		}.bind(this), duration * 1000)
 	}
@@ -82,7 +82,7 @@ class Player extends Entity {
 	}
 
 	draw() {
-		this.drawSelf(function() {
+		this.drawSelf(function () {
 			if (simulation.time - this.lastDamageTime < 0.1) draw.fillStyle = 'hsla(0, 100%, 50%, 0.85)'
 			else draw.fillStyle = this.color
 

@@ -252,7 +252,6 @@ const input = {
 			}
 		}
 		this.pressedKeys.forEach(function (k) {
-			// console.log(k)
 			switch (k) {
 				case this.keybinds.fire:
 					this.fire()

@@ -38,7 +38,7 @@ const guns = {
 
 		get HUDEntry() {
 			return this._customHUDEntry || `<span class="gun-hud ${this == guns.equippedGun ? 'equipped' : 'unequipped'
-				}">${this.name}: ${this.ammo}/${this.magazines * this.magSize}</span>`
+				}">${this.name}: ${Math.round(this.ammo)}/${Math.round(this.magazines * this.magSize)}</span>`
 		}
 
 		equip() {
@@ -53,7 +53,16 @@ const guns = {
 		}
 
 		reload() {
-			if (this.isReloading || this.magazines <= 0 || (this.ammo >= this.magSize && this.magSize !== Infinity)) return undefined
+			if (this.magazines <= 0) {
+				simulation.log(`guns.${this.id}.ammo == 0`)
+				return undefined
+			}
+			if (
+				this.isReloading || (
+					this.ammo >= this.magSize &&
+					this.magSize != Infinity
+				)
+			) return undefined
 			this.isReloading = true
 			this.reloadStartTime = simulation.time
 		}
@@ -68,6 +77,7 @@ const guns = {
 			if (guns.equippedGun == undefined) this.equip()
 			simulation.log(`guns.get(${this.id}, ${mags === Infinity ? 'Infinity' : Math.round(mags)})`)
 			if (this._get) this._get()
+			upgrades.unlocked = upgrades.unlocked.filter(id => !this.unlockables.includes(id))
 			upgrades.unlocked.push(...this.unlockables)
 		}
 
@@ -131,10 +141,7 @@ guns.shotgun = new guns.Gun({
 	fireRate: 1,
 	bulletDuration: 0.4,
 	spread: 30,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'shotgun')
-		upgrades.unlocked.push('shotgun', 'bullets')
-	},
+	unlockables: ['shotgun', 'bullets'],
 	shoot() {
 		repeat(() => bullets.shotgunBullet(player.pos.x, player.pos.y), 20)
 	}
@@ -151,10 +158,7 @@ guns.sniper = new guns.Gun({
 	bulletDuration: 4,
 	fireRate: 1.3,
 	reloadTime: 8,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'sniper')
-		upgrades.unlocked.push('sniper', 'bullets')
-	},
+	unlockables: ['sniper', 'bullets'],
 	shoot() { bullets.sniperBullet(player.pos.x, player.pos.y) }
 })
 
@@ -167,10 +171,7 @@ guns.smg = new guns.Gun({
 	magazines: 2,
 	damage: 0.8,
 	fireRate: 40,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'smg')
-		upgrades.unlocked.push('smg', 'bullets')
-	},
+	unlockables: ['smg', 'bullets'],
 	shoot() { bullets.smgBullet(player.pos.x, player.pos.y) }
 })
 
@@ -183,10 +184,7 @@ guns.pistol = new guns.Gun({
 	magazines: 5,
 	damage: 1.4,
 	fireRate: 6,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'pistol')
-		upgrades.unlocked.push('pistol', 'bullets')
-	},
+	unlockables: ['pistol', 'bullets'],
 	shoot() { bullets.pistolBullet(player.pos.x, player.pos.y) }
 })
 
@@ -199,10 +197,7 @@ guns.minigun = new guns.Gun({
 	magazines: 0,
 	damage: 0.15,
 	fireRate: 100,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'minigun')
-		upgrades.unlocked.push('minigun', 'bullets')
-	},
+	unlockables: ['minigun', 'bullets'],
 	shoot() { bullets.minigunBullet(player.pos.x, player.pos.y) }
 })
 
@@ -216,11 +211,7 @@ guns.grenadeLauncher = new guns.Gun({
 	damage: 1.3,
 	fireRate: 2,
 	bulletDuration: 1.5,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'explosions')
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'grenades')
-		upgrades.unlocked.push('grenades', 'explosions', 'bullets')
-	},
+	unlockables: ['grenades', 'explosions', 'bullets'],
 	shoot() {
 		bullets.grenade(player.pos.x, player.pos.y)
 	}
@@ -236,11 +227,7 @@ guns.missiles = new guns.Gun({
 	damage: 4,
 	fireRate: 1.4,
 	bulletDuration: 20,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'explosions')
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'missiles')
-		upgrades.unlocked.push('missiles', 'explosions', 'bullets')
-	},
+	unlockables: ['missiles', 'explosions', 'bullets'],
 	shoot() {
 		repeat(() => bullets.missile(player.pos.x, player.pos.y), upgrades.missilesPerShot)
 	}
@@ -257,12 +244,17 @@ guns.bouncyBalls = new guns.Gun({
 	fireRate: 4,
 	bulletDuration: 8,
 	isMuzzleFlash: false,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'bouncy balls')
-		upgrades.unlocked.push('bouncy balls', 'bullets')
-	},
+	unlockables: ['bouncy balls', 'bullets'],
 	shoot() {
-		repeat(() => bullets.bouncyBall(player.pos.x + rand(-player.size / 2, player.size / 2), player.pos.y + rand(-player.size / 2, player.size / 2)), 3)
+		repeat(function () {
+			bullets.bouncyBall(
+				player.pos.x + rand(
+					-player.size / 2, player.size / 2
+				), player.pos.y + rand(
+					-player.size / 2, player.size / 2
+				)
+			)
+		}, 3)
 	}
 })
 
@@ -278,10 +270,7 @@ guns.flamethrower = new guns.Gun({
 	bulletDuration: 0.8,
 	spread: 25,
 	isMuzzleFlash: false,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'flamethrower')
-		upgrades.unlocked.push('flamethrower', 'flames', 'bullets')
-	},
+	unlockables: ['flamethrower', 'flames', 'bullets'],
 	shoot() { bullets.flame(player.pos.x, player.pos.y) }
 })
 
@@ -296,10 +285,7 @@ guns.laser = new guns.Gun({
 	fireRate: 60,
 	bulletDuration: 0.05,
 	isMuzzleFlash: false,
-	get() {
-		upgrades.unlocked = upgrades.unlocked.filter(id => id !== 'laser')
-		upgrades.unlocked.push('laser', 'bullets')
-	},
+	unlockables: ['laser', 'bullets'],
 	shoot() {
 		bullets.laserBeam(player.pos.x, player.pos.y)
 		const maxRange = Math.max(main.width, main.height)
@@ -316,19 +302,7 @@ Object.assign(guns, {
 		mags ??= 1
 		this[g]?.get(mags)
 	},
-	allGuns() {
-		guns.rifle.get(Infinity)
-		guns.shotgun.get(Infinity)
-		guns.sniper.get(Infinity)
-		guns.smg.get(Infinity)
-		guns.pistol.get(Infinity)
-		guns.minigun.get(Infinity)
-		guns.grenadeLauncher.get(Infinity)
-		guns.missiles.get(Infinity)
-		guns.bouncyBalls.get(Infinity)
-		guns.flamethrower.get(Infinity)
-		guns.laser.get(Infinity)
-	},
+	allGuns() { },
 	drop(g) {
 		this[g]?.drop()
 	},
@@ -339,8 +313,14 @@ Object.assign(guns, {
 		this.inventory.forEach(function (g) {
 			if (g.isReloading && simulation.time - g.reloadStartTime >= g.reloadTime) {
 				g.isReloading = false
-				g.magazines--
-				g.ammo = g.magSize
+				if (g.magSize == Infinity) {
+					g.ammo = Infinity
+				} else {
+					const availableReserve = g.magazines * g.magSize
+					const amountToReload = Math.min(g.magSize - g.ammo, availableReserve)
+					g.ammo += amountToReload
+					g.magazines -= amountToReload / g.magSize
+				}
 			}
 		})
 	},
