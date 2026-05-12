@@ -1,4 +1,4 @@
-const guns = {
+var guns = {
 	inventory: [],
 	defaultPool: [],
 	pool: [],
@@ -26,7 +26,7 @@ const guns = {
 			this.spread = config.spread || 0
 			this.isMuzzleFlash = config.isMuzzleFlash ?? true
 			this.reloadAnimation = config.reloadAnimation ?? function () { }
-			this.reloadTime = config.reloadTime || 1.2
+			this.reloadTime = this.magSize > 1 ? (config.reloadTime || 1) : 1 / this.fireRate
 			this.isReloading = false
 			this.reloadStartTime = 0
 			this.unlockables = [...config.unlockables || []]
@@ -37,8 +37,19 @@ const guns = {
 		}
 
 		get HUDEntry() {
-			return this._customHUDEntry || `<span class="gun-hud ${this == guns.equippedGun ? 'equipped' : 'unequipped'
-				}">${this.name}: ${Math.round(this.ammo)}/${Math.round(this.magazines * this.magSize)}</span>`
+			return this._customHUDEntry || `<div class="gun-hud-item">
+				<span class="gun-hud ${this == guns.equippedGun ? 'equipped' : 'unequipped'}">
+					${this.name}: ${Math.round(this.ammo)}/${Math.round(this.magazines * this.magSize)}
+				</span>
+				<div class="gun-tooltip">${this.description}</div>
+			</div>`
+		}
+
+		reset() {
+			this.ammo = 0
+			this.magazines = this.defaultAmmo === Infinity ? Infinity : 0
+			this.isReloading = false
+			this.reloadStartTime = 0
 		}
 
 		equip() {
@@ -83,11 +94,11 @@ const guns = {
 
 		drawReload() {
 			if (!this.isReloading) return
-			const progress = clamp((simulation.time - this.reloadStartTime) / this.reloadTime, 0, 1)
-			const width = player.size * 1.5
+			const progress = clamp((simulation.time - this.reloadStartTime) / (this.reloadTime / upgrades.reloadSpeed), 0, 1)
+			const width = state.player.size * 1.5
 			const height = 6
-			const x = player.pos.x - width / 2
-			const y = player.pos.y - player.size * 0.8
+			const x = state.player.pos.x - width / 2
+			const y = state.player.pos.y - state.player.size * 0.8
 
 			draw.save()
 			draw.fillStyle = "rgba(0, 0, 0, 0.4)"
@@ -112,192 +123,25 @@ const guns = {
 			this._shoot()
 			this.ammo--
 		}
-	}
-}
+	},
 
-guns.rifle = new guns.Gun({
-	id: 'rifle',
-	name: 'rifle',
-	description: `Rapidly shoot bullets at a decent speed<br>30 ${text.ammo} per ${text.powerUp.ammo}`,
-	defaultAmmo: 400,
-	magSize: 30,
-	magazines: 3,
-	damage: 1.2,
-	fireRate: 20,
-	unlockables: ['bullets', 'rifle'],
-	shoot() {
-		bullets.rifleBullet(player.pos.x, player.pos.y)
-	}
-})
+	get defaults() {
+		return {
+			inventory: [],
+			options: [],
+			equippedGun: undefined,
+			lastBulletShot: (-10) ** 299,
+			pool: [...this.defaultPool]
+		}
+	},
 
-guns.shotgun = new guns.Gun({
-	id: 'shotgun',
-	name: 'shotgun',
-	description: `Shoot a wide burst of short-range pellets<br>3 <span class="styled-text ammo">shells</span> per ${text.powerUp.ammo}`,
-	defaultAmmo: 25,
-	magSize: 3,
-	magazines: 15,
-	damage: 1.15,
-	fireRate: 1,
-	bulletDuration: 0.4,
-	spread: 30,
-	unlockables: ['shotgun', 'bullets'],
-	shoot() {
-		repeat(() => bullets.shotgunBullet(player.pos.x, player.pos.y), 20)
-	}
-})
+	set defaults(val) { throw new Error('guns.defaults is read-only') },
 
-guns.sniper = new guns.Gun({
-	id: 'sniper',
-	name: 'sniper',
-	description: `Shoot a high-caliber shot that pierces through mobs<br>3 ${text.ammo} per ${text.powerUp.ammo}`,
-	defaultAmmo: 30,
-	magSize: 3,
-	magazines: 3,
-	damage: 13,
-	bulletDuration: 4,
-	fireRate: 1.3,
-	reloadTime: 8,
-	unlockables: ['sniper', 'bullets'],
-	shoot() { bullets.sniperBullet(player.pos.x, player.pos.y) }
-})
+	reset() {
+		Object.assign(this, this.defaults)
+		this.defaultPool.forEach(g => g.reset())
+	},
 
-guns.smg = new guns.Gun({
-	id: 'smg',
-	name: 'SMG',
-	description: `Rapidly shoot rounds faster than rifle, but slower than minigun<br>50 ${text.ammo} per ${text.powerUp.ammo}`,
-	defaultAmmo: 600,
-	magSize: 50,
-	magazines: 2,
-	damage: 0.8,
-	fireRate: 40,
-	unlockables: ['smg', 'bullets'],
-	shoot() { bullets.smgBullet(player.pos.x, player.pos.y) }
-})
-
-guns.pistol = new guns.Gun({
-	id: 'pistol',
-	name: 'pistol',
-	description: `It\'s a pistol, I don\'t know what else to tell yo<br>10 ${text.ammo} per ${text.powerUp.ammo}`,
-	defaultAmmo: 180,
-	magSize: 10,
-	magazines: 5,
-	damage: 1.4,
-	fireRate: 6,
-	unlockables: ['pistol', 'bullets'],
-	shoot() { bullets.pistolBullet(player.pos.x, player.pos.y) }
-})
-
-guns.minigun = new guns.Gun({
-	id: 'minigun',
-	name: 'minigun',
-	description: `Shoot a lot of bullets really fast<br>100 ${text.ammo} per ${text.powerUp.ammo}`,
-	defaultAmmo: 2000,
-	magSize: 100,
-	magazines: 0,
-	damage: 0.15,
-	fireRate: 100,
-	unlockables: ['minigun', 'bullets'],
-	shoot() { bullets.minigunBullet(player.pos.x, player.pos.y) }
-})
-
-guns.grenadeLauncher = new guns.Gun({
-	id: 'grenadeLauncher',
-	name: 'grenade launcher',
-	description: `Launch a grenade that explodes upon contact<br>6 <span class="styled-text ammo">grenades</span> per ${text.powerUp.ammo}`,
-	defaultAmmo: 72,
-	magSize: 6,
-	magazines: 10,
-	damage: 1.3,
-	fireRate: 2,
-	bulletDuration: 1.5,
-	unlockables: ['grenades', 'explosions', 'bullets'],
-	shoot() {
-		bullets.grenade(player.pos.x, player.pos.y)
-	}
-})
-
-guns.missiles = new guns.Gun({
-	id: 'missiles',
-	name: 'missiles',
-	description: `Launch a homing missile that tracks nearby mobs<br>3 <span class="styled-text ammo">missiles</span> per ${text.powerUp.ammo}`,
-	defaultAmmo: 50,
-	magSize: 1,
-	magazines: 50,
-	damage: 4,
-	fireRate: 1.4,
-	bulletDuration: 20,
-	unlockables: ['missiles', 'explosions', 'bullets'],
-	shoot() {
-		repeat(() => bullets.missile(player.pos.x, player.pos.y), upgrades.missilesPerShot)
-	}
-})
-
-guns.bouncyBalls = new guns.Gun({
-	id: 'bouncyBalls',
-	name: 'bouncy balls',
-	description: `Shoot 3 bouncy balls that bounce off the borders of the map and mobs<br>5 <span class="styled-text ammo">balls</span> per ${text.powerUp.ammo}`,
-	defaultAmmo: 80,
-	magSize: 5,
-	magazines: 30,
-	damage: 3,
-	fireRate: 4,
-	bulletDuration: 8,
-	isMuzzleFlash: false,
-	unlockables: ['bouncy balls', 'bullets'],
-	shoot() {
-		repeat(function () {
-			bullets.bouncyBall(
-				player.pos.x + rand(
-					-player.size / 2, player.size / 2
-				), player.pos.y + rand(
-					-player.size / 2, player.size / 2
-				)
-			)
-		}, 3)
-	}
-})
-
-guns.flamethrower = new guns.Gun({
-	id: 'flamethrower',
-	name: 'flamethrower',
-	description: `Use fire to burn your enemies!<br>150 <span class="styled-text ammo">flames</span> per ${text.powerUp.ammo}`,
-	defaultAmmo: 2000,
-	magSize: 200,
-	magazines: 3,
-	damage: 0.4,
-	fireRate: 80,
-	bulletDuration: 0.8,
-	spread: 25,
-	isMuzzleFlash: false,
-	unlockables: ['flamethrower', 'flames', 'bullets'],
-	shoot() { bullets.flame(player.pos.x, player.pos.y) }
-})
-
-guns.laser = new guns.Gun({
-	id: 'laser',
-	name: 'Laser',
-	description: `Fire a beam of <span class="styled-text laser">light</span> that travels instantly across the screen<br>Doesn't use <span class="styled-text ammo">ammo</span>`,
-	defaultAmmo: Infinity,
-	magSize: Infinity,
-	magazines: Infinity,
-	damage: 5,
-	fireRate: 60,
-	bulletDuration: 0.05,
-	isMuzzleFlash: false,
-	unlockables: ['laser', 'bullets'],
-	shoot() {
-		bullets.laserBeam(player.pos.x, player.pos.y)
-		const maxRange = Math.max(main.width, main.height)
-		mobs.list.forEach((mob) => {
-			if (lineCircleCollision(player.pos.x, player.pos.y, player.pos.x + Math.cos(input.cursor.angle) * maxRange, player.pos.y + Math.sin(input.cursor.angle) * maxRange, mob.pos.x, mob.pos.y, mob.size / 2)) {
-				mob.health -= guns.laser.damage * player.damageDone
-			}
-		})
-	}
-})
-
-Object.assign(guns, {
 	get(g, mags) {
 		mags ??= 1
 		this[g]?.get(mags)
@@ -311,7 +155,7 @@ Object.assign(guns, {
 	},
 	logic() {
 		this.inventory.forEach(function (g) {
-			if (g.isReloading && simulation.time - g.reloadStartTime >= g.reloadTime) {
+			if (g.isReloading && simulation.time - g.reloadStartTime >= (g.reloadTime / upgrades.reloadSpeed)) {
 				g.isReloading = false
 				if (g.magSize == Infinity) {
 					g.ammo = Infinity
@@ -374,6 +218,217 @@ Object.assign(guns, {
 		}.bind(this)).join('<br>')}
 		`
 	}
+}
+
+guns.rifle = new guns.Gun({
+	id: 'rifle',
+	name: 'rifle',
+	description: `Rapidly shoot ${text('bullets', 'bullets')} at a decent ${text('speed', 'speed')}<br>30 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 420,
+	magSize: 30,
+	magazines: 3,
+	damage: 1.2,
+	fireRate: 20,
+	unlockables: ['bullets', 'rifle'],
+	shoot() {
+		bullets.rifleBullet(state.player.pos.x, state.player.pos.y)
+	}
+})
+
+guns.shotgun = new guns.Gun({
+	id: 'shotgun',
+	name: 'shotgun',
+	description: `Shoot a wide burst of ${text('range', 'short-range')} ${text('pellets', 'pellets')}<br>3 ${text('ammo', 'shells')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 24,
+	magSize: 3,
+	magazines: 15,
+	damage: 1.15,
+	fireRate: 1,
+	bulletDuration: 0.4,
+	spread: 30,
+	unlockables: ['shotgun', 'bullets'],
+	shoot() {
+		repeat(() => bullets.shotgunBullet(state.player.pos.x, state.player.pos.y), upgrades.shotgunPellets)
+	}
+})
+
+guns.sniper = new guns.Gun({
+	id: 'sniper',
+	name: 'sniper',
+	description: `Shoot a high-caliber shot that ${text('piercing', 'pierces')} through mobs<br>3 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 30,
+	magSize: 3,
+	magazines: 3,
+	damage: 13,
+	bulletDuration: 4,
+	fireRate: 1.3,
+	reloadTime: 8,
+	unlockables: ['sniper', 'bullets'],
+	shoot() { bullets.sniperBullet(state.player.pos.x, state.player.pos.y) }
+})
+
+guns.smg = new guns.Gun({
+	id: 'smg',
+	name: 'SMG',
+	description: `Rapidly shoot rounds faster than rifle, but slower than minigun<br>50 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 750,
+	magSize: 50,
+	magazines: 2,
+	damage: 0.8,
+	fireRate: 40,
+	unlockables: ['smg', 'bullets'],
+	shoot() { bullets.smgBullet(state.player.pos.x, state.player.pos.y) }
+})
+
+guns.pistol = new guns.Gun({
+	id: 'pistol',
+	name: 'pistol',
+	description: `It\'s a pistol, I don\'t know what else to tell you<br>10 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 180,
+	magSize: 10,
+	magazines: 5,
+	damage: 1.4,
+	fireRate: 6,
+	unlockables: ['pistol', 'bullets'],
+	shoot() { bullets.pistolBullet(state.player.pos.x, state.player.pos.y) }
+})
+
+guns.minigun = new guns.Gun({
+	id: 'minigun',
+	name: 'minigun',
+	description: `Shoot a lot of ${text('bullets', 'bullets')} really fast<br>100 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 2000,
+	magSize: 100,
+	magazines: 0,
+	damage: 0.15,
+	fireRate: 100,
+	unlockables: ['minigun', 'bullets'],
+	shoot() { bullets.minigunBullet(state.player.pos.x, state.player.pos.y) }
+})
+
+guns.grenadeLauncher = new guns.Gun({
+	id: 'grenadeLauncher',
+	name: 'grenade launcher',
+	description: `Launch a grenade that ${text('explosion', 'explodes')} upon contact<br>6 ${text('ammo', 'grenades')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 72,
+	magSize: 6,
+	magazines: 10,
+	damage: 1.3,
+	fireRate: 2,
+	bulletDuration: 1.5,
+	unlockables: ['grenades', 'explosions', 'bullets'],
+	shoot() {
+		bullets.grenade(state.player.pos.x, state.player.pos.y)
+	}
+})
+
+guns.missiles = new guns.Gun({
+	id: 'missiles',
+	name: 'missiles',
+	description: `Launch a ${text('homing', 'homing')} missile that tracks nearby mobs<br>3 ${text('ammo', 'missiles')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 50,
+	magSize: 1,
+	magazines: 50,
+	damage: 4,
+	fireRate: 1.4,
+	bulletDuration: 20,
+	unlockables: ['missiles', 'explosions', 'bullets'],
+	shoot() {
+		repeat(function () {
+			bullets.missile(state.player.pos.x, state.player.pos.y)
+		}, upgrades.missilesPerShot)
+	}
+})
+
+guns.bouncyBalls = new guns.Gun({
+	id: 'bouncyBalls',
+	name: 'bouncy balls',
+	description: `Shoot 3 bouncy balls that ${text('bounces', 'bounce')} off the borders of the map and mobs<br>5 ${text('ammo', 'balls')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 80,
+	magSize: 5,
+	magazines: 30,
+	damage: 3,
+	fireRate: 4,
+	bulletDuration: 8,
+	isMuzzleFlash: false,
+	unlockables: ['bouncy balls', 'bullets'],
+	shoot() {
+		repeat(function () {
+			bullets.bouncyBall(
+				state.player.pos.x + rand(
+					-state.player.size / 2, state.player.size / 2
+				), state.player.pos.y + rand(
+					-state.player.size / 2, state.player.size / 2
+				)
+			)
+		}, 3)
+	}
+})
+
+guns.flamethrower = new guns.Gun({
+	id: 'flamethrower',
+	name: 'flamethrower',
+	description: `Use ${text('fire', 'fire')} to burn your enemies!<br>150 ${text('ammo', 'flames')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 2000,
+	magSize: 200,
+	magazines: 3,
+	damage: 0.4,
+	fireRate: 80,
+	bulletDuration: 0.8,
+	spread: 25,
+	isMuzzleFlash: false,
+	unlockables: ['flamethrower', 'flames', 'bullets'],
+	shoot() { bullets.flame(state.player.pos.x, state.player.pos.y) }
+})
+
+guns.laser = new guns.Gun({
+	id: 'laser',
+	name: 'Laser',
+	description: `Fire a beam of ${text('laser', 'light')} that travels instantly across the screen<br>Doesn't use ${text('ammo', 'ammo')}`,
+	defaultAmmo: Infinity,
+	magSize: Infinity,
+	magazines: Infinity,
+	damage: 1,
+	fireRate: Infinity,
+	bulletDuration: 0.05,
+	isMuzzleFlash: false,
+	unlockables: ['laser', 'bullets'],
+	shoot() {
+		bullets.laserBeam(state.player.pos.x, state.player.pos.y)
+		const maxRange = Math.max(main.width, main.height)
+		mobs.list.forEach((mob) => {
+			if (lineCircleCollision(state.player.pos.x, state.player.pos.y, state.player.pos.x + Math.cos(input.cursor.angle) * maxRange, state.player.pos.y + Math.sin(input.cursor.angle) * maxRange, mob.pos.x, mob.pos.y, mob.size / 2)) {
+				mob.health -= guns.laser.damage * state.player.damageDone
+			}
+		})
+	}
+})
+
+guns.knife = new guns.Gun({
+	id: 'knife',
+	name: 'Knife',
+	description: `Quickly stab enemies with a knife<br>1 ${text('ammo', 'knife')} per ${text('ammo', 'ammo power-up')}`,
+	defaultAmmo: 30,
+	magSize: 1,
+	magazines: 30,
+	damage: 12,
+	fireRate: 5,
+	bulletDuration: 0.2,
+	isMuzzleFlash: false,
+	unlockables: ['knife', 'bullets'],
+	reloadTime: 0.2,
+	shoot() {
+		bullets.slash(state.player.pos.x, state.player.pos.y, state.input.cursor.angle)
+		const range = state.player.size * 1.5 * state.upgrades.knifeRange
+		state.mobs.list.forEach((mob) => {
+			const dist = distance(state.player.pos.x, state.player.pos.y, mob.pos.x, mob.pos.y)
+			const mobAngle = angle(mob.pos.x, mob.pos.y, state.player.pos.x, state.player.pos.y)
+			// Check if mob is in range and within an arc of ~90 degrees (0.8 radians)
+			if (dist < range + mob.size / 2 && diffAngle(state.input.cursor.angle, mobAngle) < 0.8) {
+				mob.takeDamage(this.damage * state.player.damageDone)
+			}
+		})
+	}
 })
 
 guns.defaultPool = [
@@ -388,5 +443,6 @@ guns.defaultPool = [
 	guns.bouncyBalls,
 	guns.flamethrower,
 	guns.laser,
+	guns.knife,
 ]
 guns.pool = [...guns.defaultPool]

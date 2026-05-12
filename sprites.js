@@ -1,4 +1,4 @@
-const sprites = {
+const default_sprites = {
 	commanderHat: {
 		left: new Image(),
 		right: new Image(),
@@ -37,4 +37,7 @@ const sprites = {
 		loadAndProcess('left', './assets/commander_hat_left.png')
 	}
 }
+
+const sprites = {...default_sprites}
+
 sprites.init()

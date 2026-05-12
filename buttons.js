@@ -1,4 +1,4 @@
-const buttons = {
+const default_buttons = {
 	currentChoose: upgrades,
 	rerollButton() {
 		return `<button class="reroll-button" style="
@@ -19,3 +19,5 @@ const buttons = {
 			"
 		onclick='simulation.isChoosing = false;'>Cancel</button>`,
 }
+
+const buttons = { ...default_buttons }

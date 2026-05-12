@@ -1,4 +1,4 @@
-const mobs = {
+var mobs = {
 	Mob: class extends Entity {
 		/**
 		 * 
@@ -6,8 +6,8 @@ const mobs = {
 		 * @param {number} y the y-position of the mob
 		 * @param {object} config Properties that vary from mob to mob
 		 */
-		constructor(x, y, config) {
-			super(x, y, {
+		constructor(state, x, y, config) {
+			super(state, x, y, {
 				class: 'mob',
 				health: 10,
 				damage: 5,
@@ -21,7 +21,7 @@ const mobs = {
 				color: 'black',
 				...config
 			})
-			this.timeSpawned = simulation.time
+			this.timeSpawned = this.state.simulation.time
 			this.timeSinceLastAttack = 0
 			this.lastDamageTime = 0
 			this.maxHealth = config.maxHealth || this.health
@@ -34,8 +34,13 @@ const mobs = {
 		 */
 		takeDamage(amount) {
 			if (this.isInvulnerable) return
-			this.health -= amount * this.damageTaken
-			this.lastDamageTime = simulation.time
+			const damage = amount * this.damageTaken
+			this.health -= damage
+			this.lastDamageTime = this.state.simulation.time
+			if (this.state.upgrades.isVampire) {
+				this.state.player.health += damage * this.state.upgrades.vampireHealAmmount
+				this.state.particles.spawn(state, this.pos.x, this.pos.y, this.state.particles.vampire)//simulation.spawnVampireParticle(this.pos.x, this.pos.y)
+			}
 		}
 
 		update() {
@@ -49,13 +54,13 @@ const mobs = {
 		drawSelf(callback) {
 			draw.save()
 			if (this.class !== 'projectile') {
-				draw.globalAlpha = lerp(0, 1, (simulation.time - this.timeSpawned) * 2.5)
+				draw.globalAlpha = lerp(0, 1, (this.state.simulation.time - this.timeSpawned) * 2.5)
 			}
 			super.drawSelf(callback)
 			draw.restore()
 		}
 		moveTowardsPlayer() {
-			this.angle = angle(this.pos.x, this.pos.y, player.pos.x, player.pos.y)
+			this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 			this.pos.x -= Math.cos(this.angle) * this.speed
 			this.pos.y -= Math.sin(this.angle) * this.speed
 		}
@@ -65,6 +70,15 @@ const mobs = {
 		}
 	},
 	list: [],
+	get defaults() {
+		return { list: [] }
+	},
+
+	set defaults(val) { throw new Error('mobs.defaults is read-only') },
+
+	reset() {
+		Object.assign(this, this.defaults)
+	},
 	drawMobs: function () {
 		this.list.forEach(function (mob) { return mob.draw() }.bind(this))
 	},

@@ -2,7 +2,8 @@
  * Base class for all physical objects in the game world.
  */
 class Entity {
-	constructor(x, y, config) {
+	constructor(state, x, y, config) {
+		this.state = state
 		this.pos = { x, y }
 		this.angle = 0
 		this.speed = 0
@@ -32,7 +33,8 @@ class Entity {
 	 * @param {number} amount The amount of damage to apply.
 	 */
 	takeDamage(amount) {
-		if (this.health !== undefined) this.health -= amount
+		if (this.isInvulnerable) return
+		this.health -= amount * this.damageTaken
 	}
 
 	checkCollision(other) {

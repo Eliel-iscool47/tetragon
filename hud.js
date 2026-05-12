@@ -1,4 +1,4 @@
-const hud = {
+var hud = {
 	Obj: document.getElementById('HUD'),
 	health: document.getElementById('health-bar'),
 	maxHealth: document.getElementById('max-health'),
@@ -30,12 +30,28 @@ const hud = {
 	get displayDefense() { return this._displayDefense },
 	set displayDefense(val) { this._displayDefense = val },
 
+	get defaults() {
+		return {
+			displayHealth: 100,
+			displayMaxHealth: 100,
+			displayDmg: 1,
+			displayDefense: 1,
+			timeMessage: ''
+		}
+	},
+
+	set defaults(val) { throw new Error('hud.defaults is read-only') },
+
+	reset() {
+		Object.assign(this, this.defaults)
+	},
+
 	healthBar() {
-		this.displayHealth = lerp(this.displayHealth, player.health, 0.1)
-		this.displayMaxHealth = lerp(this.displayMaxHealth, player.maxHealth, 0.1)
+		this.displayHealth = lerp(this.displayHealth, state.player.health, 0.1)
+		this.displayMaxHealth = lerp(this.displayMaxHealth, state.player.maxHealth, 0.1)
 		this.health.style.width = `${this.displayHealth * 2}px`
 		this.health.style.backgroundColor = `hsl(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%)`
-		this.health.innerText = `${Math.round(player.health * 1000) / 1000}`
+		this.health.innerText = `${Math.round(state.player.health * 1000) / 1000}`
 		this.maxHealth.style.width = `${this.displayMaxHealth * 2}px`
 	},
 	damageTakenBar() {
@@ -50,10 +66,10 @@ const hud = {
 		}
 	},
 	damageBar() {
-		this.displayDmg = lerp(this.displayDmg, player.damageDone, 0.1)
+		this.displayDmg = lerp(this.displayDmg, state.player.damageDone, 0.1)
 		this.damage.style.height = `${this.displayDmg * 200}px`
 		this.damage.style.backgroundColor = 'hsl(0, 100%, 35%)'
-		this.damage.innerText = `${Math.round(player.damageDone * 1000) / 1000}`
+		this.damage.innerText = `${Math.round(state.player.damageDone * 1000) / 1000}`
 		this.damage.style.color = 'hsl(0, 0%, 100%)'
 		this.damage.style.textAlign = 'center'
 		this.damage.style.fontSize = '20px'
@@ -113,7 +129,7 @@ const hud = {
 			return g.HUDEntry
 		}.bind(this)
 		)
-				.join('<br>').replaceAll('Infinity', '∞')}
+				.join('').replaceAll('Infinity', '∞')}
 		`
 	},
 	levelCounter() {
@@ -162,9 +178,9 @@ const hud = {
 		this.timer.innerText = this.timeMessage
 	},
 	criticalHealth() {
-		if (player.health / player.maxHealth <= 0.3 && !simulation.isDead) {
+		if (state.player.health / state.player.maxHealth <= 0.3 && !simulation.isDead) {
 			this.criticalOverlay.style.display = 'block'
-			this.criticalOverlay.style.opacity = `${(1 - (player.health / (player.maxHealth * 0.3))) * (0.5 + 0.5 * Math.sin(simulation.time * 10))}`
+			this.criticalOverlay.style.opacity = `${(1 - (state.player.health / (state.player.maxHealth * 0.3))) * (0.5 + 0.5 * Math.sin(simulation.time * 10))}`
 		} else this.criticalOverlay.style.display = 'none'
 	},
 	make() {
@@ -178,6 +194,7 @@ const hud = {
 		this.criticalHealth()
 	}
 }
+
 hud.Obj.appendChild(hud.health)
 hud.Obj.appendChild(hud.inv)
 hud.Obj.appendChild(hud.damageTaken)

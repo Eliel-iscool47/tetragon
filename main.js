@@ -22,6 +22,37 @@ font.rel = "stylesheet"
 document.head.appendChild(font)
 document.body.style.fontFamily = "DM Sans, sans-serif"
 
+
+const state = {
+	difficultyScale: 1,
+	get simulation() { return window.simulation },
+	get player() { return window.player },
+	get upgrades() { return window.upgrades },
+	get guns() { return window.guns },
+	get level() { return window.level },
+	get mobs() { return window.mobs },
+	get bullets() { return window.bullets },
+	get powerUps() { return window.powerUps },
+	get collisions() { return window.collisions },
+	get hud() { return window.hud },
+	get input() { return window.input },
+	get particles() { return window.particles },
+
+	/**
+	 * Resets all registered modules to their default states.
+	 */
+	resetAll() {
+		const modules = [
+			this.simulation, this.player, this.upgrades, this.guns, this.level,
+			this.mobs, this.bullets, this.powerUps, this.collisions, this.hud, 
+			this.input, this.particles
+		]
+		modules.forEach(mod => {
+			if (mod && typeof mod.reset === 'function') mod.reset()
+		})
+	}
+}
+
 //HTML element objects
 
 const start = document.getElementById('start')
@@ -188,7 +219,24 @@ settingsMenu.style.zIndex = '100'
 let remappingAction = null
 
 function renderSettings() {
-	settingsMenu.innerHTML = '<h1>Settings - Keybinds</h1><p>Click to remap. Escape to cancel.</p>'
+	settingsMenu.innerHTML = '<h1>Settings</h1>'
+
+	// Difficulty Scale Slider
+	const diffContainer = document.createElement('div')
+	diffContainer.style.margin = '10px 0'
+	diffContainer.innerHTML = `
+		<label style="display: block; margin-bottom: 5px;">Difficulty Scale: ${state.difficultyScale.toFixed(2)}x</label>
+		<input type="range" min="0.2" max="5" step="0.1" value="${state.difficultyScale}" style="width: 100%; cursor: pointer;">
+	`
+	const slider = diffContainer.querySelector('input')
+	slider.oninput = function (e) {
+		state.difficultyScale = parseFloat(e.target.value)
+		diffContainer.querySelector('label').innerText = `Difficulty Scale: ${state.difficultyScale.toFixed(2)}x`
+	}.bind(this)
+	settingsMenu.appendChild(diffContainer)
+	settingsMenu.appendChild(document.createElement('hr'))
+
+	settingsMenu.insertAdjacentHTML('beforeend', '<h2>Keybinds</h2><p>Click to remap. Escape to cancel.</p>')
 	const closeBtn = document.createElement('button')
 	closeBtn.innerText = 'Close'
 	closeBtn.style.fontSize = '20px'

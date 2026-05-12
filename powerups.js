@@ -1,10 +1,10 @@
-const powerUps = {
+var powerUps = {
 	PowerUp: class extends Entity {
-		static spawn(x, y, config) {
-			powerUps.list.push(new this(x, y, config))
+		static spawn(state, x, y, config) {
+			powerUps.list.push(new this(state, x, y, config))
 		}
-		constructor(x, y, config) {
-			super(x, y, config)
+		constructor(state, x, y, config) {
+			super(state, x, y, config)
 		}
 		draw() { }
 		/**
@@ -13,7 +13,7 @@ const powerUps = {
 		 */
 		drawSelf(callback) {
 			draw.save()
-			const pulse = 1 + Math.sin(simulation.time * 8) * 0.2
+			const pulse = 1 + Math.sin(this.state.simulation.time * 8) * 0.2
 			super.drawSelf(function () {
 				draw.scale(pulse, pulse)
 				callback()
@@ -24,7 +24,7 @@ const powerUps = {
 	spawn(x, y, type) {
 		let spawnX = x
 		let spawnY = y
-		const minGap = 35
+		const minGap = 30
 
 		// If the spawn location is crowded, nudge the position away from existing power-ups
 		for (let i = 0; i < 6; i++) {
@@ -35,9 +35,18 @@ const powerUps = {
 			spawnX += Math.cos(dir) * minGap
 			spawnY += Math.sin(dir) * minGap
 		}
-		this.PowerUp.spawn(spawnX, spawnY, type)
+		this.PowerUp.spawn(state, spawnX, spawnY, type)
 	},
 	list: [],
+	get defaults() {
+		return { list: [] }
+	},
+
+	set defaults(val) { throw new Error('powerUps.defaults is read-only') },
+
+	reset() {
+		Object.assign(this, this.defaults)
+	},
 	gun: {
 		name: 'gun',
 		color: 'hsl(120, 70%, 25%)',
@@ -60,8 +69,8 @@ const powerUps = {
 		color: 'hsl(115, 100%, 45%)',
 		size: 10,
 		effect() {
-			if (simulation.isPaused || simulation.isChoosing || player.health >= player.maxHealth) return undefined
-			player.health += upgrades.healEffect * 8
+			if (simulation.isPaused || simulation.isChoosing || state.player.health >= state.player.maxHealth) return undefined
+			state.player.health += upgrades.healEffect * 8
 			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
 		},
 		draw: function () {
@@ -142,11 +151,11 @@ const powerUps = {
 	},
 	logic: function () {
 		powerUps.list.forEach(function (p) {
-			if (p.checkCollision(player)) p.effect()
-			const dist = distance(p.pos.x, p.pos.y, player.pos.x, player.pos.y)
+			if (p.checkCollision(state.player)) p.effect()
+			const dist = distance(p.pos.x, p.pos.y, state.player.pos.x, state.player.pos.y)
 			if (dist < upgrades.magnetRange && !simulation.isChoosing && !simulation.isPaused) { // Range where the magnet starts pulling
-				const dir = angle(p.pos.x, p.pos.y, player.pos.x, player.pos.y)
-				const magnetSpeed = distance(p.pos.x, p.pos.y, player.pos.x, player.pos.y) / 20 // Speed at which the magnet pulls
+				const dir = angle(p.pos.x, p.pos.y, state.player.pos.x, state.player.pos.y)
+				const magnetSpeed = distance(p.pos.x, p.pos.y, state.player.pos.x, state.player.pos.y) / 20 // Speed at which the magnet pulls
 				p.pos.x -= Math.cos(dir) * magnetSpeed * upgrades.magnetStrength
 				p.pos.y -= Math.sin(dir) * magnetSpeed * upgrades.magnetStrength
 

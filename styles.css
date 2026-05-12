@@ -110,7 +110,7 @@ br {
 	text-wrap-mode: wrap;
 	word-wrap: break-word;
 	white-space: pre-wrap;
-	scrollbar-color: hsla(0,0,0,0);
+	scrollbar-color: hsla(0, 0, 0, 0);
 	scrollbar-width: none;
 }
 
@@ -133,6 +133,7 @@ br {
 	width: 200px;
 	height: 30px;
 	background-color: hsla(0, 0%, 80%, 0.65);
+	overflow: visible !important;
 }
 
 #health-bar {
@@ -230,50 +231,152 @@ br {
 	z-index: -10;
 }
 
+/* Styled Text */
+
 .styled-text {
 	border-radius: 5px;
-	font: 24px 'DM sans', sans-serif;
+	font: 22px 'DM sans', sans-serif;
 	text-align: center;
 	display: inline-block;
-	padding: 0 4px;
+	padding: 1px 6px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .styled-text.health {
-	background-color: hsl(115, 100%, 30%);
+	background: linear-gradient(180deg, hsl(115, 80%, 35%), hsl(115, 100%, 20%));
 	color: hsl(0, 0%, 100%);
+	border-radius: 12px;
+	box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
 }
 
 .styled-text.damage {
-	background-color: hsl(0, 100%, 30%);
+	background-color: hsl(0, 100%, 25%);
 	color: hsl(0, 0%, 100%);
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 1px;
 }
 
 .styled-text.damage-taken {
-	background-color: hsl(200, 100%, 60%);
+	background-color: hsl(200, 70%, 50%);
 	color: hsl(0, 0%, 100%);
+	font-style: italic;
 }
 
 .styled-text.explosion {
-	background-color: hsl(25, 100%, 50%);
+	background: radial-gradient(circle, hsl(45, 100%, 60%) 0%, hsl(25, 100%, 50%) 100%);
 	color: hsl(0, 0%, 100%);
+	font-weight: 700;
+	border: 1px solid hsl(35, 100%, 30%);
 }
 
 .styled-text.ammo {
-	background-color: hsl(235, 50%, 25%);
+	background-color: hsl(235, 30%, 20%);
 	color: hsl(0, 0%, 100%);
+	font-family: monospace;
+	border: 1px solid hsl(235, 50%, 40%);
 }
 
 .styled-text.gun {
-	background-color: hsl(115, 100%, 20%);
-	color: hsl(0, 0%, 100%);
-	text-decoration: solid;
+	background-color: hsl(115, 30%, 15%);
+	color: hsl(115, 100%, 60%);
+	border: 1px solid hsl(115, 100%, 20%);
 }
 
 .styled-text.laser {
-	background-color: hsl(0, 100%, 55%);
+	background-color: hsl(350, 100%, 50%);
 	color: hsl(0, 0%, 100%);
-	text-decoration: solid;
+	text-shadow: 0 0 8px white, 0 0 12px red;
+	box-shadow: 0 0 5px red;
 }
+
+.styled-text.speed,
+.styled-text.movement-speed,
+.styled-text.reload-speed,
+.styled-text.fire-rate {
+	background: linear-gradient(90deg, hsl(205, 100%, 35%), hsl(205, 100%, 20%));
+	color: hsl(0, 0%, 100%);
+	transform: skewX(-12deg);
+	display: inline-block;
+}
+
+.styled-text.range {
+	background-color: hsl(280, 40%, 40%);
+	color: hsl(0, 0%, 100%);
+	border-left: 4px solid hsl(280, 100%, 70%);
+	border-right: 4px solid hsl(280, 100%, 70%);
+}
+
+.styled-text.piercing {
+	background: linear-gradient(135deg, hsl(0, 0%, 60%), hsl(0, 0%, 20%));
+	color: hsl(0, 0%, 100%);
+	border-bottom: 2px solid white;
+}
+
+.styled-text.reload {
+	background-color: hsl(45, 80%, 30%);
+	color: hsl(0, 0%, 100%);
+	font-variant: small-caps;
+}
+
+.styled-text.duration {
+	background-color: hsl(25, 60%, 40%);
+	color: hsl(0, 0%, 100%);
+	text-decoration: underline dotted;
+}
+
+.styled-text.size {
+	background-color: hsl(330, 60%, 40%);
+	color: hsl(0, 0%, 100%);
+	padding: 2px 8px;
+}
+
+.styled-text.magnet-range {
+	background-color: hsl(260, 40%, 35%);
+	color: hsl(0, 0%, 100%);
+	border-radius: 50% 5px 50% 5px;
+}
+
+.styled-text.health-regen-speed {
+	background-color: hsl(140, 50%, 30%);
+	color: hsl(120, 100%, 80%);
+	font-style: italic;
+}
+
+.styled-text.pellets,
+.styled-text.bullets {
+	background-color: hsl(0, 0%, 10%);
+	color: hsl(0, 0%, 100%);
+	border: 1px dashed #555;
+}
+
+.styled-text.bounces {
+	background-color: hsl(40, 70%, 40%);
+	color: hsl(0, 0%, 100%);
+	border-radius: 8px;
+}
+
+.styled-text.magazine-size {
+	background-color: hsl(215, 40%, 25%);
+	color: hsl(0, 0%, 100%);
+	border: 1px solid hsl(215, 100%, 50%);
+}
+
+.styled-text.fire {
+	background: linear-gradient(0deg, hsl(0, 100%, 40%), hsl(30, 100%, 50%));
+	color: hsl(0, 0%, 100%);
+	text-shadow: 1px 1px 2px black;
+}
+
+.styled-text.homing {
+	background-color: hsl(275, 60%, 35%);
+	color: hsl(0, 0%, 100%);
+	border: 2px double hsl(275, 100%, 70%);
+}
+
+
+/* .styled-text.level {} */
 
 .upgrade-button,
 .gun-button,
@@ -282,7 +385,7 @@ br {
 	position: absolute;
 	border-radius: 10px;
 	text-align: left;
-	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	font: 24px 'DM Sans', sans-serif;
 	cursor: pointer;
 }
@@ -300,6 +403,8 @@ br {
 	background-color: hsl(215, 100%, 50%);
 	color: hsl(0, 0%, 100%);
 	border: none;
+	box-shadow: 0 0 20px hsl(215, 100%, 65%);
+	transform: translateY(-3px);
 }
 
 .gun-button {
@@ -310,6 +415,42 @@ br {
 	margin: 0;
 	padding: 0;
 	font-size: 24px;
+}
+
+.gun-hud-item {
+	position: relative;
+	display: block;
+	width: fit-content;
+	padding: 2px 0;
+	cursor: help;
+}
+
+.gun-tooltip {
+	visibility: hidden;
+	position: absolute;
+	left: 105%;
+	top: 0;
+	width: 280px;
+	background-color: rgba(0, 0, 0, 0.95);
+	color: #fff;
+	text-align: left;
+	padding: 12px;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	font-size: 16px;
+	line-height: 1.4;
+	z-index: 1000;
+	opacity: 0;
+	transition: opacity 0.2s, transform 0.2s;
+	transform: translateX(-10px);
+	pointer-events: none;
+	box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.gun-hud-item:hover .gun-tooltip {
+	visibility: visible;
+	opacity: 1;
+	transform: translateX(0);
 }
 
 .gun-button:hover {
@@ -336,19 +477,21 @@ br {
 }
 
 .gun-hud {
-	transition: all 0.2s ease;
+	border-radius: 5px;
+	text-align: center;
+	padding-left: 5px;
+	padding-right: 5px;
+	font-weight: 400;
+	display: inline-block;
+	border-radius: 5px;
 }
 
 .gun-hud.equipped {
 	color: #ffffff;
-	background-color: hsl(215, 100%, 45%);
+	background-color: hsl(215, 100%, 30%);
 	border: none;
 	text-decoration: none;
-	margin: 0;
-	padding: 0;
-	font-size: 24px;
-	font-weight: bold;
-	display: inline-block;
+	font-weight: 600;
 }
 
 .gun-hud.unequipped {
@@ -359,4 +502,60 @@ br {
 	margin: 0;
 	padding: 0;
 	font-size: 24px;
+}
+
+
+@keyframes laser-pulse {
+	0%, 100% {
+		filter: brightness(1);
+		box-shadow: 0 0 5px red;
+	}
+	50% {
+		filter: brightness(1.4);
+		box-shadow: 0 0 15px red, 0 0 20px white;
+	}
+}
+
+@keyframes fire-flicker {
+	0%, 100% {
+		filter: brightness(1) contrast(1);
+		transform: translateY(0);
+	}
+	50% {
+		filter: brightness(1.3) contrast(1.2);
+		transform: translateY(-1px);
+	}
+}
+
+@keyframes explosion {
+	0%, 100% {
+		filter: saturate(1) brightness(1);
+		transform: scale(1);
+	}
+	50% {
+		filter: saturate(1.5) brightness(1.2);
+		transform: scale(1.05);
+	}
+}
+
+/* @keyframes reload {
+
+} */
+
+@keyframes heartbeat {
+	0%, 100% {
+		transform: scale(1);
+		filter: brightness(1);
+	}
+	10% {
+		transform: scale(1.08);
+		filter: brightness(1.2);
+	}
+	20% {
+		transform: scale(1.02);
+	}
+	30% {
+		transform: scale(1.12);
+		filter: brightness(1.3);
+	}
 }

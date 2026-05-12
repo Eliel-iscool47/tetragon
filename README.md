@@ -1,54 +1,95 @@
-# 1: Feedback and game version
+# Tetragon
 
-[Submit your feedback here](https://forms.gle/WEXr6qsLdpdoduct9 "Submit your feedback here!")  
-No feedback yet...  
-This is version 1.04.
+A fast-paced geometric survival shooter built with a modular, data-driven architecture.
 
-# 2: Controls
+## 1: Controls
 
 The game's controls are:
 
-___
-	W A S D or arrow keys: move
-	F or left click: fire
-	right click: nothing
-	P: toggle paused
-	Q: cycle gun left
-	E: cycle gun right
-	R: restart game (only while paused or choosing)
-	M: main menu  
+---
+* **Move**: `W`, `A`, `S`, `D` or arrow keys
+* **Fire**: `Left Click` or `F`
+* **Cycle Guns**: `Q` and `E`
+* **Reload**: `V` (or empty magazine)
+* **Pause**: `P` or `Escape` (while playing)
+* **Restart**: `R` (while paused/choosing)
+* **Main Menu**: `M`
 
-# 3: Updates
+## 2: Recent Updates (v1.06)
 
-I added:
+* **New Upgrades**: Vampirism, Heavy Caliber, Power Surge.
+* **Mechanics**: Introduced knives and lifesteal mechanics.
+* **Refactoring**: Standardized entity transformations and state resets.
 
-___
-	Some new bosses
-	Some missile upgrades
-	New gun: laser: fire a beam of light. Doesn't use ammo.
-	
+---
 
+## 3: Feedback
 
-that's it
+[Submit your feedback here]()
 
-I changed:
+---
 
-___
-	The game's time is synchronized with the game loop, rather than the IRL time.
-	"Incendiary munitions" upgrade only affects shotgun, SMG, rifle, and bouncy balls.
+## 4: Technical Overview
 
-Planned updates:
-___
-	uhh idk ig
+### 1: Core Architecture
 
-## 3.5: Bug fixes
+#### a: Centralized State Management
+The project utilizes a centralized `state` object (defined in `main.js`) to manage all core modules. This reduces reliance on the global scope and ensures a clean data flow.
+- **Standardized Resets**: Every game module ( `player`, `guns`, `mobs`, etc.) implements a `defaults` getter and a `reset()` method. Calling `state.resetAll()` performs an `Object.assign` to restore the game to its pristine initial state.
+- **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
+#### b: Data-Driven Leveling
+Level progression is defined externally in `levels.json`.
+- **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
+- **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
+- **Custom Win Conditions**: Each level tier can define its own logic for progression, such as clearing all enemies or surviving an intermission timer.
 
-___
-	There was no bugs that I remember
+### 2: Combat & Mechanics
 
-that's it
+#### a: Difficulty Scaling
+The game features a difficulty slider in the Settings menu ranging from **0.2x to 5.0x**.
+- **Probabilistic Spawning**: To handle fractional multipliers (e.g., spawning 0.3 mobs), the engine uses a weighted random roll. This ensures that statistically, the average number of spawns matches the selected difficulty over time.
 
-# 4: Dev notes
+#### b: The Arsenal
+- **Melee (Knife)**: A high-damage sweeping attack with a visual fade-out slash.
+- **Ballistics**: A wide variety of weapons including Rifles, Snipers, Shotguns, and Miniguns.
+- **Specialty**: Homing Missiles that will chase you back to little St. James, Balls 😋, Flamethrowers, and instant-hit Lasers.
 
+#### Advanced Upgrades
+The upgrade system supports prerequisites via a `requirements` property. Notable mechanics include:
+- **Vampirism**: Heal a percentage of damage dealt to enemies.
+- **Napalm**: Flamethrower projectiles leave lingering AOE fire pools.
+- **Cluster Bombs**: Explosive weapons trigger secondary sub-explosions.
+- **Incendiary Munitions**: Standard bullets gain explosive properties upon contact.
 
+### Enemy Types
+
+- **Default**: Standard melee units.
+- **Sentry**: Stationary turrets that fire glowing red projectiles with trail effects.
+- **Tank**: High health, high damage, but slow movement.
+- **Archer/Grenadier**: Ranged units that use predictive aiming.
+- **Bosses**: Unique entities like the **Pentagon Boss** (laser telegraphs) and **Void Boss** (gravitational pull).
+
+### Technical Implementation Details
+
+- **Collision Grid**: A spatial partitioning grid (150px cells) optimizes collision checks between hundreds of bullets and mobs. (could be a lie)
+- **Visual Polish**:
+  - **Muzzle Flashes**: Triggered on weapon fire.
+  - **Particle System**: Manages lifesteal tracers and blood/vampire effects.
+  - **Shadow Glow**: Used on projectiles for a "bullet-hell" aesthetic.
+- **Persistence**: Player keybinds are automatically saved to `localStorage` and persist across sessions.
+
+---
+
+#### Credits
+- **Eliel-isCool47**: Art, Code, Game Design.
+- **Project URL**: GitHub Repo
+
+#### Development
+The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.
+
+<!-- 
+Maintenance Note: 
+When adding new modules, register them in the state object in main.js 
+and implement the reset() / defaults pattern to ensure compatibility 
+with the restart system.

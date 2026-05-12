@@ -1,10 +1,6 @@
-const input = {
+var input = {
 	pressedKeys: [],
 	preventDefaultList: [
-		"KeyW",
-		"KeyS",
-		"KeyA",
-		"KeyD",
 		"ArrowUp",
 		"ArrowDown",
 		"ArrowLeft",
@@ -44,8 +40,8 @@ const input = {
 		update(posX, posY) {
 			this._x = posX
 			this._y = posY
-			if (!simulation.isPaused)
-				this._angle = angle(this._x, this._y, player.pos.x, player.pos.y)
+			if (!simulation.isPaused && state.player)
+				this._angle = angle(this._x, this._y, state.player.pos.x, state.player.pos.y)
 		},
 	},
 	fire() {
@@ -109,6 +105,17 @@ const input = {
 		hud.Obj.style.display = 'none'
 		pauseScreen.style.display = 'none'
 	},
+
+	get defaults() {
+		return { pressedKeys: [] }
+	},
+
+	set defaults(val) { throw new Error('input.defaults is read-only') },
+
+	reset() {
+		Object.assign(this, this.defaults)
+	},
+
 	respawn() {
 		if (
 			!simulation.isPaused &&
@@ -116,62 +123,14 @@ const input = {
 			!simulation.isDead &&
 			!simulation.isMainMenu
 		) return undefined
-		player.lastDamageTime = 0 - 10 ** 299
-		simulation.isPaused = false
-		simulation.consoleMessage = ``
-		simulation.isDead = false
-		simulation.isTesting = false
-		simulation.isChoosing = false
-		simulation.time = 0
-		level.time = 0
+
+		simulation.wipe()
+		simulation.isMainMenu = false
+
 		hud.Obj.style.display = 'block'
 		dc.style.display = 'none'
 		main.style.display = 'block'
 		document.title = 'Tetragon'
-		player.pos.x = collisions.center.x
-		player.pos.y = collisions.center.y
-		player.maxHealth = 100
-		player.health = player.maxHealth
-		player.velocity = 5
-		player.damageDone = 1
-		player.damageTaken = 1
-		// player.lastDamageTime = (-10) ** 299
-		upgrades.healEffect = 1
-		upgrades.ammoYield = 1
-		upgrades.powerUpSpawnChance = 1
-		upgrades.collected = []
-		upgrades.unlocked = []
-		upgrades.pool = [...upgrades.defaultPool]
-		upgrades.lastHealthRegen = (-10) ** 299
-		upgrades.fireRate = 1
-		upgrades.isBulletExplode = false
-		upgrades.isExplosionColorful = false
-		upgrades.isHealthRegen = false
-		bullets.explosions.size = 25
-		upgrades.fireRate = 1
-		upgrades.ammoYield = 1
-		upgrades.optionsPerPowerUp = 3
-		bullets.explosions.damageDone = 8
-		mobs.list = []
-		level.current = 0
-		level.time = 0
-		bullets.list = []
-		bullets.explosionList = []
-		powerUps.list = []
-		guns.inventory = []
-		guns.pool = [...guns.defaultPool]
-		upgrades.rerolls = 0
-		upgrades.options = []
-		guns.equippedGun = undefined
-		simulation.timeOffset = now()
-		simulation.startTime = now()
-		simulation.isMainMenu = false
-		simulation.isDead = false
-		guns.lastBulletShot = (-10) ** 299
-		player.pos.x = collisions.center.x
-		player.pos.y = collisions.center.y
-		player.maxHealth = 100
-		player.health = player.maxHealth
 	},
 	clickLogic(click) {
 		this.cursor.update(click.offsetX, click.offsetY)
@@ -218,7 +177,7 @@ const input = {
 		const gamepad = navigator.getGamepads()[0]
 		if (!gamepad) return
 		if (Math.abs(gamepad.axes[2]) > 0.1 || Math.abs(gamepad.axes[3]) > 0.1) {
-			this.cursor.update(player.pos.x + gamepad.axes[2] * 100, player.pos.y + gamepad.axes[3] * 100)
+			this.cursor.update(state.player.pos.x + gamepad.axes[2] * 100, state.player.pos.y + gamepad.axes[3] * 100)
 		}
 		if (gamepad.buttons[7].pressed) this.fire()
 	},
@@ -247,8 +206,8 @@ const input = {
 				// Use magnitude to prevent faster diagonal movement and allow for analog stick sensitivity
 				const normalizedX = moveX / magnitude
 				const normalizedY = moveY / magnitude
-				player.pos.x += normalizedX * player.velocity * Math.min(1, magnitude)
-				player.pos.y += normalizedY * player.velocity * Math.min(1, magnitude)
+				state.player.pos.x += normalizedX * state.player.velocity * Math.min(1, magnitude)
+				state.player.pos.y += normalizedY * state.player.velocity * Math.min(1, magnitude)
 			}
 		}
 		this.pressedKeys.forEach(function (k) {
@@ -265,20 +224,23 @@ const input = {
 					break
 			}
 		}.bind(this))
-		this.cursor.angle = angle(
-			this.cursor.x,
-			this.cursor.y,
-			player.pos.x,
-			player.pos.y,
-		)
+		if (state.player) {
+			this.cursor.angle = angle(
+				this.cursor.x,
+				this.cursor.y,
+				state.player.pos.x,
+				state.player.pos.y,
+			)
+		}
 	},
 }
+
 //actually handling input
 window.addEventListener("resize", function (r) {
 	main.width = window.innerWidth
 	main.height = window.innerHeight
-	collisions.border.right = main.width - player.size / 2
-	collisions.border.bottom = main.height - player.size / 2
+	collisions.border.right = main.width - state.player.size / 2
+	collisions.border.bottom = main.height - state.player.size / 2
 	draw.clearRect(0, 0, main.width, main.height)
 }.bind(this))
 main.addEventListener("contextmenu", function (cxm) {

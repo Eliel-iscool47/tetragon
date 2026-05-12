@@ -1,13 +1,33 @@
-const collisions = {
+var collisions = {
 	center: {
 		x: main.width / 2,
 		y: main.height / 2,
 	},
 	border: {
 		left: 25,
-		right: main.width - player.size / 2,
+		right: main.width - 25, // Set safe defaults initially
 		top: 25,
-		bottom: main.height - player.size / 2,
+		bottom: main.height - 25,
+	},
+	get defaults() {
+		return {
+			center: {
+				x: main.width / 2,
+				y: main.height / 2,
+			},
+			border: {
+				left: 25,
+				right: main.width - state.player.size / 2,
+				top: 25,
+				bottom: main.height - state.player.size / 2,
+			}
+		}
+	},
+
+	set defaults(val) { throw new Error('collisions.defaults is read-only') },
+
+	reset() {
+		Object.assign(this, this.defaults)
 	},
 	grid: {
 		size: 150,
@@ -38,8 +58,8 @@ const collisions = {
 	},
 	loop() {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		player.pos.x = clamp(player.pos.x, collisions.border.left, collisions.border.right)
-		player.pos.y = clamp(player.pos.y, collisions.border.top, collisions.border.bottom)
+		state.player.pos.x = clamp(state.player.pos.x, collisions.border.left, collisions.border.right)
+		state.player.pos.y = clamp(state.player.pos.y, collisions.border.top, collisions.border.bottom)
 
 		this.grid.clear()
 		for (let i = 0; i < bullets.list.length; i++) {
@@ -61,8 +81,8 @@ const collisions = {
 				if ((percentChance(upgrades.powerUpSpawnChance * 0.01 * mob.dropChance) || mob.class == 'boss') && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.upgrade)
 			}
 			mob.health = Math.min(mob.health, mob.maxHealth)
-			if (distance(mob.pos.x, mob.pos.y, player.pos.x, player.pos.y) <= Math.max(player.size, mob.size) / 2) {
-				player.takeDamage(mob.damage)
+			if (distance(mob.pos.x, mob.pos.y, state.player.pos.x, state.player.pos.y) <= Math.max(state.player.size, mob.size) / 2) {
+				state.player.takeDamage(mob.damage)
 				upgrades.lastHealthRegen = simulation.time
 				mob.timeSinceLastAttack = simulation.time
 				if (mob.class != 'projectile') {
@@ -73,13 +93,13 @@ const collisions = {
 			}
 			this.grid.query(mob.pos.x, mob.pos.y, function (e) {
 				if (e.isExplosion) {
-					if (distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size * 0.5 && e.timeSinceLastAttack <= simulation.time - 0.05) {
-						mob.takeDamage(bullets.explosions.damageDone * player.damageDone)
+					if (!e.targetsPlayerOnly && distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size * 0.5 && e.timeSinceLastAttack <= simulation.time - 0.05) {
+						mob.takeDamage(e.damage * state.player.damageDone)
 						e.timeSinceLastAttack = simulation.time
 					}
 				} else {
 					if (e.piercing > 0 && distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size / 2) {
-						mob.takeDamage(e.damage * player.damageDone)
+						mob.takeDamage(e.damage * state.player.damageDone)
 						if (e.type == 'bouncyBalls') {
 							e.angle += rand(Math.PI * -0.05, Math.PI * 0.05)
 							if (upgrades.isBulletExplode) {
@@ -91,10 +111,16 @@ const collisions = {
 					}
 				}
 			}.bind(this))
+
+			if (bullets.firePoolList) bullets.firePoolList.forEach(p => {
+				if (distance(mob.pos.x, mob.pos.y, p.pos.x, p.pos.y) <= p.size + mob.size / 2) {
+					mob.takeDamage(p.damage * state.player.damageDone)
+				}
+			})
 		}.bind(this))
 		bullets.explosionList.forEach(function (xp) {
-			if (distance(player.pos.x, player.pos.y, xp.pos.x, xp.pos.y) <= xp.size / 2 + player.size / 2 && xp.timeSinceLastAttack < simulation.time - 0.05) {
-				player.takeDamage(bullets.explosions.damageDone)
+			if (distance(state.player.pos.x, state.player.pos.y, xp.pos.x, xp.pos.y) <= xp.size / 2 + state.player.size / 2 && xp.timeSinceLastAttack < simulation.time - 0.05) {
+				state.player.takeDamage(xp.damage)
 				xp.timeSinceLastAttack = simulation.time
 				upgrades.lastHealthRegen = simulation.time
 			}

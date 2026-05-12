@@ -2,8 +2,8 @@
  * The object containing all the information about the player.
  */
 class Player extends Entity {
-	constructor(x, y) {
-		super(x, y, {
+	constructor(state, x, y) {
+		super(state, x, y, {
 			_health: 100,
 			_maxHealth: 100,
 			_damageDone: 1,
@@ -16,11 +16,28 @@ class Player extends Entity {
 		})
 	}
 
+	get defaults() {
+		return {
+			_health: 100,
+			_maxHealth: 100,
+			_damageDone: 1,
+			_lastDamageTime: -(10 ** 299),
+			_damageTaken: 1,
+			_isInvulnerable: false,
+			_size: 50,
+			_velocity: 5,
+			color: 'hsl(215, 100%, 45%)',
+			pos: { x: main.width / 2, y: main.height / 2 }
+		}
+	}
+
+	set defaults(val) { throw new Error('player.defaults is read-only') }
+
 	takeDamage(amount) {
 		if (this.isInvulnerable) return
-		this.health -= amount
-		this.lastDamageTime = simulation.time
-		upgrades.lastHealthRegen = simulation.time
+		this.health -= amount * this.damageTaken
+		this.lastDamageTime = this.state.simulation.time
+		this.state.upgrades.lastHealthRegen = this.state.simulation.time
 	}
 
 	get health() { return this._health }
@@ -36,7 +53,7 @@ class Player extends Entity {
 	set damageDone(val) { this._damageDone = Math.abs(val) }
 
 	get lastDamageTime() { return this._lastDamageTime }
-	set lastDamageTime(val) { this._lastDamageTime = Math.abs(val) }
+	set lastDamageTime(val) { this._lastDamageTime = val }
 
 	get damageTaken() { return this._damageTaken }
 	set damageTaken(val) { this._damageTaken = val }
@@ -46,7 +63,7 @@ class Player extends Entity {
 
 	get size() { return this._size }
 	set size(val) {
-		this._size = Math.max(val, 1)
+		this._size = val
 	}
 
 	get velocity() { return this._velocity }
@@ -68,38 +85,40 @@ class Player extends Entity {
 		draw.textAlign = 'center'
 		draw.fillText('Game Over', main.width / 2, main.height / 2)
 		draw.font = `${(main.width + main.height) / 40}px 'DM Sans'`
-		draw.fillText(`press ${input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, main.width / 2, main.height / 2 + 75, main.width)
-		document.title = `Tetragon: Score: ${Math.round(level.current)}`
+		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, main.width / 2, main.height / 2 + 75, main.width)
+		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
 	}
 
 	kill() {
 		this.health = 0
-		simulation.wipe()
-		simulation.isDead = true
-		upgrades.pool = [...upgrades.defaultPool]
-		upgrades.collected = []
+		this.state.simulation.wipe()
+		this.state.simulation.isDead = true
+		this.state.simulation.isMainMenu = false
+		this.state.simulation.isPaused = false
+		this.state.simulation.isChoosing = false
+
 		this.deathScreen()
 	}
 
 	draw() {
 		this.drawSelf(function () {
-			if (simulation.time - this.lastDamageTime < 0.1) draw.fillStyle = 'hsla(0, 100%, 50%, 0.85)'
+			if (this.state.simulation.time - this.lastDamageTime < 0.1) draw.fillStyle = 'hsla(0, 100%, 50%, 0.85)'
 			else draw.fillStyle = this.color
 
 			if (this.isInvulnerable) {
 				draw.save()
-				draw.globalAlpha = 0.4 + 0.6 * Math.sin(simulation.time * 30)
+				draw.globalAlpha = 0.4 + 0.6 * Math.sin(this.state.simulation.time * 30)
 				draw.restore()
 			}
 			draw.fillRect(this.size / -2, this.size / -2, this.size, this.size)
 
 			if (
-				input.cursor.angle < Math.PI / -2 ||
-				input.cursor.angle > Math.PI / 2
+				this.state.input.cursor.angle < Math.PI / -2 ||
+				this.state.input.cursor.angle > Math.PI / 2
 			) draw.drawImage(sprites.commanderHat.left, this.size * -0.6, this.size * -1.2, this.size * 1.2, this.size * 0.6)
 			else draw.drawImage(sprites.commanderHat.right, this.size * -0.6, this.size * -1.2, this.size * 1.2, this.size * 0.6)
 
-			draw.rotate(input.cursor.angle)
+			draw.rotate(this.state.input.cursor.angle)
 			draw.strokeStyle = 'white'
 			draw.lineWidth = this.size / 10
 			draw.beginPath()
@@ -111,6 +130,12 @@ class Player extends Entity {
 			draw.stroke()
 		}.bind(this))
 	}
+
+	reset() {
+		const d = this.defaults
+		Object.assign(this, d)
+		this.pos = { ...d.pos }
+	}
 }
 
-const player = new Player(main.width / 2, main.height / 2)
+var player = new Player(state, main.width / 2, main.height / 2)
