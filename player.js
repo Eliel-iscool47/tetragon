@@ -85,7 +85,7 @@ class Player extends Entity {
 		draw.textAlign = 'center'
 		draw.fillText('Game Over', main.width / 2, main.height / 2)
 		draw.font = `${(main.width + main.height) / 40}px 'DM Sans'`
-		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, main.width / 2, main.height / 2 + 75, main.width)
+		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn\nor ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, main.width / 2, main.height / 2 + 75, main.width)
 		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
 	}
 
