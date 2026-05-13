@@ -1,10 +1,14 @@
+# Note
+
+This README was AI-generated, but it looks cool.
+
 # Tetragon
 
 A fast-paced geometric survival shooter built with a modular, data-driven architecture.
 
 ## 1: Controls
 
-The game's controls are:
+The game's controls are the following:
 
 ---
 * **Move**: `W`, `A`, `S`, `D` or arrow keys
@@ -25,7 +29,7 @@ The game's controls are:
 
 ## 3: Feedback
 
-[Submit your feedback here]()
+[Submit your feedback here](https://docs.google.com/forms/d/1iQ4DOSDVXXOdok1HwxPqQm1_M0hk6KeB30nidJq4nxw/edit)
 
 ---
 
@@ -39,10 +43,8 @@ The project utilizes a centralized `state` object (defined in `main.js`) to mana
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
 #### b: Data-Driven Leveling
-Level progression is defined externally in `levels.json`.
 - **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
 - **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
-- **Custom Win Conditions**: Each level tier can define its own logic for progression, such as clearing all enemies or surviving an intermission timer.
 
 ### 2: Combat & Mechanics
 
