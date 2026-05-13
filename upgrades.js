@@ -332,10 +332,10 @@ upgrades.reactiveArmor = new upgrades.Upgrade({
 upgrades.liquidCooling = new upgrades.Upgrade({
 	id: 'liquidCooling',
 	name: 'Liquid Cooling',
-	description: `${text('movement-speed', 'movement speed')}, 2x ${text('fire-rate', 'fire rate')}, and 1.5x ${text('magnet-range', 'magnet range')}`,
+	description: `1.3x ${text('movement-speed', 'movement speed')}, 2.5x ${text('fire-rate', 'fire rate')}, and 1.5x ${text('magnet-range', 'magnet range')}`,
 	effect() {
-		state.player.velocity *= 1.35
-		upgrades.fireRate *= 2
+		state.player.velocity *= 1.3
+		upgrades.fireRate *= 2.5
 		upgrades.magnetRange *= 1.5
 	}
 })

@@ -154,6 +154,7 @@ ${this._consoleMessage}
 		main.style.display = 'none'
 		document.title = 'Tetragon: Main Menu'
 		simulation.time = 0
+		hud.Obj.style.display = 'none'
 		dc.style.display = 'block'
 		this.wipe()
 	},
@@ -170,7 +171,7 @@ ${this._consoleMessage}
 		draw.clearRect(0, 0, main.width, main.height)
 		input.keyLogic()
 		main.style.display = this.isMainMenu || this.isChoosing ? 'none' : 'block'
-		hud.Obj.style.display = simulation.isPaused || simulation.isChoosing ? 'none' : 'block'
+		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu ? 'none' : 'block'
 		if (this.isMainMenu) {
 			this.mainMenu()
 			dc.style.display = 'block'

@@ -91,6 +91,12 @@ class Player extends Entity {
 
 	kill() {
 		this.health = 0
+		const score = Math.round(this.state.level.current)
+		const highScore = Number(localStorage.getItem('tetragon-high-score') || 0)
+		if (score > highScore) {
+			localStorage.setItem('tetragon-high-score', score)
+		}
+
 		this.state.simulation.wipe()
 		this.state.simulation.isDead = true
 		this.state.simulation.isMainMenu = false

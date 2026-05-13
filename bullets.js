@@ -177,34 +177,71 @@ var bullets = {
 			}
 		}))
 	},
-	missile(x, y) {
+	missile(x, y, angleOffset = 0) {
 		bullets.list.push(new bullets.Bullet(state, x, y, {
 			type: 'missiles',
-			angle: state.input.cursor.angle,
-			speed: 15,
+			angle: state.input.cursor.angle + angleOffset,
+			angleOffset: angleOffset,
+			speed: 1.5,
 			isHoming: true,
 			isExplode: true,
 			piercing: 1,
 			damage: 5,
 			draw: function () {
 				this.drawSelf(function () {
+					const pulse = 0.5 + 0.5 * Math.sin(this.state.simulation.time * 20)
+					// Map speed (1.5 to 30) to hue (200/Blue to 0/Red) for a heat-up effect
+					const glowColor = `hsl(${lerp(200, 0, (this.speed - 1.5) / 28.5)}, 100%, 50%)`
+
+					// Add a glow effect to the missile body
+					draw.shadowBlur = 10 + pulse * 10
+					draw.shadowColor = glowColor //`hsl(195, 100%, 50%)`
+
 					draw.fillStyle = "hsl(220, 50%, 25%)"
 					draw.fillRect(-15, -5, 30, 10)
+
+					// Engine core at the rear
+					draw.shadowBlur = 15
+					draw.fillStyle = "white"
+					draw.beginPath()
+					draw.arc(-15, 0, 3 + pulse * 2, 0, Math.PI * 2)
+					draw.fill()
+
+					draw.shadowBlur = 0
+					draw.fillStyle = glowColor //"hsl(195, 100%, 50%)"
+					draw.setLineDash([3])
+					draw.beginPath()
+					draw.moveTo(-12.5, 0)
+					draw.lineTo(12.5, 0)
+					draw.stroke()
+					draw.setLineDash([])
 				}.bind(this))
 			},
 			onCollision: function () {
 				bullets.explosion(this.pos.x, this.pos.y, 2)
 			},
 			update: function () {
-				this.angle = angle(this.state.input.cursor.x, this.state.input.cursor.y, this.pos.x, this.pos.y)
+				if (!this.state.simulation) return undefined
+				this.angle = angle(this.state.input.cursor.x, this.state.input.cursor.y, this.pos.x, this.pos.y) + this.angleOffset
 				this.state.mobs.list.forEach(function (mob) {
 					if (
 						distance(this.pos.x, this.pos.y, mob.pos.x, mob.pos.y) < mob.size * 8 &&
 						mob.class != 'projectile'
-					) this.angle = angle(mob.pos.x, mob.pos.y, this.pos.x, this.pos.y)
+					) this.angle = angle(mob.pos.x, mob.pos.y, this.pos.x, this.pos.y) + this.angleOffset
 				}.bind(this))
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed
+				this.speed = Math.min(30, this.speed + 0.15)
+
+				// Spawn smoke particle for trail effect
+				if (this.state.simulation.time % 0.05 < 1 / this.state.simulation.fps) {
+					this.state.particles.spawn(this.pos.x, this.pos.y, {
+						...this.state.particles.missileSmoke,
+						angle: this.angle + Math.PI + rand(-0.5, 0.5), // Opposite direction with spread
+						speed: rand(0.2, 1.0), // Slight outward speed
+						size: rand(3, 6) // Randomize size slightly
+					});
+				}
 			}
 		}))
 	},

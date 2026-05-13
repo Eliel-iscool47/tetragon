@@ -1,6 +1,3 @@
-# Note
-
-This README was AI-generated, but it looks cool.
 
 # Tetragon
 
@@ -16,14 +13,12 @@ The game's controls are the following:
 * **Cycle Guns**: `Q` and `E`
 * **Reload**: `V` (or empty magazine)
 * **Pause**: `P` or `Escape` (while playing)
-* **Restart**: `R` (while paused/choosing)
+* **Restart**: `R` (while paused/choosing/dead)
 * **Main Menu**: `M`
 
-## 2: Recent Updates (v1.06)
+## 2: Recent Updates (v1.07)
 
-* **New Upgrades**: Vampirism, Heavy Caliber, Power Surge.
-* **Mechanics**: Introduced knives and lifesteal mechanics.
-* **Refactoring**: Standardized entity transformations and state resets.
+* **Mechanics**: MIRV missiles now shoot 1 at a time. They also now accelerate towards their target instead of instantly being fast.
 
 ---
 
@@ -55,7 +50,7 @@ The game features a difficulty slider in the Settings menu ranging from **0.2x t
 #### b: The Arsenal
 - **Melee (Knife)**: A high-damage sweeping attack with a visual fade-out slash.
 - **Ballistics**: A wide variety of weapons including Rifles, Snipers, Shotguns, and Miniguns.
-- **Specialty**: Homing Missiles that will chase you back to little St. James, Balls 😋, Flamethrowers, and instant-hit Lasers.
+- **Specialty**: Homing Missiles that accelerate towards their target, <!--Edwin's juicy -->Balls 😋, Flamethrowers, and instant-hit Lasers.
 
 #### Advanced Upgrades
 The upgrade system supports prerequisites via a `requirements` property. Notable mechanics include:
@@ -88,10 +83,9 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 - **Project URL**: GitHub Repo
 
 #### Development
-The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.
+The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. <!-- To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.-->
 
-<!-- 
-Maintenance Note: 
+<!-- Maintenance Note: 
 When adding new modules, register them in the state object in main.js 
 and implement the reset() / defaults pattern to ensure compatibility 
-with the restart system.
+with the restart system. -->

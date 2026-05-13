@@ -223,7 +223,7 @@ var guns = {
 guns.rifle = new guns.Gun({
 	id: 'rifle',
 	name: 'rifle',
-	description: `Rapidly shoot ${text('bullets', 'bullets')} at a decent ${text('speed', 'speed')}<br>30 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Rapidly shoot ${text('bullets', 'bullets')} at a decent ${text('speed', 'speed')}<br>30 ${text('ammo', 'ammo')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 420,
 	magSize: 30,
 	magazines: 3,
@@ -238,7 +238,7 @@ guns.rifle = new guns.Gun({
 guns.shotgun = new guns.Gun({
 	id: 'shotgun',
 	name: 'shotgun',
-	description: `Shoot a wide burst of ${text('range', 'short-range')} ${text('pellets', 'pellets')}<br>3 ${text('ammo', 'shells')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Shoot a wide burst of ${text('range', 'short-range')} ${text('pellets', 'pellets')}<br>3 ${text('ammo', 'shells')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 24,
 	magSize: 3,
 	magazines: 15,
@@ -255,7 +255,7 @@ guns.shotgun = new guns.Gun({
 guns.sniper = new guns.Gun({
 	id: 'sniper',
 	name: 'sniper',
-	description: `Shoot a high-caliber shot that ${text('piercing', 'pierces')} through mobs<br>3 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Shoot a high-caliber shot that ${text('piercing', 'pierces')} through mobs<br>3 ${text('ammo', 'ammo')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 30,
 	magSize: 3,
 	magazines: 3,
@@ -270,7 +270,7 @@ guns.sniper = new guns.Gun({
 guns.smg = new guns.Gun({
 	id: 'smg',
 	name: 'SMG',
-	description: `Rapidly shoot rounds faster than rifle, but slower than minigun<br>50 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Rapidly shoot rounds faster than rifle, but slower than minigun<br>50 ${text('ammo', 'ammo')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 750,
 	magSize: 50,
 	magazines: 2,
@@ -283,7 +283,7 @@ guns.smg = new guns.Gun({
 guns.pistol = new guns.Gun({
 	id: 'pistol',
 	name: 'pistol',
-	description: `It\'s a pistol, I don\'t know what else to tell you<br>10 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	description: `It\'s a pistol, I don\'t know what else to tell you<br>10 ${text('ammo', 'ammo')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 180,
 	magSize: 10,
 	magazines: 5,
@@ -296,7 +296,7 @@ guns.pistol = new guns.Gun({
 guns.minigun = new guns.Gun({
 	id: 'minigun',
 	name: 'minigun',
-	description: `Shoot a lot of ${text('bullets', 'bullets')} really fast<br>100 ${text('ammo', 'ammo')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Shoot a lot of ${text('bullets', 'bullets')} really fast<br>100 ${text('ammo', 'ammo')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 2000,
 	magSize: 100,
 	magazines: 0,
@@ -309,7 +309,7 @@ guns.minigun = new guns.Gun({
 guns.grenadeLauncher = new guns.Gun({
 	id: 'grenadeLauncher',
 	name: 'grenade launcher',
-	description: `Launch a grenade that ${text('explosion', 'explodes')} upon contact<br>6 ${text('ammo', 'grenades')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Launch a grenade that ${text('explosion', 'explodes')} upon contact<br>6 ${text('ammo', 'grenades')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 72,
 	magSize: 6,
 	magazines: 10,
@@ -325,7 +325,7 @@ guns.grenadeLauncher = new guns.Gun({
 guns.missiles = new guns.Gun({
 	id: 'missiles',
 	name: 'missiles',
-	description: `Launch a ${text('homing', 'homing')} missile that tracks nearby mobs<br>3 ${text('ammo', 'missiles')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Launch a ${text('homing', 'homing')} missile that tracks nearby mobs<br>3 ${text('ammo', 'missiles')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 50,
 	magSize: 1,
 	magazines: 50,
@@ -334,16 +334,26 @@ guns.missiles = new guns.Gun({
 	bulletDuration: 20,
 	unlockables: ['missiles', 'explosions', 'bullets'],
 	shoot() {
-		repeat(function () {
-			bullets.missile(state.player.pos.x, state.player.pos.y)
-		}, upgrades.missilesPerShot)
+		let fired = 0
+		const launch = () => {
+			if (fired >= upgrades.missilesPerShot) return
+			if (simulation.isPaused || simulation.isChoosing || simulation.isDead) {
+				setTimeout(launch, 50)
+				return
+			}
+			bullets.missile(state.player.pos.x, state.player.pos.y, rand(-0.15, 0.15))
+			if (this.isMuzzleFlash) bullets.muzzleFlash()
+			fired++
+			if (fired < upgrades.missilesPerShot) setTimeout(launch, 200)
+		}
+		launch()
 	}
 })
 
 guns.bouncyBalls = new guns.Gun({
 	id: 'bouncyBalls',
 	name: 'bouncy balls',
-	description: `Shoot 3 bouncy balls that ${text('bounces', 'bounce')} off the borders of the map and mobs<br>5 ${text('ammo', 'balls')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Shoot 3 bouncy balls that ${text('bounces', 'bounce')} off the borders of the map and mobs<br>5 ${text('ammo', 'balls')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 80,
 	magSize: 5,
 	magazines: 30,
@@ -368,7 +378,7 @@ guns.bouncyBalls = new guns.Gun({
 guns.flamethrower = new guns.Gun({
 	id: 'flamethrower',
 	name: 'flamethrower',
-	description: `Use ${text('fire', 'fire')} to burn your enemies!<br>150 ${text('ammo', 'flames')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Use ${text('fire', 'fire')} to burn your enemies!<br>150 ${text('ammo', 'flames')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 2000,
 	magSize: 200,
 	magazines: 3,
@@ -407,7 +417,7 @@ guns.laser = new guns.Gun({
 guns.knife = new guns.Gun({
 	id: 'knife',
 	name: 'Knife',
-	description: `Quickly stab enemies with a knife<br>1 ${text('ammo', 'knife')} per ${text('ammo', 'ammo power-up')}`,
+	description: `Quickly stab enemies with a knife<br>1 ${text('ammo', 'knife')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 30,
 	magSize: 1,
 	magazines: 30,

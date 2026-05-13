@@ -3,6 +3,7 @@ var particles = {
 		constructor(state, x, y, config) {
 			Object.assign(this, config)
 			this.state = state
+			this.timeSpawned = state.simulation.time
 			this.pos = { x, y }
 			this.color = config.color
 		}
@@ -57,4 +58,28 @@ var particles = {
 			if (this.state.simulation.time > this.time + this.duration) this.state.particles.list = this.state.particles.list.filter(p => p != this)
 		}
 	},
+	missileSmoke: {
+		size: 4,
+		color: 'hsl(220, 10%, 50%)', // Greyish blue
+		speed: 0.5,
+		duration: 0.4, // Short duration
+		draw() {
+			const elapsed = this.state.simulation.time - this.timeSpawned;
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1); // Fade out
+			draw.save();
+			draw.globalAlpha = alpha;
+			draw.beginPath();
+			draw.fillStyle = this.color;
+			draw.arc(this.pos.x, this.pos.y, this.size, 0, Math.PI * 2);
+			draw.fill();
+			draw.restore();
+		},
+		update() {
+			this.pos.x += Math.cos(this.angle) * this.speed;
+			this.pos.y += Math.sin(this.angle) * this.speed;
+			if (this.state.simulation.time - this.timeSpawned > this.duration) {
+				this.state.particles.list = this.state.particles.list.filter(p => p !== this);
+			}
+		}
+	}
 }

@@ -102,8 +102,8 @@ var input = {
 		dc.style.display = 'block'
 		main.style.display = 'none'
 		document.title = 'Tetragon: Main Menu'
-		hud.Obj.style.display = 'none'
 		pauseScreen.style.display = 'none'
+		hud.Obj.style.display = 'none'
 	},
 
 	get defaults() {
