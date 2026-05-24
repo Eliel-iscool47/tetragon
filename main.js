@@ -116,9 +116,17 @@ window.addEventListener('load', () => {
 leaderboardButton.onclick = async function () {
 	leaderboardModal.style.display = 'flex'
 	leaderboardList.innerHTML = 'Loading...'
+
+	if (API_BASE_URL.includes('your-backend-app-name')) {
+		console.error("API_BASE_URL is still set to a placeholder! Update it in main.js.");
+		leaderboardList.innerHTML = 'Error: Backend URL not configured.';
+		return;
+	}
+
 	try {
 		const response = await fetch(`${API_BASE_URL}/api/leaderboard`)
-		const data = await response.json()
+		if (!response.ok) throw new Error(`Server returned ${response.status}`);
+		const data = await response.json();
 		if (data.length <= 0) {
 			leaderboardList.innerHTML = 'No scores yet!'
 		} else {
