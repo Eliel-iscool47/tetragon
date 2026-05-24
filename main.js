@@ -5,7 +5,7 @@ const dc = document.getElementById('container')
 // Supabase Configuration
 const SUPABASE_URL = 'https://jjneuqhgdjydjanlygbw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbmV1cWhnZGp5ZGphbmx5Z2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODA3MTgsImV4cCI6MjA5NTE1NjcxOH0.odnPoLV8NGD1GezSYdntlfOIY0zm1d7TM6rZKLif5DY';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const main = document.getElementById('main')
 main.width = window.innerWidth
@@ -118,13 +118,13 @@ leaderboardButton.onclick = async function () {
 	leaderboardModal.style.display = 'flex'
 	leaderboardList.innerHTML = 'Loading...'
 
-	if (!supabase) {
+	if (!supabaseClient) {
 		leaderboardList.innerHTML = 'Error: Supabase not initialized.';
 		return;
 	}
 
 	try {
-		const { data, error } = await supabase
+		const { data, error } = await supabaseClient
 			.from('leaderboard')
 			.select('*')
 			.order('level', { ascending: false })
@@ -163,7 +163,7 @@ submitFeedback.onclick = async function () {
 	submitFeedback.innerText = "Sending..."
 
 	try {
-		const { error } = await supabase
+		const { error } = await supabaseClient
 			.from('feedback')
 			.insert([{ message }]);
 
@@ -301,7 +301,7 @@ document.getElementById('submit-score').onclick = async function () {
 	localStorage.setItem('tetragon-username', playerName)
 
 	try {
-		const { error } = await supabase
+		const { error } = await supabaseClient
 			.from('leaderboard')
 			.insert([{ name: playerName, level: score }]);
 		if (error) throw error;
