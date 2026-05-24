@@ -1,16 +1,16 @@
 //container && canvas && 2-Dimensional rendering context
 
-const dc = document.getElementById('container')
+var dc = document.getElementById('container')
 
 // Supabase Configuration
 const SUPABASE_URL = 'https://jjneuqhgdjydjanlygbw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbmV1cWhnZGp5ZGphbmx5Z2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODA3MTgsImV4cCI6MjA5NTE1NjcxOH0.odnPoLV8NGD1GezSYdntlfOIY0zm1d7TM6rZKLif5DY';
-const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+var supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-const main = document.getElementById('main')
+var main = document.getElementById('main')
 main.width = window.innerWidth
 main.height = window.innerHeight
-const draw = main.getContext('2d')
+var draw = main.getContext('2d')
 
 //document stuff
 
@@ -29,7 +29,7 @@ document.head.appendChild(font)
 document.body.style.fontFamily = "DM Sans, sans-serif"
 
 
-const state = {
+var state = {
 	difficultyScale: 1,
 	get simulation() { return window.simulation },
 	get player() { return window.player },
@@ -61,21 +61,21 @@ const state = {
 
 //HTML element objects
 
-const start = document.getElementById('start')
-const controls = document.getElementById('controls')
-const controlDoc = document.getElementById('control-doc')
-const settings = document.getElementById('settings')
-const leaderboardButton = document.getElementById('leaderboard-button')
-const leaderboardModal = document.getElementById('leaderboard-modal')
-const leaderboardList = document.getElementById('leaderboard-list')
-const feedbackButton = document.getElementById('feedback-button')
-const feedbackModal = document.getElementById('feedback-modal')
-const feedbackText = document.getElementById('feedback-text')
-const submitFeedback = document.getElementById('submit-feedback')
-const closeFeedback = document.getElementById('close-feedback')
-const pauseScreen = document.getElementById('pause-screen')
-const chooseScreen = document.getElementById('choice-screen')
-const chooseHeader = chooseScreen.querySelector('h1')
+var start = document.getElementById('start')
+var controls = document.getElementById('controls')
+var controlDoc = document.getElementById('control-doc')
+var settings = document.getElementById('settings')
+var leaderboardButton = document.getElementById('leaderboard-button')
+var leaderboardModal = document.getElementById('leaderboard-modal')
+var leaderboardList = document.getElementById('leaderboard-list')
+var feedbackButton = document.getElementById('feedback-button')
+var feedbackModal = document.getElementById('feedback-modal')
+var feedbackText = document.getElementById('feedback-text')
+var submitFeedback = document.getElementById('submit-feedback')
+var closeFeedback = document.getElementById('close-feedback')
+var pauseScreen = document.getElementById('pause-screen')
+var chooseScreen = document.getElementById('choice-screen')
+var chooseHeader = chooseScreen.querySelector('h1')
 const chooseText = document.createElement('ul')
 chooseScreen.appendChild(chooseText)
 
