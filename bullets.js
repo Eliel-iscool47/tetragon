@@ -120,6 +120,8 @@ var bullets = {
 			type: 'shotgun',
 			angle: state.input.cursor.angle + (rand(-state.guns.shotgun.spread, state.guns.shotgun.spread) / 100),
 			speed: 10,
+			damage: state.guns.shotgun.damage,
+			size: 6,
 			piercing: 1,
 			draw: function () {
 				this.drawSelf(function () {
@@ -135,6 +137,8 @@ var bullets = {
 			type: 'smg',
 			angle: state.input.cursor.angle,
 			speed: 12,
+			damage: state.guns.smg.damage,
+			size: 10,
 			piercing: 1,
 			draw: function () {
 				this.drawSelf(function () {
@@ -150,6 +154,8 @@ var bullets = {
 			type: 'minigun',
 			angle: state.input.cursor.angle,
 			speed: 10,
+			damage: state.guns.minigun.damage,
+			size: 10,
 			piercing: 1,
 			draw: function () {
 				this.drawSelf(function () {
@@ -266,16 +272,62 @@ var bullets = {
 			type: 'bouncyBalls',
 			angle: state.input.cursor.angle,
 			speed: 8,
-			piercing: 3,
+			damage: state.guns.bouncyBalls.damage,
+			size: 5,
+			piercing: guns.bouncyBalls.piercing,
 			update: function () {
-				if (this.pos.x < 0 || this.pos.x > main.width || this.pos.y < 0 || this.pos.y > main.height) {
-					this.angle += Math.PI * rand(-0.6, 0.6)
+				const radius = this.size / 2
+				if (this.pos.x < radius || this.pos.x > main.width - radius) {
+					this.angle = Math.PI - this.angle + rand(-0.05, 0.05)
+					this.pos.x = clamp(this.pos.x, radius, main.width - radius)
+					this.speed = Math.min(30, this.speed + 0.8)
 				}
+				if (this.pos.y < radius || this.pos.y > main.height - radius) {
+					this.angle = -this.angle + rand(-0.05, 0.05)
+					this.pos.y = clamp(this.pos.y, radius, main.height - radius)
+					this.speed = Math.min(30, this.speed + 0.8)
+				}
+
+				// Homing logic: If upgrade is active, steer toward the nearest mob
+				if (upgrades.isBouncyBallHoming) {
+					let nearest = null
+					let minDist = 500 // Search radius
+					this.state.mobs.list.forEach(m => {
+						if (m.class !== 'projectile' && !m.isInvulnerable) {
+							const d = distance(this.pos.x, this.pos.y, m.pos.x, m.pos.y)
+							if (d < minDist) {
+								minDist = d
+								nearest = m
+							}
+						}
+					})
+					if (nearest) {
+						const targetAngle = angle(nearest.pos.x, nearest.pos.y, this.pos.x, this.pos.y)
+						let diff = targetAngle - this.angle
+						while (diff < -Math.PI) diff += Math.PI * 2
+						while (diff > Math.PI) diff -= Math.PI * 2
+						this.angle += diff * 0.05 // Steer strength
+					}
+				}
+
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed
+
+				// Spawn trail particle every ~30ms
+				if (this.state.simulation.time % 0.03 < 1 / this.state.simulation.fps) {
+					this.state.particles.spawn(this.pos.x, this.pos.y, {
+						...this.state.particles.bouncyBallTrail
+					});
+				}
 			},
 			draw: function () {
 				this.drawSelf(function () {
+					if (upgrades.isBouncyBallHoming) {
+						// Add a pulsing golden glow when homing is active
+						const pulse = 0.5 + 0.5 * Math.sin(this.state.simulation.time * 15)
+						draw.shadowBlur = 12 + pulse * 8
+						draw.shadowColor = "hsl(45, 100%, 65%)"
+					}
 					draw.fillStyle = "hsl(35, 100%, 50%)"
 					draw.arc(0, 0, 10, 0, Math.PI * 2)
 					draw.fill()
@@ -290,6 +342,8 @@ var bullets = {
 			type: 'flamethrower',
 			angle: state.input.cursor.angle + angle,
 			speed: 11,
+			damage: state.guns.flamethrower.damage,
+			size: 15,
 			piercing: 5,
 			draw: function () {
 				this.drawSelf(function () {

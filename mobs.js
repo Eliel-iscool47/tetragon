@@ -54,20 +54,6 @@ var mobs = {
 			const isCrit = percentChance(this.state.upgrades.critChance)
 			if (isCrit) damage *= this.state.upgrades.critMultiplier
 
-			let absorbed = 0
-			if (this.shield > 0) {
-				absorbed = Math.min(this.shield, damage)
-				this.shield -= absorbed
-				damage -= absorbed
-				this.state.particles.spawn(this.pos.x, this.pos.y, {
-					...this.state.particles.textPopup,
-					text: Math.round(absorbed),
-					color: 'hsl(200, 100%, 60%)',
-					size: 20,
-					vx: rand(-2, 2),
-					vy: rand(-5, -3)
-				})
-			}
 			this.health -= damage
 			if (damage > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
 				...this.state.particles.textPopup,
@@ -80,13 +66,13 @@ var mobs = {
 
 			this.lastDamageTime = this.state.simulation.time
 			if (this.state.upgrades.isVampire) {
-				this.state.player.heal(damage * this.state.upgrades.vampireHealAmmount)
 				this.state.particles.spawn(
-					state,
 					this.pos.x,
 					this.pos.y,
-					this.state.particles.vampire
-				) //simulation.spawnVampireParticle(this.pos.x, this.pos.y)
+					{ ...this.state.particles.vampire,
+						healAmount: damage * this.state.upgrades.vampireHealAmmount
+					}
+				)
 			}
 		}
 

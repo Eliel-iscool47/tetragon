@@ -155,35 +155,23 @@ var powerUps = {
 	},
 	invincibility: {
 		name: 'invincibility',
-		color: 'hsl(180, 100%, 70%)',
+		color: 'hsl(160, 100%, 75%)',
 		size: 15,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
-			state.player.setInvulnerable(5 * upgrades.invulnerabilityDuration)
+			state.player.setInvulnerable(3 * upgrades.invulnerabilityDuration)
 			powerUps.list = powerUps.list.filter(p => p != this)
-		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
+		}
 	},
-	shield: {
-		name: 'shield',
-		color: 'hsl(80, 100%, 50%)',
+	overdrive: {
+		name: 'overdrive',
+		color: 'hsl(200, 100%, 52%)',
 		size: 15,
 		effect() {
-			if (
-				simulation.isPaused || 
-				simulation.isChoosing || 
-				state.player.shield >= 
-				state.player.maxShield
-			) state.player.maxShield += 10 * upgrades.shieldEffect
-			state.player.shield += 10 * upgrades.shieldEffect
+			if (simulation.isPaused || simulation.isChoosing) return undefined
+			state.player.setSpeedBoost(8)
 			powerUps.list = powerUps.list.filter(p => p != this)
-		},
+		}
 	},
 	draw: function () {
 		this.list.forEach(function (p) { return p.draw() }.bind(this))
@@ -201,8 +189,8 @@ var powerUps = {
 				// Draw a tapering visual trail effect
 				for (let i = 0; i < 3; i++) {
 					draw.beginPath()
-					draw.strokeStyle = `hsla(0, 100%, 50%, ${0.5 - i * 0.15})`
-					draw.lineWidth = 4 - i
+					draw.strokeStyle = `hsla(0, 100%, 50%, ${0.45 - i * 0.2})`
+					draw.lineWidth = 5 - i
 					draw.moveTo(p.pos.x, p.pos.y)
 					draw.lineTo(p.pos.x + Math.cos(dir) * (10 + i * 15), p.pos.y + Math.sin(dir) * (10 + i * 15))
 					draw.stroke()

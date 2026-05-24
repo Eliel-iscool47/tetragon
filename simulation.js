@@ -1,4 +1,10 @@
 var simulation = {
+
+	_collisions: collisions,
+	get collisions() { return this._collisions },
+	set collisions(val) { this._collisions = val },
+
+
 	_isChoosing: false,
 	get isChoosing() { return this._isChoosing },
 	set isChoosing(val) { this._isChoosing = val },
@@ -91,6 +97,7 @@ ${val}
 
 	get defaults() {
 		return {
+			collisions,
 			isChoosing: false,
 			consoleMessage: '',
 			isDead: false,
@@ -101,14 +108,12 @@ ${val}
 			crosshairColor: 'black',
 			Particles: [],
 			fps: 60,
-			interval: undefined,
 		}
 	},
 
 	set defaults(val) { throw new Error('simulation.defaults is read-only') },
 
 	reset() {
-		if (this.interval) clearInterval(this.interval)
 		Object.assign(this, this.defaults)
 	},
 
@@ -144,6 +149,7 @@ ${this.consoleMessage}
 	},
 	mainMenu() {
 		pauseScreen.style.display = 'none'
+		nameModal.style.display = 'none'
 		start.style.display = 'block'
 		controls.style.display = 'block'
 		settings.style.display = 'block'
@@ -151,6 +157,8 @@ ${this.consoleMessage}
 		feedbackButton.style.display = 'block'
 		main.style.display = 'none'
 		document.title = 'Tetragon: Main Menu'
+		if (this.interval) clearInterval(this.interval)
+		this.interval = undefined
 		simulation.time = 0
 		hud.Obj.style.display = 'none'
 		dc.style.display = 'block'
@@ -169,7 +177,7 @@ ${this.consoleMessage}
 		draw.clearRect(0, 0, main.width, main.height)
 		input.keyLogic()
 		main.style.display = this.isMainMenu || this.isChoosing ? 'none' : 'block'
-		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu ? 'none' : 'block'
+		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
 		if (this.isMainMenu) {
 			this.mainMenu()
 			dc.style.display = 'block'
@@ -272,6 +280,10 @@ ${this.consoleMessage}
 	},
 	init() {
 		if (this.interval) clearInterval(this.interval)
+		this.interval = undefined
+		
+		this.wipe()
+
 		main.style.display = 'block'
 		this.isMainMenu = false
 		this.isPaused = false
@@ -281,10 +293,9 @@ ${this.consoleMessage}
 		dc.style.display = 'none'
 		main.style.cursor = 'default'
 		pauseScreen.style.display = 'none'
+		document.getElementById('name-modal').style.display = 'none'
 		hud.Obj.style.display = 'block'
-		input.respawn()
-		this.wipe()
-		this.isMainMenu = false
+		this.collisions.grid.init()
 		level.init() // Call level init here
 		this.interval = setInterval(this.gameLoop.bind(this), 1000 / this.fps)
 	},

@@ -11,6 +11,7 @@ var main = document.getElementById('main')
 main.width = window.innerWidth
 main.height = window.innerHeight
 var draw = main.getContext('2d')
+var nameModal = document.getElementById('name-modal')
 
 //document stuff
 
@@ -290,6 +291,7 @@ controls.style.display = 'block'
 settings.style.display = 'block'
 leaderboardButton.style.display = 'block'
 feedbackButton.style.display = 'block'
+document.getElementById('name-modal').style.display = 'none'
 main.style.display = 'none'
 
 renderSettings() // Initial render

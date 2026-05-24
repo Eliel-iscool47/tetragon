@@ -1,11 +1,25 @@
 var particles = {
 	Particle: class {
-		constructor(state, x, y, config) {
-			Object.assign(this, config)
+		constructor(state) {
 			this.state = state
-			this.timeSpawned = state.simulation.time
+			this.active = false
+		}
+
+		init(x, y, config) {
+			// Reset to base defaults to avoid property leakage from previous pooled usage
+			this.size = 10
+			this.color = 'black'
+			this.speed = 0
+			this.angle = 0
+			this.vx = 0
+			this.vy = 0
+			this.draw = particles.Particle.prototype.draw
+			this.update = particles.Particle.prototype.update
+			
+			Object.assign(this, config)
 			this.pos = { x, y }
-			this.color = config.color
+			this.timeSpawned = this.state.simulation.time
+			this.active = true
 		}
 
 		draw() {
@@ -21,8 +35,9 @@ var particles = {
 		}
 	},
 	list: [],
+	pool: [],
 	get defaults() {
-		return { list: [] }
+		return { list: [], pool: [] }
 	},
 
 	set defaults(val) { throw new Error('particles.defaults is read-only') },
@@ -31,31 +46,47 @@ var particles = {
 		Object.assign(this, this.defaults)
 	},
 	spawn(x, y, config) {
-		this.list.push(new this.Particle(state, x, y, config))
+		let p
+		if (this.pool.length > 0) {
+			p = this.pool.pop()
+		} else {
+			p = new this.Particle(state)
+		}
+		p.init(x, y, config)
+		this.list.push(p)
 	},
 	draw() {
 		this.list.forEach(function (p) { return p.draw() }.bind(this))
 	},
 	update() {
-		this.list.forEach(function (p) { return p.update() }.bind(this))
+		for (let i = this.list.length - 1; i >= 0; i--) {
+			const p = this.list[i]
+			p.update()
+			
+			if (!p.active) {
+				this.pool.push(p)
+				this.list.splice(i, 1)
+			}
+		}
 	},
 	vampire: {
-		size: 5,
-		color: 'hsl(0, 100%, 25%)',
-		speed: 0,
-		duration: 0.6,
+		size: 6,
+		color: 'hsl(0, 100%, 45%)',
+		speed: 10,
+		duration: 1.5,
+		healAmount: 0, // Default heal amount
 		angle: 0,
-		draw() {
-			draw.beginPath()
-			draw.fillStyle = this.color
-			draw.arc(this.pos.x, this.pos.y, this.size, 0, Math.PI * 2)
-			draw.fill()
-		},
 		update() {
 			this.angle = angle(this.state.player.pos.x, this.state.player.pos.y, this.pos.x, this.pos.y)
+			this.speed = Math.min(25, this.speed + 0.3) // Accelerate towards the player
 			this.pos.x += Math.cos(this.angle) * this.speed
 			this.pos.y += Math.sin(this.angle) * this.speed
-			if (this.state.simulation.time > this.time + this.duration) this.state.particles.list = this.state.particles.list.filter(p => p != this)
+
+			const dist = distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
+			if (dist < this.state.player.size / 2) {
+				this.state.player.heal(this.healAmount) // Only heal on actual contact
+				this.active = false
+			}
 		}
 	},
 	missileSmoke: {
@@ -78,7 +109,7 @@ var particles = {
 			this.pos.x += Math.cos(this.angle) * this.speed;
 			this.pos.y += Math.sin(this.angle) * this.speed;
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
-				this.state.particles.list = this.state.particles.list.filter(p => p !== this);
+				this.active = false
 			}
 		}
 	},
@@ -95,7 +126,7 @@ var particles = {
 			this.pos.y += this.vy;
 
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
-				this.state.particles.list = this.state.particles.list.filter(p => p !== this);
+				this.active = false
 			}
 		},
 		draw() {
@@ -111,6 +142,28 @@ var particles = {
 			draw.fillText(this.text, this.pos.x, this.pos.y);
 			draw.strokeText(this.text, this.pos.x, this.pos.y);
 			draw.restore();
+		}
+	},
+	bouncyBallTrail: {
+		size: 8,
+		color: 'hsl(35, 100%, 50%)',
+		duration: 0.3,
+		draw() {
+			const elapsed = this.state.simulation.time - this.timeSpawned;
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1);
+			draw.save();
+			draw.globalAlpha = alpha * 0.5; // Slight transparency
+			draw.beginPath();
+			draw.fillStyle = this.color;
+			// Shrink the trail particle over its lifetime
+			draw.arc(this.pos.x, this.pos.y, this.size * alpha, 0, Math.PI * 2);
+			draw.fill();
+			draw.restore();
+		},
+		update() {
+			if (this.state.simulation.time - this.timeSpawned > this.duration) {
+				this.active = false
+			}
 		}
 	},
 }

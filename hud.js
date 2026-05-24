@@ -2,8 +2,6 @@ var hud = {
 	Obj: document.getElementById('HUD'),
 	health: document.getElementById('health-bar'),
 	maxHealth: document.getElementById('max-health'),
-	shield: document.getElementById('shield-bar'),
-	maxShield: document.getElementById('max-shield'),
 	upgrades: document.getElementById('upgrade-list'),
 	inv: document.getElementById('inventory'),
 	levels: document.getElementById('level-counter'),
@@ -22,15 +20,10 @@ var hud = {
 	get displayMaxHealth() { return this._displayMaxHealth },
 	set displayMaxHealth(val) { this._displayMaxHealth = val },
 
-	_displayShield: 0,
-	get displayShield() { return this._displayShield },
-	set displayShield(val) { this._displayShield = val },
-
 	get defaults() {
 		return {
 			displayHealth: 100,
 			displayMaxHealth: 100,
-			displayShield: 0,
 			timeMessage: ''
 		}
 	},
@@ -61,13 +54,6 @@ var hud = {
 		// this.maxHealth.style.backgroundColor = `hsla(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%, 0.3)`
 		this.health.innerText = `${Math.round(state.player.health * 1000) / 1000}`
 		this.maxHealth.style.width = `${this.displayMaxHealth * 2}px`
-	},
-	shieldBar() {
-		this.displayShield = lerp(this.displayShield, state.player.shield, 0.1)
-		const displayMaxShield = state.player.maxShield
-		this.shield.style.width = `${this.displayShield * 2}px`
-		this.shield.innerText = this.displayShield > 1 ? Math.round(this.displayShield) : ''
-		this.maxShield.style.width = `${displayMaxShield * 2}px`
 	},
 	upgradeList() {
 		this.upgrades.style.display = 'block'
@@ -143,7 +129,6 @@ var hud = {
 	make() {
 		this.timeMessage = this.processTime()
 		this.healthBar()
-		this.shieldBar()
 		this.inventory()
 		this.levelCounter()
 		this.console()
@@ -153,8 +138,6 @@ var hud = {
 }
 
 hud.Obj.appendChild(hud.health)
-hud.Obj.appendChild(hud.maxShield)
-hud.Obj.appendChild(hud.shield)
 hud.Obj.appendChild(hud.inv)
 hud.Obj.appendChild(hud.levels)
 hud.Obj.appendChild(hud.upgrades)

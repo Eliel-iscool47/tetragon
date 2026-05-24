@@ -24,6 +24,7 @@ var guns = {
 			this.fireRate = config.fireRate || 1
 			this.bulletDuration = config.bulletDuration || 1
 			this.spread = config.spread || 0
+			this.piercing = config.piercing || 1
 			this.isMuzzleFlash = config.isMuzzleFlash ?? true
 			this.reloadAnimation = config.reloadAnimation ?? function () { }
 			this.reloadTime = this.magSize > 1 ? (config.reloadTime || 1) : 1 / this.fireRate
@@ -86,7 +87,7 @@ var guns = {
 			guns.inventory.push(this)
 			guns.pool = guns.pool.filter(function (g) { return g != this }.bind(this))
 			if (guns.equippedGun == undefined) this.equip()
-			simulation.log(`guns.get(${this.id}, ${mags === Infinity ? 'Infinity' : Math.round(mags)})`)
+			simulation.log(`guns.get(\"${this.id}\", ${mags === Infinity ? 'Infinity' : Math.round(mags * 10) / 10})`)
 			if (this._get) this._get()
 			upgrades.unlocked = upgrades.unlocked.filter(id => !this.unlockables.includes(id))
 			upgrades.unlocked.push(...this.unlockables)
@@ -353,7 +354,7 @@ guns.missiles = new guns.Gun({
 guns.bouncyBalls = new guns.Gun({
 	id: 'bouncyBalls',
 	name: 'bouncy balls',
-	description: `Shoot 3 bouncy balls that ${text('bounces', 'bounce')} off the borders of the map and mobs<br>5 ${text('ammo', 'balls')} per ${text('ammo', 'magazine')}`,
+	description: `Shoot 5 ${text('bullets', 'bouncy balls')} that ${text('bounces', 'bounce')} off the borders of the map and mobs up to 3 times.<br>25 ${text('ammo', 'balls')} (5 shots)per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 80,
 	magSize: 5,
 	magazines: 30,
@@ -362,6 +363,8 @@ guns.bouncyBalls = new guns.Gun({
 	bulletDuration: 8,
 	isMuzzleFlash: false,
 	unlockables: ['bouncy balls', 'bullets'],
+	reloadTime: 0.8,
+	piercing: 3,
 	shoot() {
 		repeat(function () {
 			bullets.bouncyBall(
@@ -371,7 +374,7 @@ guns.bouncyBalls = new guns.Gun({
 					-state.player.size / 2, state.player.size / 2
 				)
 			)
-		}, 3)
+		}, upgrades.bouncyBallsPerShot)
 	}
 })
 

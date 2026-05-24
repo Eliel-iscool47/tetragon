@@ -6,13 +6,12 @@ class Player extends Entity {
 		super(state, x, y, {
 			_health: 100,
 			_maxHealth: 100,
-			_shield: 0,
-			_maxShield: 0,
 			_damageDone: 1,
 			_lastDamageTime: -(10 ** 299),
 			_damageTaken: 1,
 			_isInvulnerable: false,
 			_invulnerableUntil: 0,
+			_speedBoostUntil: 0,
 			_size: 50,
 			_velocity: 5,
 			color: 'hsl(215, 100%, 45%)',
@@ -23,13 +22,12 @@ class Player extends Entity {
 		return {
 			_health: 100,
 			_maxHealth: 100,
-			_shield: 0,
-			_maxShield: 0,
 			_damageDone: 1,
 			_lastDamageTime: -(10 ** 299),
 			_damageTaken: 1,
 			_isInvulnerable: false,
 			_invulnerableUntil: 0,
+			_speedBoostUntil: 0,
 			_size: 50,
 			_velocity: 5,
 			color: 'hsl(215, 100%, 45%)',
@@ -42,21 +40,6 @@ class Player extends Entity {
 	takeDamage(amount) {
 		if (this.isInvulnerable) return
 		let damage = amount * this.damageTaken
-
-		let absorbed = 0
-		if (this.shield > 0) {
-			absorbed = Math.min(this.shield, damage)
-			this.shield -= absorbed
-			damage -= absorbed
-			this.state.particles.spawn(this.pos.x, this.pos.y, {
-				...this.state.particles.textPopup,
-				text: Math.round(absorbed),
-				color: 'hsl(200, 100%, 60%)',
-				size: 20,
-				vx: rand(-2, 2),
-				vy: rand(-5, -3)
-			})
-		}
 
 		this.health -= damage
 		if (damage > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
@@ -81,15 +64,6 @@ class Player extends Entity {
 		this.health = Math.min(this.health, val)
 	}
 
-	get shield() { return this._shield }
-	set shield(val) { this._shield = Math.min(val, this.maxShield) }
-
-	get maxShield() { return this._maxShield }
-	set maxShield(val) {
-		this._maxShield = val
-		this.shield = Math.min(this.shield, val)
-	}
-
 	get damageDone() { return this._damageDone }
 	set damageDone(val) { this._damageDone = Math.abs(val) }
 
@@ -107,11 +81,17 @@ class Player extends Entity {
 		this._size = val
 	}
 
-	get velocity() { return this._velocity }
+	get velocity() { 
+		return this.state.simulation.time < this._speedBoostUntil ? this._velocity * 1.6 : this._velocity 
+	}
 	set velocity(val) { this._velocity = Math.max(val, 1) }
 
 	setInvulnerable(duration) {
 		this._invulnerableUntil = this.state.simulation.time + duration
+	}
+
+	setSpeedBoost(duration) {
+		this._speedBoostUntil = this.state.simulation.time + duration
 	}
 
 	deathScreen() {
@@ -165,6 +145,12 @@ class Player extends Entity {
 				draw.shadowBlur = 15 + 10 * Math.sin(this.state.simulation.time * 25)
 				draw.shadowColor = 'white'
 			}
+
+			if (this.state.simulation.time < this._speedBoostUntil) {
+				draw.shadowBlur = 20
+				draw.shadowColor = 'hsl(190, 100%, 50%)'
+			}
+
 			draw.fillRect(this.size / -2, this.size / -2, this.size, this.size)
 
 			if (

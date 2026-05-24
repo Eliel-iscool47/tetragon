@@ -8,7 +8,7 @@
 			{ "type": "heal", "count": 5 },
 			{ "type": "reroll", "count": 5 },
 			{ "type": "invincibility", "count": 3 },
-			{ "type": "shield", "count": 3 }
+			{ "type": "overdrive", "count": 3 }
 		]
 	},
 	{
@@ -23,7 +23,7 @@
 			{ "type": "heal", "count": 5 },
 			{ "type": "reroll", "count": 5 },
 			{ "type": "invincibility", "count": 3 },
-			{ "type": "shield", "count": 3 }
+			{ "type": "overdrive", "count": 3 }
 		]
 	},
 	{
@@ -37,9 +37,9 @@
 		"powerUpSpawns": [
 			{ "type": "ammo", "count": 4 },
 			{ "type": "heal", "count": 3 },
-			{ "type": "reroll", "count": 3 },
-			{ "type": "invincibility", "count": 3 },
-			{ "type": "shield", "count": 3 }
+			{ "type": "reroll", "count": 1 },
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 3 }
 		]
 	},
 	{
@@ -54,8 +54,9 @@
 		"powerUpSpawns": [
 			{ "type": "ammo", "count": 3 },
 			{ "type": "heal", "count": 2 },
-			{ "type": "reroll", "count": 2 },
-			{ "type": "invincibility", "count": 2 }
+			{ "type": "reroll", "count": 1 },
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 3 }
 		]
 	},
 	{
@@ -72,7 +73,8 @@
 			{ "type": "ammo", "count": 2 },
 			{ "type": "heal", "count": 2 },
 			{ "type": "reroll", "count": 2 },
-			{ "type": "invincibility", "count": 2 }
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 2 }
 		]
 	},
 	{
@@ -89,7 +91,8 @@
 			{ "type": "ammo", "count": 2 },
 			{ "type": "heal", "count": 2 },
 			{ "type": "reroll", "count": 2 },
-			{ "type": "invincibility", "count": 2 }
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 2 }
 		]
 	},
 	{
@@ -99,7 +102,8 @@
 		"powerUpSpawns": [
 			{ "type": "ammo", "count": 2 },
 			{ "type": "heal", "count": 2 },
-			{ "type": "invincibility", "count": 2}
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 1 }
 		]
 	}
 ]

@@ -135,8 +135,8 @@ br {
 	font-weight: 400;
 	position: absolute;
 	top: 89vh;
-	left: 15vw;
-	width: 20vw;
+	left: 20vw;
+	width: 15vw;
 	height: 10vh;
 	background-color: hsl(0, 100%, 30%);
 	color: #ffffff;
@@ -216,24 +216,6 @@ br {
 	height: 40px;
 }
 
-#shield-bar {
-	background-color: hsl(200, 100%, 50%);
-	top: 0;
-	left: 0;
-	width: 0px;
-	height: 20px;
-	font-size: 16px;
-	font-weight: 500;
-}
-
-#max-shield {
-	background-color: hsla(200, 100%, 20%, 0.5);
-	top: 0;
-	left: 0;
-	width: 0px;
-	height: 20px;
-}
-
 #feedback-button {
 	font-style: normal;
 	font-weight: 400;
@@ -261,7 +243,7 @@ br {
 	position: absolute;
 	top: 89vh;
 	left: 2vw;
-	width: 12vw;
+	width: 17vw;
 	height: 10vh;
 	background-color: hsl(45, 100%, 40%);
 	color: #ffffff;
@@ -321,7 +303,7 @@ br {
 
 #leaderboard-modal {
 	position: absolute;
-	bottom: 12vh;
+	bottom: -89vh;
 	left: 2vw;
 	background-color: rgba(0, 0, 0, 0.95);
 	padding: 30px;
@@ -341,15 +323,16 @@ br {
 	margin: 10px 0;
 }
 
-#feedback-modal {
+#feedback-modal,
+#name-modal {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(-50%, -50%);
-	background-color: rgba(0, 0, 0, 0.95);
-	padding: 30px;
-	border: 5px solid black;
-	border-radius: 10px;
+	background: rgba(0, 0, 0, 0.9);
+	padding: 40px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 20px;
+	box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
 	z-index: 1000;
 	display: none;
 	flex-direction: column;
@@ -357,6 +340,32 @@ br {
 	width: 450px;
 	text-align: center;
 	color: white;
+}
+
+#name-modal h2 {
+	font-size: 32px;
+	margin-top: 0;
+	color: hsl(45, 100%, 60%);
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+#name-input {
+	padding: 12px;
+	font-family: 'DM Sans', sans-serif;
+	font-size: 20px;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: white;
+	text-align: center;
+	outline: none;
+	transition: border-color 0.2s;
+}
+
+#name-input:focus {
+	border-color: hsl(215, 100%, 50%);
+	background: rgba(255, 255, 255, 0.1);
 }
 
 #feedback-text {
@@ -369,6 +378,18 @@ br {
 	background-color: #222;
 	color: white;
 	border: 2px solid #444;
+}
+
+#submit-score {
+	padding: 12px;
+	background-color: hsl(215, 100%, 40%);
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 20px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
 }
 
 #submit-feedback, #close-feedback {
@@ -415,12 +436,12 @@ br {
 #settings-menu {
 	position: absolute;
 	/* top: 50vh; */
-	bottom: -25vh;
+	bottom: -65vh;
 	left: 65vw;
 	width: 20vw;
 	height: fit-content;
 	max-height: 50vh;
-	background-color: hsl(0, 0%, 45%);
+	background-color: hsl(0, 0%, 70%);
 	color: black;
 	overflow-y: scroll;
 	display: none;
@@ -719,57 +740,6 @@ br {
 }
 
 
-@keyframes laser-pulse {
-	0%, 100% {
-		filter: brightness(1);
-		box-shadow: 0 0 5px red;
-	}
-	50% {
-		filter: brightness(1.4);
-		box-shadow: 0 0 15px red, 0 0 20px white;
-	}
-}
-
-@keyframes fire-flicker {
-	0%, 100% {
-		filter: brightness(1) contrast(1);
-		transform: translateY(0);
-	}
-	50% {
-		filter: brightness(1.3) contrast(1.2);
-		transform: translateY(-1px);
-	}
-}
-
-@keyframes explosion {
-	0%, 100% {
-		filter: saturate(1) brightness(1);
-		transform: scale(1);
-	}
-	50% {
-		filter: saturate(1.5) brightness(1.2);
-		transform: scale(1.05);
-	}
-}
-
-/* @keyframes reload {
-
+/* #name-modal {
+	
 } */
-
-@keyframes heartbeat {
-	0%, 100% {
-		transform: scale(1);
-		filter: brightness(1);
-	}
-	10% {
-		transform: scale(1.08);
-		filter: brightness(1.2);
-	}
-	20% {
-		transform: scale(1.02);
-	}
-	30% {
-		transform: scale(1.12);
-		filter: brightness(1.3);
-	}
-}

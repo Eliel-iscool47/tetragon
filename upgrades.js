@@ -27,10 +27,6 @@ var upgrades = {
 	get invulnerabilityDuration() { return this._invulnerabilityDuration },
 	set invulnerabilityDuration(val) { this._invulnerabilityDuration = val },
 
-	_shieldEffect: 1,
-	get shieldEffect() { return this._shieldEffect },
-	set shieldEffect(val) { this._shieldEffect = val },
-
 	_reloadSpeed: 1,
 	get reloadSpeed() { return this._reloadSpeed },
 	set reloadSpeed(val) { this._reloadSpeed = val },
@@ -107,10 +103,6 @@ var upgrades = {
 	get critMultiplier() { return this._critMultiplier },
 	set critMultiplier(val) { this._critMultiplier = val },
 
-	_shieldMultiplier: 1,
-	get shieldMultiplier() { return this._shieldMultiplier },
-	set shieldMultiplier(val) { this._shieldMultiplier = val },
-
 	_isClusterBomb: false,
 	get isClusterBomb() { return this._isClusterBomb },
 	set isClusterBomb(val) { this._isClusterBomb = !!val },
@@ -122,6 +114,16 @@ var upgrades = {
 	_isNapalm: false,
 	get isNapalm() { return this._isNapalm },
 	set isNapalm(val) { this._isNapalm = !!val },
+
+	_bouncyBallsPerShot: 5,
+	get bouncyBallsPerShot() { return this._bouncyBallsPerShot },
+	set bouncyBallsPerShot(val) { this._bouncyBallsPerShot = +val },
+
+	_isBouncyBallHoming: false,
+	get isBouncyBallHoming() { return this._isBouncyBallHoming },
+	set isBouncyBallHoming(val) { this._isBouncyBallHoming = !!val },
+
+	
 
 	clusterBombTypes: [
 		'missiles',
@@ -154,13 +156,11 @@ var upgrades = {
 		'logistics',
 		'regeneration',
 		'heavyCaliber',
-		'energyShield',
 		'speedLoader',
 		'deadlyAim',
 		'powerSurge',
 		'vampirism',
 		'ironWill',
-		'reinforcedShields',
 		'lightCaliber',
 	],
 	Upgrade: class {
@@ -259,6 +259,7 @@ var upgrades = {
 			'internalCooling',
 			'superball',
 			'refractiveLens',
+			'smartBounces',
 			'lightCaliber',
 			// Add any other upgrade IDs that might become available conditionally
 		]
@@ -283,7 +284,6 @@ var upgrades = {
 			_powerUpSpawnChance: 1,
 			_reloadSpeed: 1,
 			_invulnerabilityDuration: 1,
-			_shieldEffect: 1,
 			_missilesPerShot: 1,
 			_shotgunPellets: 10,
 			_isExplosionColorful: false,
@@ -304,7 +304,6 @@ var upgrades = {
 			_grenadeExplosionSize: 1,
 			_critChance: 0.05,
 			_critMultiplier: 2,
-			_shieldMultiplier: 1,
 			_isExplosionColorful: false,
 			_isKillDefense: false,
 			lastKill: (-10) ** 299,
@@ -391,14 +390,6 @@ upgrades.ironWill = new upgrades.Upgrade({
 	stackSize: 3,
 	description: `1.5x ${text('duration', 'invulnerability duration')}`,
 	effect() { upgrades.invulnerabilityDuration *= 1.5 }
-})
-
-upgrades.reinforcedShields = new upgrades.Upgrade({
-	id: 'reinforcedShields',
-	name: 'Reinforced Shields',
-	stackSize: 3,
-	description: `1.5x ${text('duration', 'shield power-up effect')}`,
-	effect() { upgrades.shieldEffect *= 1.5 }
 })
 
 upgrades.regeneration = new upgrades.Upgrade({
@@ -506,17 +497,6 @@ upgrades.speedLoader = new upgrades.Upgrade({
 	stackSize: 3, // Description for when it's available
 	description: `1.5x ${text('reload', 'reload speed')}`,
 	effect() { upgrades.reloadSpeed *= 1.5 }
-})
-
-upgrades.energyShield = new upgrades.Upgrade({
-	id: 'energyShield',
-	name: 'Energy Shield',
-	stackSize: 5,
-	description: `Add a ${text('health', 'shield')} that absorbs up to 25 ${text('damage', 'damage')}.`,
-	effect() {
-		state.player.maxShield += 25
-		state.player.shield += 25
-	}
 })
 
 upgrades.deadlyAim = new upgrades.Upgrade({
@@ -651,6 +631,14 @@ upgrades.refractiveLens = new upgrades.Upgrade({
 	description: `2x ${text('laser', 'laser')} ${text('damage', 'damage')}`, // Already uses text.damage
 	requirements() { return upgrades.unlocked.includes('laser') },
 	effect() { guns.laser.damage *= 2 }
+})
+
+upgrades.smartBounces = new upgrades.Upgrade({
+	id: 'smartBounces',
+	name: 'Smart Bounces',
+	description: `${text('gun', 'Bouncy balls')} gain a ${text('homing', 'homing')} effect towards nearby enemies.`,
+	requirements() { return upgrades.unlocked.includes('bouncy balls') },
+	effect() { upgrades.isBouncyBallHoming = true }
 })
 
 upgrades.lightCaliber = new upgrades.Upgrade({

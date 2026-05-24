@@ -126,6 +126,11 @@ var level = {
 				randInt(collisions.border.top, collisions.border.bottom),
 				powerUps.reroll
 			)
+			if (percentChance(0.15)) powerUps.spawn(
+				randInt(collisions.border.left, collisions.border.right),
+				randInt(collisions.border.top, collisions.border.bottom),
+				powerUps.overdrive
+			)
 		}, 2)
 	},
 	get defaults() {
@@ -148,7 +153,8 @@ var level = {
 						{ type: 'ammo', count: 5 },
 						{ type: 'upgrade', count: 1 },
 						{ type: 'heal', count: 3 },
-						{ type: 'reroll', count: 5 }
+						{ type: 'reroll', count: 5 },
+						{ type: 'overdrive', count: 1 }
 					],
 				},
 				{
@@ -162,7 +168,8 @@ var level = {
 						{ type: 'ammo', count: 5 },
 						{ type: 'upgrade', count: 1 },
 						{ type: 'heal', count: 3 },
-						{ type: 'reroll', count: 5 }
+						{ type: 'reroll', count: 5 },
+						{ type: 'overdrive', count: 1 }
 					]
 				},
 				{
@@ -177,7 +184,8 @@ var level = {
 						{ type: 'ammo', count: 3 },
 						{ type: 'upgrade', count: 1 },
 						{ type: 'heal', count: 2 },
-						{ type: 'reroll', count: 2 }
+						{ type: 'reroll', count: 2 },
+						{ type: 'overdrive', count: 1 }
 					]
 				},
 				{
@@ -193,7 +201,8 @@ var level = {
 					powerUpSpawns: [
 						{ type: 'ammo', count: 2 },
 						{ type: 'heal', count: 2 },
-						{ type: 'reroll', count: 2 }
+						{ type: 'reroll', count: 2 },
+						{ type: 'overdrive', count: 1 }
 					]
 				},
 				{
@@ -210,7 +219,8 @@ var level = {
 					powerUpSpawns: [
 						{ type: 'ammo', count: 2 },
 						{ type: 'heal', count: 2 },
-						{ type: 'reroll', count: 2 }
+						{ type: 'reroll', count: 2 },
+						{ type: 'overdrive', count: 1 }
 					]
 				},
 				{
@@ -225,7 +235,8 @@ var level = {
 					powerUpSpawns: [
 						{ type: 'ammo', count(c) { return 2 } },
 						{ type: 'heal', count(c) { return 2 } },
-						{ type: 'reroll', count(c) { return 2 } }
+						{ type: 'reroll', count(c) { return 2 } },
+						{ type: 'overdrive', count(c) { return 1 } }
 					]
 				},
 				{
@@ -238,7 +249,8 @@ var level = {
 						{ type: 'ammo', count: 5 },
 						{ type: 'heal', count: 5 },
 						{ type: 'upgrade', count: 1 },
-						{ type: 'reroll', count: 2 }
+						{ type: 'reroll', count: 2 },
+						{ type: 'overdrive', count: 1 }
 					]
 				},
 			]

@@ -93,19 +93,7 @@ var input = {
 	},
 	mainMenu() {
 		simulation.isMainMenu = true
-		simulation.isPaused = false
-		simulation.isDead = false
-		simulation.isTesting = false
-		simulation.startTime = now()
-		simulation.timeOffset = now()
-		simulation.time = 0
-		dc.style.display = 'block'
-		main.style.display = 'none'
-		document.title = 'Tetragon: Main Menu'
-		pauseScreen.style.display = 'none'
-		hud.Obj.style.display = 'none'
-		chooseScreen.style.display = 'none'
-		if (simulation.interval) clearInterval(simulation.interval)
+		simulation.mainMenu()
 	},
 
 	get defaults() {
@@ -126,13 +114,7 @@ var input = {
 			!simulation.isMainMenu
 		) return undefined
 
-		simulation.wipe()
-		simulation.isMainMenu = false
-
-		hud.Obj.style.display = 'block'
-		dc.style.display = 'none'
-		main.style.display = 'block'
-		document.title = 'Tetragon'
+		simulation.init()
 	},
 	clickLogic(click) {
 		this.cursor.update(click.offsetX, click.offsetY)
@@ -244,6 +226,7 @@ window.addEventListener("resize", function (r) {
 	collisions.border.right = main.width - state.player.size / 2
 	collisions.border.bottom = main.height - state.player.size / 2
 	draw.clearRect(0, 0, main.width, main.height)
+	collisions.grid.init()
 }.bind(this))
 main.addEventListener("contextmenu", function (cxm) {
 	cxm.preventDefault()

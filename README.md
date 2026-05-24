@@ -13,14 +13,14 @@ The game's controls are the following:
 * **Cycle Guns**: `Q` and `E`
 * **Reload**: `V` (or empty magazine)
 * **Pause**: `P` or `Escape` (while playing)
-* **Restart**: `R` (while paused/choosing/dead)
-* **Main Menu**: `M`
+* **Restart**: `R` *(while paused/choosing/dead)*
+* **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.08)
+# II: Recent Updates (v1.09)
 
-* **Bosses**: Added the `Ghost Boss` with phasing invulnerability. `Shifter Boss` changed to `Dodger boss`.
-* **Settings**: Added a difficulty slider to adjust the game challenge (0.2x to 5.0x).
-* **Mechanics**: Introduced timed invulnerability states and duration-scaling upgrades (`Iron Will`, `Reinforced Shields`).
+* **Upgrades**: Added new upgrade `Smart Bounces`: Bouncy Balls gain a homing effect towards enemies
+* **Mechanics**: Removed the shield mechanic because it was too OP.
+* **Bug Fixes**: Fixed *the bug*. I also fixed the bug where the vampirism's particles wouldn't spawn. 
 
 ---
 
@@ -97,7 +97,7 @@ The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTM
 # VI: Planned Updates
 
 - **Mobile Support**: I am planning to add support for mobile devices by July 31st.
-- **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I am planning to reädd them in the future.
+- **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I might reädd them in the future.
 
 <!-- Maintenance Note: 
 When adding new modules, register them in the state object in main.js 

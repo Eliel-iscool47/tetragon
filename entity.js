@@ -9,7 +9,6 @@ class Entity {
 		this.speed = 0
 		this.size = 10
 		this.color = 'black'
-		this.shield = 0
 		Object.assign(this, config)
 	}
 
@@ -39,22 +38,6 @@ class Entity {
 		const isCrit = percentChance(this.state.upgrades.critChance)
 		if (isCrit) damage *= this.state.upgrades.critMultiplier
 
-		let absorbed = 0
-		if (this.shield > 0) {
-			absorbed = Math.min(this.shield, damage)
-			this.shield -= absorbed
-			damage -= absorbed
-
-			this.state.particles.spawn(this.pos.x, this.pos.y, {
-				...this.state.particles.textPopup,
-				text: Math.round(absorbed),
-				color: 'hsl(200, 100%, 60%)',
-				size: 20,
-				vx: rand(-2, 2),
-				vy: rand(-5, -3)
-			})
-		}
-
 		this.health -= damage
 		if (damage > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
 			...this.state.particles.textPopup,
@@ -72,7 +55,7 @@ class Entity {
 	 */
 	heal(amount) {
 		this.health += amount
-		this.state.particles.spawn(this.pos.x, this.pos.y, {
+		if (Math.round(amount) > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
 			...this.state.particles.textPopup,
 			text: '+' + Math.round(amount),
 			color: 'hsl(120, 100%, 50%)',

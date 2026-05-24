@@ -31,26 +31,38 @@ var collisions = {
 	},
 	grid: {
 		size: 150,
-		cells: new Map(),
+		cells: [],
+		cols: 0,
+		rows: 0,
+		init() {
+			this.cols = Math.ceil(main.width / this.size) + 1
+			this.rows = Math.ceil(main.height / this.size) + 1
+			this.cells = Array.from({ length: this.cols * this.rows }, () => [])
+		},
 		clear() {
-			this.cells.clear()
+			for (let i = 0, len = this.cells.length; i < len; i++) {
+				this.cells[i].length = 0
+			}
 		},
 		add(obj) {
-			const key = Math.floor(obj.pos.x / this.size) + ',' + Math.floor(obj.pos.y / this.size)
-			if (!this.cells.has(key)) this.cells.set(key, [])
-			this.cells.get(key).push(obj)
+			const cx = Math.floor(obj.pos.x / this.size)
+			const cy = Math.floor(obj.pos.y / this.size)
+			if (cx >= 0 && cx < this.cols && cy >= 0 && cy < this.rows) {
+				this.cells[cx + cy * this.cols].push(obj)
+			}
 		},
 		query(x, y, callback) {
 			const cx = Math.floor(x / this.size)
 			const cy = Math.floor(y / this.size)
 			for (let i = -1; i <= 1; i++) {
+				const nx = cx + i
+				if (nx < 0 || nx >= this.cols) continue
 				for (let j = -1; j <= 1; j++) {
-					const key = (cx + i) + ',' + (cy + j)
-					const cell = this.cells.get(key)
-					if (cell) {
-						for (let k = 0; k < cell.length; k++) {
-							callback(cell[k])
-						}
+					const ny = cy + j
+					if (ny < 0 || ny >= this.rows) continue
+					const cell = this.cells[nx + ny * this.cols]
+					for (let k = 0, kLen = cell.length; k < kLen; k++) {
+						callback(cell[k])
 					}
 				}
 			}
@@ -80,33 +92,36 @@ var collisions = {
 			mob.health = Math.min(mob.health, mob.maxHealth)
 
 			// Player collision
-			if (
-				// distance(
-				// 	mob.pos.x, mob.pos.y, 
-				// 	state.player.pos.x, state.player.pos.y
-				// ) <= Math.max(state.player.size, mob.size) / 2
-				state.player.checkCollision(mob)
-			) if (!mob.onCollide()) return false
+			if (state.player.checkCollision(mob)) if (!mob.onCollide()) return false
 
 			// Bullet/Explosion collision via grid
 			this.grid.query(mob.pos.x, mob.pos.y, function (e) {
 				if (e.isExplosion) {
 					if (!e.targetsPlayerOnly && 
-						// distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size * 0.5 && e.timeSinceLastAttack <= simulation.time - 0.05
+						e.timeSinceLastAttack <= 
+						simulation.time - 0.05 &&
 						mob.checkCollision(e)
-				) {
+					) {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						e.timeSinceLastAttack = simulation.time
 					}
 				} else {
-					if (e.piercing > 0 && distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size / 2) {
+					if (e.piercing > 0 && mob.checkCollision(e)) {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						if (e.type == 'bouncyBalls') {
-							e.angle += rand(Math.PI * -0.35, Math.PI * 0.35)
+							// Realistic reflection off circle normal
+							const dist = distance(e.pos.x, e.pos.y, mob.pos.x, mob.pos.y)
+							const nx = (e.pos.x - mob.pos.x) / dist
+							const ny = (e.pos.y - mob.pos.y) / dist
+							const vx = Math.cos(e.angle)
+							const vy = Math.sin(e.angle)
+							const dot = vx * nx + vy * ny
+							e.angle = Math.atan2(vy - 2 * dot * ny, vx - 2 * dot * nx) + rand(-0.05, 0.05)
 							if (upgrades.isBulletExplode) {
 								bullets.explosion(e.pos.x, e.pos.y, 1)
 								e.piercing = 0
 							}
+							e.speed = Math.min(30, e.speed + 0.15)
 						}
 						e.piercing--
 					}
