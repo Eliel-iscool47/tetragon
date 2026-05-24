@@ -1,10 +1,11 @@
 //container && canvas && 2-Dimensional rendering context
 
 const dc = document.getElementById('container')
-// Update this to your deployed backend URL
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-	? 'http://localhost:3000' 
-	: 'https://your-backend-app-name.onrender.com';
+
+// Supabase Configuration
+const SUPABASE_URL = 'https://jjneuqhgdjydjanlygbw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqbmV1cWhnZGp5ZGphbmx5Z2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODA3MTgsImV4cCI6MjA5NTE1NjcxOH0.odnPoLV8NGD1GezSYdntlfOIY0zm1d7TM6rZKLif5DY';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const main = document.getElementById('main')
 main.width = window.innerWidth
@@ -117,17 +118,20 @@ leaderboardButton.onclick = async function () {
 	leaderboardModal.style.display = 'flex'
 	leaderboardList.innerHTML = 'Loading...'
 
-	if (API_BASE_URL.includes('your-backend-app-name')) {
-		console.error("API_BASE_URL is still set to a placeholder! Update it in main.js.");
-		leaderboardList.innerHTML = 'Error: Backend URL not configured.';
+	if (!supabase) {
+		leaderboardList.innerHTML = 'Error: Supabase not initialized.';
 		return;
 	}
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/api/leaderboard`)
-		if (!response.ok) throw new Error(`Server returned ${response.status}`);
-		const data = await response.json();
-		if (data.length <= 0) {
+		const { data, error } = await supabase
+			.from('leaderboard')
+			.select('*')
+			.order('level', { ascending: false })
+			.limit(10);
+
+		if (error) throw error;
+		if (!data || data.length <= 0) {
 			leaderboardList.innerHTML = 'No scores yet!'
 		} else {
 			leaderboardList.innerHTML = data.map((entry, i) =>
@@ -159,13 +163,11 @@ submitFeedback.onclick = async function () {
 	submitFeedback.innerText = "Sending..."
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/api/feedback`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message })
-		})
+		const { error } = await supabase
+			.from('feedback')
+			.insert([{ message }]);
 
-		if (response.ok) alert("Feedback sent! Thank you.")
+		if (!error) alert("Feedback sent! Thank you.")
 		else alert("Failed to send feedback.")
 	} catch (e) {
 		alert("An error occurred.")
@@ -299,11 +301,10 @@ document.getElementById('submit-score').onclick = async function () {
 	localStorage.setItem('tetragon-username', playerName)
 
 	try {
-		await fetch(`${API_BASE_URL}/api/score`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name: playerName, level: score })
-		})
+		const { error } = await supabase
+			.from('leaderboard')
+			.insert([{ name: playerName, level: score }]);
+		if (error) throw error;
 	} catch (err) {
 		console.error("Failed to submit score", err)
 	}
