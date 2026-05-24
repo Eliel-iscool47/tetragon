@@ -20,10 +20,13 @@ var bullets = {
 			this.pos.x += Math.cos(this.angle) * this.speed
 			this.pos.y += Math.sin(this.angle) * this.speed
 		}
+		takeDamage(amount) {
+			this.piercing --
+		}
 	},
 	explosions: {
 		size: 25,
-		duration: 0.3,
+		duration: 0.15,
 		damageDone: 8,
 		color: 'hsl(25, 100%, 50%)',
 		damageTaken: 1,
@@ -187,6 +190,10 @@ var bullets = {
 			isExplode: true,
 			piercing: 1,
 			damage: 5,
+			target: {
+				x: state.input.cursor.x,
+				y: state.input.cursor.y
+			},
 			draw: function () {
 				this.drawSelf(function () {
 					const pulse = 0.5 + 0.5 * Math.sin(this.state.simulation.time * 20)
@@ -195,9 +202,9 @@ var bullets = {
 
 					// Add a glow effect to the missile body
 					draw.shadowBlur = 10 + pulse * 10
-					draw.shadowColor = glowColor //`hsl(195, 100%, 50%)`
-
-					draw.fillStyle = "hsl(220, 50%, 25%)"
+					draw.shadowColor = glowColor
+					
+					draw.fillStyle = "hsl(220, 60%, 40%)"
 					draw.fillRect(-15, -5, 30, 10)
 
 					// Engine core at the rear
@@ -208,7 +215,7 @@ var bullets = {
 					draw.fill()
 
 					draw.shadowBlur = 0
-					draw.fillStyle = glowColor //"hsl(195, 100%, 50%)"
+					draw.fillStyle = glowColor
 					draw.setLineDash([3])
 					draw.beginPath()
 					draw.moveTo(-12.5, 0)
@@ -222,13 +229,22 @@ var bullets = {
 			},
 			update: function () {
 				if (!this.state.simulation) return undefined
-				this.angle = angle(this.state.input.cursor.x, this.state.input.cursor.y, this.pos.x, this.pos.y) + this.angleOffset
-				this.state.mobs.list.forEach(function (mob) {
+				this.target.x = this.state.input.cursor.x
+				this.target.y = this.state.input.cursor.y
+
+				// Move towards the target
+				this.angle = angle(this.target.x, this.target.y, this.pos.x, this.pos.y) + this.angleOffset
+				this.state.mobs.list.forEach(function (m) {
 					if (
-						distance(this.pos.x, this.pos.y, mob.pos.x, mob.pos.y) < mob.size * 8 &&
-						mob.class != 'projectile'
-					) this.angle = angle(mob.pos.x, mob.pos.y, this.pos.x, this.pos.y) + this.angleOffset
+						distance(this.pos.x, this.pos.y, m.pos.x, m.pos.y) <=
+						this.size * m.size &&
+						m.class != 'projectile' && !m.isInvulnerable
+					) {
+						this.target.x = m.pos.x
+						this.target.y = m.pos.y
+					}
 				}.bind(this))
+				this.angle = angle(this.target.x, this.target.y, this.pos.x, this.pos.y) + this.angleOffset
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed
 				this.speed = Math.min(30, this.speed + 0.15)
@@ -253,7 +269,7 @@ var bullets = {
 			piercing: 3,
 			update: function () {
 				if (this.pos.x < 0 || this.pos.x > main.width || this.pos.y < 0 || this.pos.y > main.height) {
-					this.angle += Math.PI * 0.5 + rand(-0.1, 0.1)
+					this.angle += Math.PI * rand(-0.6, 0.6)
 				}
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed

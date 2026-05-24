@@ -25,6 +25,57 @@ br {
 	font: 36px "DM Sans"
 }
 
+#menu-title {
+	position: absolute;
+	top: 5vh;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 120px;
+	font-weight: 900;
+	color: black;
+	letter-spacing: 15px;
+	margin: 0;
+	pointer-events: none;
+	animation: glitch 3s infinite;
+}
+
+@keyframes glitch {
+	0% {
+		text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+			-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+			0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+	}
+	14% {
+		text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+			-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+			0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+	}
+	15% {
+		text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+			0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+			-0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+		transform: translateX(-5px) skewX(5deg);
+	}
+	16% {
+		text-shadow: 0.05em 0.025em 0 rgba(255, 0, 0, 0.75),
+			-0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+			0.05em 0.05em 0 rgba(0, 0, 255, 0.75);
+		transform: translateX(5px) skewX(-5deg);
+	}
+	17% {
+		text-shadow: none;
+		transform: none;
+	}
+	30% { transform: none; }
+	31% { transform: scale(1.05) rotate(-1deg); filter: blur(1px); opacity: 0.8; }
+	32% { transform: none; filter: none; opacity: 1; }
+	100% {
+		text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+			-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+			0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+	}
+}
+
 #main {
 	position: absolute;
 	top: 0;
@@ -40,6 +91,10 @@ br {
 	font-weight: 400;
 	font-size: 24px;
 	position: absolute;
+	top: 45vh;
+	left: 40vw;
+	width: 20vw;
+	height: 20vh;
 	background-color: hsl(210, 100%, 40%);
 	color: #ffffff;
 	border-radius: 5px;
@@ -49,6 +104,7 @@ br {
 	cursor: pointer;
 	overflow: hidden;
 	margin: 0;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	padding: 0;
 	font: 48px "DM Sans"
 }
@@ -58,6 +114,10 @@ br {
 	font-weight: 400;
 	font-size: 24px;
 	position: absolute;
+	top: 65vh;
+	left: 65vw;
+	width: 20vw;
+	height: 20vh;
 	background-color: hsl(0, 0%, 45%);
 	color: #ffffff;
 	border-radius: 5px;
@@ -65,6 +125,7 @@ br {
 	border-style: solid;
 	border-color: black;
 	cursor: pointer;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	overflow: hidden;
 	font: 60px "DM Sans"
 }
@@ -73,6 +134,10 @@ br {
 	font-style: normal;
 	font-weight: 400;
 	position: absolute;
+	top: 89vh;
+	left: 15vw;
+	width: 20vw;
+	height: 10vh;
 	background-color: hsl(0, 100%, 30%);
 	color: #ffffff;
 	border-radius: 5px;
@@ -80,6 +145,7 @@ br {
 	border-style: solid;
 	border-color: black;
 	cursor: pointer;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	overflow: hidden;
 	font: 36px "DM Sans"
 }
@@ -122,13 +188,8 @@ br {
 	overflow: hidden;
 }
 
-#damage-bar {
-	background-color: hsl(0, 100%, 50%);
-	height: 200px;
-}
-
 #inventory {
-	top: 50px;
+	top: 60px;
 	left: 0;
 	width: 200px;
 	height: 30px;
@@ -138,7 +199,7 @@ br {
 
 #health-bar {
 	background-color: hsl(115, 100%, 50%);
-	top: 10px;
+	top: 20px;
 	left: 0;
 	width: 200px;
 	height: 40px;
@@ -148,27 +209,41 @@ br {
 }
 
 #max-health {
-	background-color: hsl(0, 0%, 50%);
-	top: 10px;
+	background-color: hsla(0, 0%, 50%, 1);
+	top: 20px;
 	left: 0;
 	width: 200px;
 	height: 40px;
 }
 
-#damage-taken-bar {
-	background-color: hsl(200, 100%, 85%);
+#shield-bar {
+	background-color: hsl(200, 100%, 50%);
 	top: 0;
 	left: 0;
-	width: 200px;
-	height: 10px;
+	width: 0px;
+	height: 20px;
+	font-size: 16px;
+	font-weight: 500;
 }
 
-#credits-button {
+#max-shield {
+	background-color: hsla(200, 100%, 20%, 0.5);
+	top: 0;
+	left: 0;
+	width: 0px;
+	height: 20px;
+}
+
+#feedback-button {
 	font-style: normal;
 	font-weight: 400;
 	font-size: 24px;
 	position: absolute;
-	background-color: hsl(0, 0%, 60%);
+	top: 89vh;
+	left: 58.5vw;
+	width: 15vw;
+	height: 10vh;
+	background-color: hsl(280, 70%, 40%);
 	color: #ffffff;
 	border-radius: 5px;
 	border-width: 5px;
@@ -176,9 +251,49 @@ br {
 	border-color: black;
 	cursor: pointer;
 	overflow: hidden;
-	text-align: center;
-	border-radius: 5px;
 	font: 36px "DM Sans"
+}
+
+#leaderboard-button {
+	font-style: normal;
+	font-weight: 400;
+	font-size: 24px;
+	position: absolute;
+	top: 89vh;
+	left: 2vw;
+	width: 12vw;
+	height: 10vh;
+	background-color: hsl(45, 100%, 40%);
+	color: #ffffff;
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black;
+	cursor: pointer;
+	overflow: hidden;
+	font: 36px "DM Sans"
+}
+
+#start:hover,
+#settings:hover,
+#controls:hover,
+#leaderboard-button:hover,
+#feedback-button:hover {
+	background-color: hsl(215, 100%, 50%); /* A consistent hover color */
+	color: hsl(0, 0%, 100%);
+	border-color: hsl(215, 100%, 65%); /* A consistent border color */
+	box-shadow: 0 0 20px hsl(215, 100%, 65%);
+	transform: translateY(-3px);
+}
+
+#settings:hover {
+	background-color: hsl(0, 0%, 60%); /* Slightly different for settings */
+	border-color: hsl(0, 0%, 75%);
+}
+
+#controls:hover {
+	background-color: hsl(0, 100%, 45%); /* Slightly different for controls */
+	border-color: hsl(0, 100%, 60%);
 }
 
 #control-doc {
@@ -186,6 +301,11 @@ br {
 	font-weight: 400;
 	font-size: 24px;
 	position: absolute;
+	top: 67vh;
+	left: 15vw;
+	width: 20vw;
+	height: 20vh;
+	font-size: 1.5vw;
 	background-color: hsl(0, 0%, 0);
 	color: #000000;
 	border-radius: 5px;
@@ -197,6 +317,64 @@ br {
 	margin: 0;
 	padding: 0;
 	display: none;
+}
+
+#leaderboard-modal {
+	position: absolute;
+	bottom: 12vh;
+	left: 2vw;
+	background-color: rgba(0, 0, 0, 0.95);
+	padding: 30px;
+	border: 5px solid black;
+	border-radius: 10px;
+	z-index: 1000;
+	display: none;
+	flex-direction: column;
+	width: 400px;
+	text-align: center;
+	color: white;
+}
+
+#leaderboard-list {
+	text-align: left;
+	font-size: 20px;
+	margin: 10px 0;
+}
+
+#feedback-modal {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: rgba(0, 0, 0, 0.95);
+	padding: 30px;
+	border: 5px solid black;
+	border-radius: 10px;
+	z-index: 1000;
+	display: none;
+	flex-direction: column;
+	gap: 15px;
+	width: 450px;
+	text-align: center;
+	color: white;
+}
+
+#feedback-text {
+	height: 150px;
+	padding: 10px;
+	font-family: 'DM Sans', sans-serif;
+	font-size: 18px;
+	border-radius: 5px;
+	resize: none;
+	background-color: #222;
+	color: white;
+	border: 2px solid #444;
+}
+
+#submit-feedback, #close-feedback {
+	padding: 10px 20px;
+	font-size: 20px;
+	cursor: pointer;
 }
 
 #pause-screen {
@@ -213,6 +391,42 @@ br {
 	font-size: 40px;
 	font-style: normal;
 	z-index: 10;
+}
+
+#pause-screen h1 {
+	position: absolute;
+	top: 15%;
+	left: 50%;
+	text-align: center;
+	color: white;
+	transform: translate(-50%, -50%);
+}
+
+#pause-screen p {
+	font-size: 3vw;
+	text-align: center;
+	color: white;
+	position: absolute;
+	top: 50vh;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+#settings-menu {
+	position: absolute;
+	/* top: 50vh; */
+	bottom: -25vh;
+	left: 65vw;
+	width: 20vw;
+	height: fit-content;
+	max-height: 50vh;
+	background-color: hsl(0, 0%, 45%);
+	color: black;
+	overflow-y: scroll;
+	display: none;
+	padding: 20px;
+	border: 2px solid hsl(0, 0%, 10%);
+	z-index: 100;
 }
 
 #choice-screen {

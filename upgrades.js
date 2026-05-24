@@ -23,6 +23,14 @@ var upgrades = {
 	get powerUpSpawnChance() { return this._powerUpSpawnChance },
 	set powerUpSpawnChance(val) { this._powerUpSpawnChance = val },
 
+	_invulnerabilityDuration: 1,
+	get invulnerabilityDuration() { return this._invulnerabilityDuration },
+	set invulnerabilityDuration(val) { this._invulnerabilityDuration = val },
+
+	_shieldEffect: 1,
+	get shieldEffect() { return this._shieldEffect },
+	set shieldEffect(val) { this._shieldEffect = val },
+
 	_reloadSpeed: 1,
 	get reloadSpeed() { return this._reloadSpeed },
 	set reloadSpeed(val) { this._reloadSpeed = val },
@@ -91,6 +99,18 @@ var upgrades = {
 	get grenadeExplosionSize() { return this._grenadeExplosionSize },
 	set grenadeExplosionSize(val) { this._grenadeExplosionSize = val },
 
+	_critChance: 0.05,
+	get critChance() { return this._critChance },
+	set critChance(val) { this._critChance = val },
+
+	_critMultiplier: 2,
+	get critMultiplier() { return this._critMultiplier },
+	set critMultiplier(val) { this._critMultiplier = val },
+
+	_shieldMultiplier: 1,
+	get shieldMultiplier() { return this._shieldMultiplier },
+	set shieldMultiplier(val) { this._shieldMultiplier = val },
+
 	_isClusterBomb: false,
 	get isClusterBomb() { return this._isClusterBomb },
 	set isClusterBomb(val) { this._isClusterBomb = !!val },
@@ -134,9 +154,13 @@ var upgrades = {
 		'logistics',
 		'regeneration',
 		'heavyCaliber',
+		'energyShield',
 		'speedLoader',
+		'deadlyAim',
 		'powerSurge',
 		'vampirism',
+		'ironWill',
+		'reinforcedShields',
 		'lightCaliber',
 	],
 	Upgrade: class {
@@ -258,6 +282,8 @@ var upgrades = {
 			_healEffect: 1,
 			_powerUpSpawnChance: 1,
 			_reloadSpeed: 1,
+			_invulnerabilityDuration: 1,
+			_shieldEffect: 1,
 			_missilesPerShot: 1,
 			_shotgunPellets: 10,
 			_isExplosionColorful: false,
@@ -276,6 +302,9 @@ var upgrades = {
 			_missileExplosionSize: 1,
 			_grenadeExplosionDamage: 1,
 			_grenadeExplosionSize: 1,
+			_critChance: 0.05,
+			_critMultiplier: 2,
+			_shieldMultiplier: 1,
 			_isExplosionColorful: false,
 			_isKillDefense: false,
 			lastKill: (-10) ** 299,
@@ -307,7 +336,7 @@ var upgrades = {
 			state.player &&
 			state.player.health < state.player.maxHealth
 		) {
-			state.player.health += this.regenAmount * this.healEffect
+			state.player.heal(this.regenAmount * this.healEffect)
 			this.lastHealthRegen = simulation.time
 		}
 	},
@@ -354,6 +383,22 @@ upgrades.maintenance = new upgrades.Upgrade({
 	stackSize: 5,
 	description: `1.5x health per ${text('health', 'heal')}`,
 	effect() { upgrades.healEffect *= 1.5 }
+})
+
+upgrades.ironWill = new upgrades.Upgrade({
+	id: 'ironWill',
+	name: 'Iron Will',
+	stackSize: 3,
+	description: `1.5x ${text('duration', 'invulnerability duration')}`,
+	effect() { upgrades.invulnerabilityDuration *= 1.5 }
+})
+
+upgrades.reinforcedShields = new upgrades.Upgrade({
+	id: 'reinforcedShields',
+	name: 'Reinforced Shields',
+	stackSize: 3,
+	description: `1.5x ${text('duration', 'shield power-up effect')}`,
+	effect() { upgrades.shieldEffect *= 1.5 }
 })
 
 upgrades.regeneration = new upgrades.Upgrade({
@@ -461,6 +506,28 @@ upgrades.speedLoader = new upgrades.Upgrade({
 	stackSize: 3, // Description for when it's available
 	description: `1.5x ${text('reload', 'reload speed')}`,
 	effect() { upgrades.reloadSpeed *= 1.5 }
+})
+
+upgrades.energyShield = new upgrades.Upgrade({
+	id: 'energyShield',
+	name: 'Energy Shield',
+	stackSize: 5,
+	description: `Add a ${text('health', 'shield')} that absorbs up to 25 ${text('damage', 'damage')}.`,
+	effect() {
+		state.player.maxShield += 25
+		state.player.shield += 25
+	}
+})
+
+upgrades.deadlyAim = new upgrades.Upgrade({
+	id: 'deadlyAim',
+	name: 'Deadly Aim',
+	stackSize: 5,
+	description: `+10% ${text('damage', 'crit chance')} and +0.5x ${text('damage', 'crit multiplier')}`,
+	effect() {
+		upgrades.critChance += 0.1
+		upgrades.critMultiplier += 0.5
+	}
 })
 
 upgrades.powerSurge = new upgrades.Upgrade({

@@ -408,7 +408,7 @@ guns.laser = new guns.Gun({
 		const maxRange = Math.max(main.width, main.height)
 		mobs.list.forEach((mob) => {
 			if (lineCircleCollision(state.player.pos.x, state.player.pos.y, state.player.pos.x + Math.cos(input.cursor.angle) * maxRange, state.player.pos.y + Math.sin(input.cursor.angle) * maxRange, mob.pos.x, mob.pos.y, mob.size / 2)) {
-				mob.health -= guns.laser.damage * state.player.damageDone
+				mob.takeDamage(guns.laser.damage * state.player.damageDone)
 			}
 		})
 	}

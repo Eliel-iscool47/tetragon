@@ -3,7 +3,7 @@
 
 A fast-paced geometric survival shooter built with a modular, data-driven architecture.
 
-## 1: Controls
+# I: Controls
 
 The game's controls are the following:
 
@@ -16,58 +16,60 @@ The game's controls are the following:
 * **Restart**: `R` (while paused/choosing/dead)
 * **Main Menu**: `M`
 
-## 2: Recent Updates (v1.07)
+# II: Recent Updates (v1.08)
 
-* **Mechanics**: MIRV missiles now shoot 1 at a time. They also now accelerate towards their target instead of instantly being fast.
-
----
-
-## 3: Feedback
-
-[Submit your feedback here](https://docs.google.com/forms/d/1iQ4DOSDVXXOdok1HwxPqQm1_M0hk6KeB30nidJq4nxw/edit)
+* **Bosses**: Added the `Ghost Boss` with phasing invulnerability. `Shifter Boss` changed to `Dodger boss`.
+* **Settings**: Added a difficulty slider to adjust the game challenge (0.2x to 5.0x).
+* **Mechanics**: Introduced timed invulnerability states and duration-scaling upgrades (`Iron Will`, `Reinforced Shields`).
 
 ---
 
-## 4: Technical Overview
+# III: Technical Overview
 
-### 1: Core Architecture
+## 1: Core Architecture
 
-#### a: Centralized State Management
+### a: Centralized State Management
 The project utilizes a centralized `state` object (defined in `main.js`) to manage all core modules. This reduces reliance on the global scope and ensures a clean data flow.
 - **Standardized Resets**: Every game module ( `player`, `guns`, `mobs`, etc.) implements a `defaults` getter and a `reset()` method. Calling `state.resetAll()` performs an `Object.assign` to restore the game to its pristine initial state.
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
-#### b: Data-Driven Leveling
+### b: Data-Driven Leveling
+- **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
+
+### c: Data-Driven Leveling
 - **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
 - **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
 
-### 2: Combat & Mechanics
+## 2: Combat & Mechanics
 
-#### a: Difficulty Scaling
+### a: Difficulty Scaling
 The game features a difficulty slider in the Settings menu ranging from **0.2x to 5.0x**.
 - **Probabilistic Spawning**: To handle fractional multipliers (e.g., spawning 0.3 mobs), the engine uses a weighted random roll. This ensures that statistically, the average number of spawns matches the selected difficulty over time.
 
-#### b: The Arsenal
+### b: The Arsenal
 - **Melee (Knife)**: A high-damage sweeping attack with a visual fade-out slash.
 - **Ballistics**: A wide variety of weapons including Rifles, Snipers, Shotguns, and Miniguns.
-- **Specialty**: Homing Missiles that accelerate towards their target, <!--Edwin's juicy -->Balls 😋, Flamethrowers, and instant-hit Lasers.
+- **Specialty**: Homing Missiles that accelerate towards their target, Balls 😋, Flamethrowers, and instant-hit Lasers.
 
-#### Advanced Upgrades
+## 3: Advanced Upgrades
 The upgrade system supports prerequisites via a `requirements` property. Notable mechanics include:
 - **Vampirism**: Heal a percentage of damage dealt to enemies.
 - **Napalm**: Flamethrower projectiles leave lingering AOE fire pools.
 - **Cluster Bombs**: Explosive weapons trigger secondary sub-explosions.
 - **Incendiary Munitions**: Standard bullets gain explosive properties upon contact.
+- **Iron Will**: Multiplies the base duration of invulnerability power-ups.
+- **Reinforced Shields**: Increases the effectiveness/magnitude of shield power-ups.
 
-### Enemy Types
+## 4: Enemy Types
 
 - **Default**: Standard melee units.
 - **Sentry**: Stationary turrets that fire glowing red projectiles with trail effects.
 - **Tank**: High health, high damage, but slow movement.
 - **Archer/Grenadier**: Ranged units that use predictive aiming.
 - **Bosses**: Unique entities like the **Pentagon Boss** (laser telegraphs) and **Void Boss** (gravitational pull).
+- **Ghost Boss**: A spectral entity that phases between states, becoming invulnerable to damage.
 
-### Technical Implementation Details
+## 5: Technical Implementation Details
 
 - **Collision Grid**: A spatial partitioning grid (150px cells) optimizes collision checks between hundreds of bullets and mobs. (could be a lie)
 - **Visual Polish**:
@@ -78,12 +80,24 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 
 ---
 
-#### Credits
-- **Eliel-isCool47**: Art, Code, Game Design.
-- **Project URL**: GitHub Repo
+# IV: Credits and Links
 
-#### Development
-The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. <!-- To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.-->
+
+
+- **Eliel-isCool47**: Art, Code, Game Design.
+
+## Links
+
+- **Project URL**: [github.com/Eliel-isCool47/Tetragon](https://github.com/Eliel-isCool47/Tetragon)
+- **Feedback Link**: [https://forms.gle/xokJpH3U76hHibot7](https://forms.gle/xokJpH3U76hHibot7)
+
+# V: Development
+The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.
+
+# VI: Planned Updates
+
+- **Mobile Support**: I am planning to add support for mobile devices by July 31st.
+- **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I am planning to reädd them in the future.
 
 <!-- Maintenance Note: 
 When adding new modules, register them in the state object in main.js 

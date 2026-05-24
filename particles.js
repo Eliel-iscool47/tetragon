@@ -81,5 +81,36 @@ var particles = {
 				this.state.particles.list = this.state.particles.list.filter(p => p !== this);
 			}
 		}
-	}
+	},
+	textPopup: {
+		size: 24,
+		color: 'white',
+		duration: 0.8,
+		vx: 0,
+		vy: 0,
+		gravity: 0.2,
+		update() {
+			this.vy += this.gravity;
+			this.pos.x += this.vx;
+			this.pos.y += this.vy;
+
+			if (this.state.simulation.time - this.timeSpawned > this.duration) {
+				this.state.particles.list = this.state.particles.list.filter(p => p !== this);
+			}
+		},
+		draw() {
+			const elapsed = this.state.simulation.time - this.timeSpawned;
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1);
+			draw.save();
+			draw.globalAlpha = alpha;
+			draw.fillStyle = this.color;
+			draw.strokeStyle = 'black';
+			draw.lineWidth = 1;
+			draw.font = `bold ${this.size}px "DM Sans"`;
+			draw.textAlign = 'center';
+			draw.fillText(this.text, this.pos.x, this.pos.y);
+			draw.strokeText(this.text, this.pos.x, this.pos.y);
+			draw.restore();
+		}
+	},
 }

@@ -8,7 +8,6 @@ var simulation = {
 	set consoleMessage(val) {
 		this._consoleMessage = `
 ${val}
-${this._consoleMessage}
 ` },
 
 	_isDead: false,
@@ -34,8 +33,6 @@ ${this._consoleMessage}
 				box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
 			">
 				<div style="flex: 2; overflow-y: auto; padding-right: 30px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.3) transparent;">
-					<h1 style="margin: 0 0 20px 0; font-size: 48px; border-bottom: 2px solid rgba(255,255,255,0.2); padding-bottom: 10px;">Simulation Paused</h1>
-
 					<div style="text-align: left; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
 						<h2 style="font-size: 28px; color: #aaa; margin-bottom: 10px;">Equipped Weapon:</h2>
 						${guns.equippedGun ? `
@@ -52,8 +49,8 @@ ${this._consoleMessage}
 					<div style="text-align: left;">
 						<h2 style="font-size: 28px; color: #aaa; margin-bottom: 20px;">Collected Upgrades:</h2>
 						${unique.length > 0 ? unique.map(upg => {
-							const count = upgrades.collected.filter(u => u === upg).length
-							return `
+				const count = upgrades.collected.filter(u => u === upg).length
+				return `
 								<div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border-left: 5px solid hsl(215, 100%, 50%);">
 									<div style="font-size: 24px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
 										<span>${upg.name}</span>
@@ -63,7 +60,7 @@ ${this._consoleMessage}
 										${upg.description}
 									</div>
 								</div>`
-						}).join('') : `<p style="font-size: 20px; color: #666; font-style: italic;">No upgrades collected yet.</p>`}
+			}).join('') : `<p style="font-size: 20px; color: #666; font-style: italic;">No upgrades collected yet.</p>`}
 					</div>
 					<p style="margin-top: 30px; font-size: 18px; opacity: 0.5;">Press ${input.keybinds.pause.replace('Key', '').replace('Digit', '')} to Resume</p>
 				</div>
@@ -111,6 +108,7 @@ ${this._consoleMessage}
 	set defaults(val) { throw new Error('simulation.defaults is read-only') },
 
 	reset() {
+		if (this.interval) clearInterval(this.interval)
 		Object.assign(this, this.defaults)
 	},
 
@@ -121,16 +119,15 @@ ${this._consoleMessage}
 	Particles: [],
 	log(msg, style) {
 		style ??= 'color: black; font-size: 14px;'
-		this.consoleMessage = `<p>
+		this.consoleMessage = `
 <span style="${style}">${msg}</span><br>
-</p>
+${this.consoleMessage}
 		`
 	},
 	error(msg) {
 		this.log(msg, `
 			background-color: red; 
 			font-size: 16px;
-
 			`)
 	},
 	pause() {
@@ -150,7 +147,8 @@ ${this._consoleMessage}
 		start.style.display = 'block'
 		controls.style.display = 'block'
 		settings.style.display = 'block'
-		creditsButton.style.display = 'block'
+		leaderboardButton.style.display = 'block'
+		feedbackButton.style.display = 'block'
 		main.style.display = 'none'
 		document.title = 'Tetragon: Main Menu'
 		simulation.time = 0
@@ -178,7 +176,11 @@ ${this._consoleMessage}
 			return undefined
 		}
 		main.style.cursor = 'none'
-		if (this.time - state.player.lastDamageTime < 0.1 && !this.isDead && !this.isPaused) {
+		if (
+			this.time - state.player.lastDamageTime < 0.1 &&
+			!this.isDead &&
+			!this.isPaused
+		) {
 			main.style.top = `${rand(-10, 10)}px`
 			main.style.left = `${rand(-10, 10)}px`
 		} else {
@@ -252,8 +254,6 @@ ${this._consoleMessage}
 			draw.stroke()
 		}
 
-		//
-
 		bullets.draw()
 		bullets.kill()
 		bullets.drawExplosions()
@@ -271,6 +271,7 @@ ${this._consoleMessage}
 		this.crosshair(16)
 	},
 	init() {
+		if (this.interval) clearInterval(this.interval)
 		main.style.display = 'block'
 		this.isMainMenu = false
 		this.isPaused = false
@@ -285,11 +286,10 @@ ${this._consoleMessage}
 		this.wipe()
 		this.isMainMenu = false
 		level.init() // Call level init here
-		if (this.interval) clearInterval(this.interval)
 		this.interval = setInterval(this.gameLoop.bind(this), 1000 / this.fps)
 	},
 	spawnVampireParticle(x, y) {
-		
+
 	},
 	crosshair(s) {
 		draw.strokeStyle = this.crosshairColor

@@ -32,9 +32,15 @@ var level = {
 	},
 
 	async init() {
-		// Levels are now hardcoded in defaults to reduce external dependencies
-		this._loadedLevels = this.defaults._loadedLevels
-		console.log('Levels initialized from internal configuration.')
+		try {
+			const response = await fetch('./assets/levels.json')
+			if (!response.ok) throw new Error('Network response was not ok')
+			this._loadedLevels = await response.json()
+			console.log('Levels loaded successfully from JSON.')
+		} catch (error) {
+			console.warn('Failed to load levels.json, using defaults:', error)
+			this._loadedLevels = this.defaults._loadedLevels
+		}
 	},
 
 	make() {
@@ -60,10 +66,23 @@ var level = {
 			.reverse()
 			.find(l => this.current >= l.threshold)
 
+		// Helper to parse count as a number, function, or formula string
+		const parseCount = (val) => {
+			if (typeof val === 'string') {
+				try {
+					// Replace 'c' (case-insensitive) with the current level and evaluate
+					return eval(val.replace(/c/gi, this.current))
+				} catch (e) {
+					console.warn(`Failed to parse formula: ${val}`, e)
+					return 1
+				}
+			}
+			return (typeof val == 'function' ? val(this.current) : (val ?? 1))
+		}
 
 		if (this.config?.spawns) {
 			this.config.spawns.forEach(s => {
-				const rawCount = (typeof s.count == 'function' ? s.count(this.current) : (s.count ?? 1)) * state.difficultyScale
+				const rawCount = parseCount(s.count) * state.difficultyScale
 				const count = Math.floor(rawCount) + (percentChance(rawCount % 1) ? 1 : 0)
 				repeat(() => {
 					if (spawn[s.type]) {
@@ -78,7 +97,7 @@ var level = {
 
 		if (this.config?.powerUpSpawns) {
 			this.config.powerUpSpawns.forEach(p => {
-				const rawCount = (typeof p.count == 'function' ? p.count(this.current) : (p.count ?? 1)) * state.difficultyScale
+				const rawCount = parseCount(p.count) / state.difficultyScale
 				const count = Math.floor(rawCount) + (percentChance(rawCount % 1) ? 1 : 0)
 				repeat(function () {
 					if (powerUps[p.type]) {
@@ -88,7 +107,7 @@ var level = {
 							powerUps[p.type]
 						)
 					}
-				}, count);
+				}, count)
 			})
 		} else repeat(function () {
 			// Spawn common power-ups for every level

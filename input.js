@@ -104,6 +104,8 @@ var input = {
 		document.title = 'Tetragon: Main Menu'
 		pauseScreen.style.display = 'none'
 		hud.Obj.style.display = 'none'
+		chooseScreen.style.display = 'none'
+		if (simulation.interval) clearInterval(simulation.interval)
 	},
 
 	get defaults() {

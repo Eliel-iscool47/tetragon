@@ -70,30 +70,31 @@ var collisions = {
 			this.grid.add(bullets.explosionList[i])
 		}
 
-		mobs.list.forEach(function (mob) {
-			if (mob.health <= 0 || (!inCanvas(mob.pos.x, mob.pos.y, main) && mob.class == 'projectile' && mob.type != 'hexagon minion')) {
-				mobs.list = mobs.list.filter(m => m !== mob)
-				if (upgrades.isKillDefense) upgrades.lastKill = simulation.time
-				if (percentChance(upgrades.powerUpSpawnChance * 0.15 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.ammo)
-				if (percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.heal)
-				if (percentChance(upgrades.powerUpSpawnChance * 0.1 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.reroll)
-				if (percentChance(upgrades.powerUpSpawnChance * 0.03 * mob.dropChance) && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.gun)
-				if ((percentChance(upgrades.powerUpSpawnChance * 0.01 * mob.dropChance) || mob.class == 'boss') && mob.class != 'projectile') powerUps.spawn(mob.pos.x, mob.pos.y, powerUps.upgrade)
+		mobs.list = mobs.list.filter(function (mob) {
+			// Check for death or out-of-bounds projectiles
+			if (mob.health <= 0 || (!inCanvas(mob.pos.x, mob.pos.y, main) && mob.class == 'projectile')) {
+				if (mob.health <= 0) mob.die()
+				return false
 			}
+
 			mob.health = Math.min(mob.health, mob.maxHealth)
-			if (distance(mob.pos.x, mob.pos.y, state.player.pos.x, state.player.pos.y) <= Math.max(state.player.size, mob.size) / 2) {
-				state.player.takeDamage(mob.damage)
-				upgrades.lastHealthRegen = simulation.time
-				mob.timeSinceLastAttack = simulation.time
-				if (mob.class != 'projectile') {
-					mob.pos.x += Math.cos(input.cursor.angle) * mob.speed * mob.size
-					mob.pos.y += Math.sin(input.cursor.angle) * mob.speed * mob.size
-					mob.onCollide()
-				} else mobs.list = mobs.list.filter(function (m) { return m != mob }.bind(this))
-			}
+
+			// Player collision
+			if (
+				// distance(
+				// 	mob.pos.x, mob.pos.y, 
+				// 	state.player.pos.x, state.player.pos.y
+				// ) <= Math.max(state.player.size, mob.size) / 2
+				state.player.checkCollision(mob)
+			) if (!mob.onCollide()) return false
+
+			// Bullet/Explosion collision via grid
 			this.grid.query(mob.pos.x, mob.pos.y, function (e) {
 				if (e.isExplosion) {
-					if (!e.targetsPlayerOnly && distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size * 0.5 && e.timeSinceLastAttack <= simulation.time - 0.05) {
+					if (!e.targetsPlayerOnly && 
+						// distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size * 0.5 && e.timeSinceLastAttack <= simulation.time - 0.05
+						mob.checkCollision(e)
+				) {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						e.timeSinceLastAttack = simulation.time
 					}
@@ -101,9 +102,9 @@ var collisions = {
 					if (e.piercing > 0 && distance(mob.pos.x, mob.pos.y, e.pos.x, e.pos.y) <= mob.size / 2) {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						if (e.type == 'bouncyBalls') {
-							e.angle += rand(Math.PI * -0.05, Math.PI * 0.05)
+							e.angle += rand(Math.PI * -0.35, Math.PI * 0.35)
 							if (upgrades.isBulletExplode) {
-								bullets.explosion(e.pos.x, e.pos.y, 2)
+								bullets.explosion(e.pos.x, e.pos.y, 1)
 								e.piercing = 0
 							}
 						}
@@ -111,12 +112,13 @@ var collisions = {
 					}
 				}
 			}.bind(this))
-
-			if (bullets.firePoolList) bullets.firePoolList.forEach(p => {
-				if (distance(mob.pos.x, mob.pos.y, p.pos.x, p.pos.y) <= p.size + mob.size / 2) {
-					mob.takeDamage(p.damage * state.player.damageDone)
+			const fireList = state.bullets.firePoolList ?? []
+			fireList.forEach(function (f) {
+				if (distance(mob.pos.x, mob.pos.y, f.pos.x, f.pos.y) <= f.size + mob.size / 2) {
+					mob.takeDamage(f.damage * state.player.damageDone)
 				}
 			})
+			return true
 		}.bind(this))
 		bullets.explosionList.forEach(function (xp) {
 			if (distance(state.player.pos.x, state.player.pos.y, xp.pos.x, xp.pos.y) <= xp.size / 2 + state.player.size / 2 && xp.timeSinceLastAttack < simulation.time - 0.05) {

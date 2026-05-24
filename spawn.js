@@ -1,45 +1,24 @@
 const default_mobSpawn = {
+	bosses: {
+		voidBoss: 10,
+		summonerBoss: 10,
+		triangleBoss: 10,
+		dodgerBoss: 10,
+		pentagonBoss: 10,
+		hexagonBoss: 10,
+		twinBoss: 5, // Twins are rare/difficult
+		octagonBoss: 10,
+		sniperBoss: 10,
+		minefieldBoss: 10,
+		ghostBoss: 1000 // New Boss!
+	},
 	randomBoss(x, y) {
-		switch (randInt(1, 10)) {
-			case 1:
-				this.voidBoss(x, y)
-				break
-			case 2:
-				this.summonerBoss(x, y)
-				break
-			case 3:
-				this.triangleBoss(x, y)
-				break
-			case 4:
-				this.shifterBoss(x, y)
-				break
-			case 5:
-				this.pentagonBoss(x, y)
-				break
-			case 6:
-				this.hexagonBoss(x, y)
-				break
-			case 7:
-				this.twinBoss(
-					x + 400,
-					y + 250
-				)
-				this.twinBoss(
-					x - 250,
-					y - 400
-				)
-				break
-			case 8:
-				this.octagonBoss(x, y)
-				break
-			case 9:
-				this.sniperBoss(x, y)
-				break
-			case 10:
-				this.minefieldBoss(x, y)
-				break
-			default:
-				break
+		const choice = weightedRand(this.bosses)
+		if (choice === 'twinBoss') {
+			this.twinBoss(x + 400, y + 250)
+			this.twinBoss(x - 250, y - 400)
+		} else {
+			this[choice](x, y)
 		}
 	},
 	default(x, y) {
@@ -72,15 +51,15 @@ const default_mobSpawn = {
 			draw: function () {
 				this.drawSelf(function () {
 					// Apply glow effect
-					draw.shadowBlur = 15;
-					draw.shadowColor = "red";
+					draw.shadowBlur = 15
+					draw.shadowColor = "red"
 
 					// Draw a trailing effect behind the bullet's current position
 					for (let i = 1; i <= 3; i++) {
-						draw.fillStyle = `hsla(0, 100%, 50%, ${0.5 / i})`;
-						draw.beginPath();
-						draw.arc(i * this.speed * 1.5, 0, (this.size / 2) * (1 - i * 0.2), 0, Math.PI * 2);
-						draw.fill();
+						draw.fillStyle = `hsla(0, 100%, 50%, ${0.5 / i})`
+						draw.beginPath()
+						draw.arc(i * this.speed * 1.5, 0, (this.size / 2) * (1 - i * 0.2), 0, Math.PI * 2)
+						draw.fill()
 					}
 
 					draw.beginPath()
@@ -89,7 +68,7 @@ const default_mobSpawn = {
 					draw.stroke()
 
 					// Reset shadow to prevent bleeding into other draw calls
-					draw.shadowBlur = 0;
+					draw.shadowBlur = 0
 				}.bind(this))
 			}
 		}))
@@ -108,6 +87,8 @@ const default_mobSpawn = {
 			draw: function () {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
+					draw.strokeStyle = 'black'
+					draw.lineWidth = 2
 					draw.strokeRect(this.size * -0.75, this.size * -0.75, this.size * 1.5, this.size * 1.5)
 				}.bind(this))
 			}
@@ -186,6 +167,7 @@ const default_mobSpawn = {
 			},
 			onCollide: function () {
 				bullets.explosion(this.pos.x, this.pos.y, 2.5, this.damage, true)
+				return false
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -356,7 +338,7 @@ const default_mobSpawn = {
 
 				const endX = this.pos.x - Math.cos(this.angle) * this.length
 				const endY = this.pos.y - Math.sin(this.angle) * this.length
-				
+
 				// Continuous damage check: check collision every frame, but apply damage on a cooldown
 				if (lineCircleCollision(this.pos.x, this.pos.y, endX, endY, this.state.player.pos.x, this.state.player.pos.y, this.state.player.size / 2)) {
 					if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
@@ -607,10 +589,6 @@ const default_mobSpawn = {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
-					draw.beginPath()
-					draw.moveTo(Math.cos(this.angle) * this.size, Math.sin(this.angle) * this.size)
-					draw.lineTo(Math.cos(this.angle + Math.PI) * this.size, Math.sin(this.angle + Math.PI) * this.size)
-					draw.stroke()
 				}.bind(this))
 			}
 		}))
@@ -630,7 +608,7 @@ const default_mobSpawn = {
 				mobs.list.forEach(function (other) {
 					if (other == this || other.type != "twin boss") return undefined
 					if (distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) < 300) {
-						this.health += 0.05
+						this.heal(0.05)
 						draw.beginPath()
 						draw.strokeStyle = 'hsl(115, 100%, 50%)'
 						draw.lineWidth = 5
@@ -698,22 +676,36 @@ const default_mobSpawn = {
 			}
 		}))
 	},
-	shifterBoss(x, y) {
+	dodgerBoss(x, y) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
-			type: 'shifter',
+			type: 'dodger',
 			class: 'boss',
-			health: 1,
+			health: 25,
 			damage: 20,
 			size: 45,
-			speed: 8,
-			dropChance: 0,
-			color: 'hsl(320, 100%, 50%)',
-			timeSinceLastShift: (-10) ** 299,
+			speed: 7,
+			dropChance: 1,
+			color: 'hsl(325, 100%, 50%)',
+			anchor: { x, y },
+			target: { x, y },
+			range: 300,
 			update: function () {
-				if (this.state.simulation.time - this.timeSinceLastShift < 1) return undefined
-				this.pos.x = randInt(0, main.width)
-				this.pos.y = randInt(0, main.height)
-				this.timeSinceLastShift = this.state.simulation.time
+				if ((simulation.time - this.timeSpawned) % 5 > 2) {
+					if (distance(this.pos.x, this.pos.y, this.target.x, this.target.y) < 10) {
+						/* Pick a new random target within the circular range of the anchor point */
+						const moveAngle = Math.random() * Math.PI * 2
+						const dist = Math.random() * this.range
+						this.target.x = clamp(this.anchor.x + Math.cos(moveAngle) * dist, 0, main.width)
+						this.target.y = clamp(this.anchor.y + Math.sin(moveAngle) * dist, 0, main.height)
+						const me = this
+					}
+				} else {
+					this.target.x = this.state.player.pos.x
+					this.target.y = this.state.player.pos.y
+				}
+				this.angle /*const moveAngle*/ = angle(this.pos.x, this.pos.y, this.target.x, this.target.y)
+				this.pos.x -= Math.cos(this.angle) * this.speed
+				this.pos.y -= Math.sin(this.angle) * this.speed
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -721,6 +713,36 @@ const default_mobSpawn = {
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
 					draw.stroke()
+				}.bind(this))
+			}
+		}))
+	},
+	ghostBoss(x, y) {
+		mobs.list.push(new mobs.Mob(state, x, y, {
+			type: 'ghost boss',
+			class: 'boss',
+			health: 70,
+			damage: 15,
+			size: 45,
+			speed: 2.2,
+			color: 'hsla(0, 0%, 100%, 0.6)',
+			update: function () {
+				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
+				// Periodic invulnerability (phasing)
+				const phase = Math.sin(this.state.simulation.time * 2.5)
+				this.isInvulnerable = phase > 0.1
+				this.moveTowardsPlayer()
+			},
+			draw: function () {
+				this.drawSelf(function () {
+					draw.globalAlpha = this.isInvulnerable ? 0.2 : 0.8
+					draw.beginPath()
+					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
+					draw.fill()
+					draw.stroke()
+					// Spectral glow
+					draw.shadowBlur = this.isInvulnerable ? 25 : 5
+					draw.shadowColor = 'cyan'
 				}.bind(this))
 			}
 		}))
@@ -734,11 +756,11 @@ const default_mobSpawn = {
 			speed: 0, /* Turrets are stationary */
 			attackRate: 3,
 			attackType: 'ranged',
-			color: 'hsl(250, 100%, 30%)',
+			color: 'hsl(230, 100%, 30%)',
 			update: function () {
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				const dist = distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
-				
+
 				// Only fire if the player is within range
 				if (dist < 800 && this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.bullet(this.pos.x, this.pos.y)
@@ -750,7 +772,7 @@ const default_mobSpawn = {
 					// Draw the armored square base
 					draw.fillRect(-this.size / 2, -this.size / 2, this.size, this.size)
 					draw.strokeRect(-this.size / 2, -this.size / 2, this.size, this.size)
-					
+
 					// Draw a rotating core to indicate it is active
 					draw.fillStyle = 'white'
 					draw.beginPath()

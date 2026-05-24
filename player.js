@@ -6,10 +6,13 @@ class Player extends Entity {
 		super(state, x, y, {
 			_health: 100,
 			_maxHealth: 100,
+			_shield: 0,
+			_maxShield: 0,
 			_damageDone: 1,
 			_lastDamageTime: -(10 ** 299),
 			_damageTaken: 1,
 			_isInvulnerable: false,
+			_invulnerableUntil: 0,
 			_size: 50,
 			_velocity: 5,
 			color: 'hsl(215, 100%, 45%)',
@@ -20,10 +23,13 @@ class Player extends Entity {
 		return {
 			_health: 100,
 			_maxHealth: 100,
+			_shield: 0,
+			_maxShield: 0,
 			_damageDone: 1,
 			_lastDamageTime: -(10 ** 299),
 			_damageTaken: 1,
 			_isInvulnerable: false,
+			_invulnerableUntil: 0,
 			_size: 50,
 			_velocity: 5,
 			color: 'hsl(215, 100%, 45%)',
@@ -35,7 +41,33 @@ class Player extends Entity {
 
 	takeDamage(amount) {
 		if (this.isInvulnerable) return
-		this.health -= amount * this.damageTaken
+		let damage = amount * this.damageTaken
+
+		let absorbed = 0
+		if (this.shield > 0) {
+			absorbed = Math.min(this.shield, damage)
+			this.shield -= absorbed
+			damage -= absorbed
+			this.state.particles.spawn(this.pos.x, this.pos.y, {
+				...this.state.particles.textPopup,
+				text: Math.round(absorbed),
+				color: 'hsl(200, 100%, 60%)',
+				size: 20,
+				vx: rand(-2, 2),
+				vy: rand(-5, -3)
+			})
+		}
+
+		this.health -= damage
+		if (damage > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
+			...this.state.particles.textPopup,
+			text: Math.round(damage),
+			color: 'hsl(0, 100%, 60%)',
+			size: 24,
+			vx: rand(-2, 2),
+			vy: rand(-5, -3)
+		})
+
 		this.lastDamageTime = this.state.simulation.time
 		this.state.upgrades.lastHealthRegen = this.state.simulation.time
 	}
@@ -49,6 +81,15 @@ class Player extends Entity {
 		this.health = Math.min(this.health, val)
 	}
 
+	get shield() { return this._shield }
+	set shield(val) { this._shield = Math.min(val, this.maxShield) }
+
+	get maxShield() { return this._maxShield }
+	set maxShield(val) {
+		this._maxShield = val
+		this.shield = Math.min(this.shield, val)
+	}
+
 	get damageDone() { return this._damageDone }
 	set damageDone(val) { this._damageDone = Math.abs(val) }
 
@@ -58,7 +99,7 @@ class Player extends Entity {
 	get damageTaken() { return this._damageTaken }
 	set damageTaken(val) { this._damageTaken = val }
 
-	get isInvulnerable() { return this._isInvulnerable }
+	get isInvulnerable() { return this._isInvulnerable || this.state.simulation.time < this._invulnerableUntil }
 	set isInvulnerable(val) { this._isInvulnerable = !!val }
 
 	get size() { return this._size }
@@ -69,12 +110,8 @@ class Player extends Entity {
 	get velocity() { return this._velocity }
 	set velocity(val) { this._velocity = Math.max(val, 1) }
 
-	setInvulnerable(duration = Number.MAX_VALUE / 1000) {
-		duration ??= Number.MAX_VALUE / 1000
-		this.isInvulnerable = true
-		setTimeout(function () {
-			this.isInvulnerable = false
-		}.bind(this), duration * 1000)
+	setInvulnerable(duration) {
+		this._invulnerableUntil = this.state.simulation.time + duration
 	}
 
 	deathScreen() {
@@ -95,6 +132,18 @@ class Player extends Entity {
 		const highScore = Number(localStorage.getItem('tetragon-high-score') || 0)
 		if (score > highScore) {
 			localStorage.setItem('tetragon-high-score', score)
+
+			// Only show the submission modal if a new high score is achieved
+			this.state.lastScore = score;
+			document.getElementById('name-modal').style.display = 'flex';
+
+			// Ensure the container is visible but the main menu buttons are hidden
+			dc.style.display = 'block';
+			start.style.display = 'none';
+			settings.style.display = 'none';
+			controls.style.display = 'none';
+			feedbackButton.style.display = 'none';
+			leaderboardButton.style.display = 'none';
 		}
 
 		this.state.simulation.wipe()
@@ -112,9 +161,9 @@ class Player extends Entity {
 			else draw.fillStyle = this.color
 
 			if (this.isInvulnerable) {
-				draw.save()
-				draw.globalAlpha = 0.4 + 0.6 * Math.sin(this.state.simulation.time * 30)
-				draw.restore()
+				draw.globalAlpha = 0.4 + 0.4 * Math.sin(this.state.simulation.time * 25)
+				draw.shadowBlur = 15 + 10 * Math.sin(this.state.simulation.time * 25)
+				draw.shadowColor = 'white'
 			}
 			draw.fillRect(this.size / -2, this.size / -2, this.size, this.size)
 

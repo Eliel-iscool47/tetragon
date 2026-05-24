@@ -1,0 +1,105 @@
+[
+	{
+		"threshold": 1,
+		"title": "Incursion",
+		"spawns": [{ "type": "default", "count": 5 }],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 5 },
+			{ "type": "heal", "count": 5 },
+			{ "type": "reroll", "count": 5 },
+			{ "type": "invincibility", "count": 3 },
+			{ "type": "shield", "count": 3 }
+		]
+	},
+	{
+		"threshold": 6,
+		"title": "Defensive Line",
+		"spawns": [
+			{ "type": "default", "count": 5 },
+			{ "type": "sentry", "count": 3 }
+		],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 5 },
+			{ "type": "heal", "count": 5 },
+			{ "type": "reroll", "count": 5 },
+			{ "type": "invincibility", "count": 3 },
+			{ "type": "shield", "count": 3 }
+		]
+	},
+	{
+		"threshold": 11,
+		"title": "Triple Threat",
+		"spawns": [
+			{ "type": "default", "count": 5 },
+			{ "type": "sentry", "count": 4 },
+			{ "type": "grenadier", "count": 3 }
+		],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 4 },
+			{ "type": "heal", "count": 3 },
+			{ "type": "reroll", "count": 3 },
+			{ "type": "invincibility", "count": 3 },
+			{ "type": "shield", "count": 3 }
+		]
+	},
+	{
+		"threshold": 16,
+		"title": "The Vanguard",
+		"spawns": [
+			{ "type": "default", "count": 8 },
+			{ "type": "tank", "count": 8 },
+			{ "type": "grenadier", "count": 8 },
+			{ "type": "sentry", "count": 8 }
+		],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 3 },
+			{ "type": "heal", "count": 2 },
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 2 }
+		]
+	},
+	{
+		"threshold": 21,
+		"title": "Elite Force",
+		"spawns": [
+			{ "type": "archer", "count": 5 },
+			{ "type": "tank", "count": 12 },
+			{ "type": "grenadier", "count": 8 },
+			{ "type": "default", "count": 10 },
+			{ "type": "sentry", "count": 12 }
+		],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 2 },
+			{ "type": "heal", "count": 2 },
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 2 }
+		]
+	},
+	{
+		"threshold": 31,
+		"title": "The Depths",
+		"spawns": [
+			{ "type": "default", "count": "c - 15" },
+			{ "type": "tank", "count": "c - 20" },
+			{ "type": "archer", "count": "c - 25" },
+			{ "type": "grenadier", "count": "c - 15" },
+			{ "type": "sentry", "count": "c - 15" }
+		],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 2 },
+			{ "type": "heal", "count": 2 },
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 2 }
+		]
+	},
+	{
+		"threshold": 41,
+		"title": "The Swarm",
+		"spawns": [{ "type": "default", "count": "c + 10" }],
+		"powerUpSpawns": [
+			{ "type": "ammo", "count": 2 },
+			{ "type": "heal", "count": 2 },
+			{ "type": "invincibility", "count": 2}
+		]
+	}
+]

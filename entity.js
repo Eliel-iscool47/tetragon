@@ -9,6 +9,7 @@ class Entity {
 		this.speed = 0
 		this.size = 10
 		this.color = 'black'
+		this.shield = 0
 		Object.assign(this, config)
 	}
 
@@ -34,10 +35,54 @@ class Entity {
 	 */
 	takeDamage(amount) {
 		if (this.isInvulnerable) return
-		this.health -= amount * this.damageTaken
+		let damage = amount * this.damageTaken
+		const isCrit = percentChance(this.state.upgrades.critChance)
+		if (isCrit) damage *= this.state.upgrades.critMultiplier
+
+		let absorbed = 0
+		if (this.shield > 0) {
+			absorbed = Math.min(this.shield, damage)
+			this.shield -= absorbed
+			damage -= absorbed
+
+			this.state.particles.spawn(this.pos.x, this.pos.y, {
+				...this.state.particles.textPopup,
+				text: Math.round(absorbed),
+				color: 'hsl(200, 100%, 60%)',
+				size: 20,
+				vx: rand(-2, 2),
+				vy: rand(-5, -3)
+			})
+		}
+
+		this.health -= damage
+		if (damage > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
+			...this.state.particles.textPopup,
+			text: Math.round(damage),
+			color: isCrit ? 'yellow' : 'white',
+			size: isCrit ? 36 : 24,
+			vx: rand(-2, 2),
+			vy: rand(-5, -3)
+		})
+	}
+
+	/**
+	 * Standard method to handle healing for an entity.
+	 * @param {number} amount The amount of health to restore.
+	 */
+	heal(amount) {
+		this.health += amount
+		this.state.particles.spawn(this.pos.x, this.pos.y, {
+			...this.state.particles.textPopup,
+			text: '+' + Math.round(amount),
+			color: 'hsl(120, 100%, 50%)',
+			size: 24,
+			vx: rand(-2, 2),
+			vy: rand(-5, -3)
+		})
 	}
 
 	checkCollision(other) {
-		return distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) <= Math.max(this.size + other.size)
+		return distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) <= (this.size + other.size) * 0.5
 	}
 }

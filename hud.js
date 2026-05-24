@@ -2,8 +2,8 @@ var hud = {
 	Obj: document.getElementById('HUD'),
 	health: document.getElementById('health-bar'),
 	maxHealth: document.getElementById('max-health'),
-	damageTaken: document.getElementById('damage-taken-bar'),
-	damage: document.getElementById('damage-bar'),
+	shield: document.getElementById('shield-bar'),
+	maxShield: document.getElementById('max-shield'),
 	upgrades: document.getElementById('upgrade-list'),
 	inv: document.getElementById('inventory'),
 	levels: document.getElementById('level-counter'),
@@ -22,20 +22,15 @@ var hud = {
 	get displayMaxHealth() { return this._displayMaxHealth },
 	set displayMaxHealth(val) { this._displayMaxHealth = val },
 
-	_displayDmg: 1,
-	get displayDmg() { return this._displayDmg },
-	set displayDmg(val) { this._displayDmg = val },
-
-	_displayDefense: 1,
-	get displayDefense() { return this._displayDefense },
-	set displayDefense(val) { this._displayDefense = val },
+	_displayShield: 0,
+	get displayShield() { return this._displayShield },
+	set displayShield(val) { this._displayShield = val },
 
 	get defaults() {
 		return {
 			displayHealth: 100,
 			displayMaxHealth: 100,
-			displayDmg: 1,
-			displayDefense: 1,
+			displayShield: 0,
 			timeMessage: ''
 		}
 	},
@@ -45,38 +40,34 @@ var hud = {
 	reset() {
 		Object.assign(this, this.defaults)
 	},
-
+	processTime() {
+		switch (true) {
+			case simulation.time < 60:
+				return `${simulation.time.toFixed(1)}s`
+				break
+			case simulation.time < 3600:
+				return `${Math.floor(simulation.time / 60)}m ${(simulation.time % 60).toFixed(1)}s`
+				break
+			default:
+				return `${Math.floor(simulation.time / 3600)}h ${Math.floor((simulation.time % 3600) / 1)}m ${Math.round(simulation.time % 60)}s`
+				break
+		}
+	},
 	healthBar() {
 		this.displayHealth = lerp(this.displayHealth, state.player.health, 0.1)
 		this.displayMaxHealth = lerp(this.displayMaxHealth, state.player.maxHealth, 0.1)
 		this.health.style.width = `${this.displayHealth * 2}px`
 		this.health.style.backgroundColor = `hsl(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%)`
+		// this.maxHealth.style.backgroundColor = `hsla(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%, 0.3)`
 		this.health.innerText = `${Math.round(state.player.health * 1000) / 1000}`
 		this.maxHealth.style.width = `${this.displayMaxHealth * 2}px`
 	},
-	damageTakenBar() {
-		this.displayDefense = lerp(this.displayDefense, player.damageTaken, 0.1)
-		if (this.displayDefense <= 1) {
-			this.damageTaken.style.backgroundColor = 'hsl(190, 100%, 75%)'
-			this.damageTaken.style.width = `${(1 - this.displayDefense) * this.displayMaxHealth * 2}px`
-		}
-		else {
-			this.damageTaken.style.backgroundColor = 'hsl(0, 100%, 70%)'
-			this.damageTaken.style.width = `${(this.displayDefense - 1) * this.displayMaxHealth * 2}px`
-		}
-	},
-	damageBar() {
-		this.displayDmg = lerp(this.displayDmg, state.player.damageDone, 0.1)
-		this.damage.style.height = `${this.displayDmg * 200}px`
-		this.damage.style.backgroundColor = 'hsl(0, 100%, 35%)'
-		this.damage.innerText = `${Math.round(state.player.damageDone * 1000) / 1000}`
-		this.damage.style.color = 'hsl(0, 0%, 100%)'
-		this.damage.style.textAlign = 'center'
-		this.damage.style.fontSize = '20px'
-		this.damage.style.position = 'absolute'
-		this.damage.style.left = `${main.width - 25}px`
-		this.damage.style.width = `${main.width - parseFloat(this.damage.style.left)}px`
-		this.damage.style.top = '0'
+	shieldBar() {
+		this.displayShield = lerp(this.displayShield, state.player.shield, 0.1)
+		const displayMaxShield = state.player.maxShield
+		this.shield.style.width = `${this.displayShield * 2}px`
+		this.shield.innerText = this.displayShield > 1 ? Math.round(this.displayShield) : ''
+		this.maxShield.style.width = `${displayMaxShield * 2}px`
 	},
 	upgradeList() {
 		this.upgrades.style.display = 'block'
@@ -85,7 +76,7 @@ var hud = {
 		this.upgrades.style.width = `${main.width * 0.125}px`
 		upgrades.uniqueCollected = [...new Set(upgrades.collected)]
 		this.upgrades.style.height = `${upgrades.uniqueCollected.length * 50}px`
-		this.upgrades.style.left = `${parseFloat(this.damage.style.left) - parseFloat(this.upgrades.style.width)}px`
+		this.upgrades.style.left = `${main.width - 25 - parseFloat(this.upgrades.style.width)}px`
 		this.upgrades.style.top = '0px'
 		this.upgrades.style.color = 'black'
 		this.upgrades.style.fontSize = '15px'
@@ -128,8 +119,7 @@ var hud = {
 		${guns.inventory.map(function (g) {
 			return g.HUDEntry
 		}.bind(this)
-		)
-				.join('').replaceAll('Infinity', '∞')}
+		).join('').replaceAll('Infinity', '∞')}
 		`
 	},
 	levelCounter() {
@@ -141,41 +131,8 @@ var hud = {
 		this.levels.style.textAlign = 'center'
 		this.levels.style.left = `${(main.width * 0.5) - 200}px`
 		this.levels.style.top = '0'
-		switch (true) {
-			case simulation.time < 60:
-				this.timeMessage = `${simulation.time.toFixed(1)}s`
-				break
-			case simulation.time < 3600:
-				this.timeMessage = `${Math.floor(simulation.time / 60)}m ${(simulation.time % 60).toFixed(1)}s`
-				break
-			default:
-				this.timeMessage = `${Math.floor(simulation.time / 3600)}h ${Math.floor((simulation.time % 3600) / 1)}m ${Math.round(simulation.time % 60)}s`
-				break
-		}
-		this.levels.innerText = (mobs.list.some(m => m.class == 'boss') ? `Level ${level.current}` : `Level ${level.current + 1} in ${level.intermission - Math.round(simulation.time - level.time)}s`) +
+		this.levels.innerText = (!state.level.isWon() ? `Level ${level.current}` : `Level ${level.current + 1} in ${level.intermission - Math.round(simulation.time - level.time)}s`) +
 			`\n${this.timeMessage}`
-	},
-	elapsedTime() {
-		this.timer.style.top = `${main.height - 50}px`
-		this.timer.style.left = '0'
-		this.timer.style.width = '180px'
-		this.timer.style.height = '50px'
-		this.timer.style.backgroundColor = 'hsla(0, 0%, 55%, 0.65)'
-		this.timer.style.color = 'black'
-		this.timer.style.fontSize = '20px'
-		this.timer.style.textAlign = 'left'
-		switch (true) {
-			case simulation.time < 60:
-				this.timeMessage = `${simulation.time.toFixed(1)}s`
-				break
-			case simulation.time < 3600:
-				this.timeMessage = `${Math.floor(simulation.time / 60)}m ${(simulation.time % 60).toFixed(1)}s`
-				break
-			default:
-				this.timeMessage = `${Math.floor(simulation.time / 3600)}h ${Math.floor((simulation.time % 3600) / 1)}m ${Math.round(simulation.time % 60)}s`
-				break
-		}
-		this.timer.innerText = this.timeMessage
 	},
 	criticalHealth() {
 		if (state.player.health / state.player.maxHealth <= 0.3 && !simulation.isDead) {
@@ -184,9 +141,9 @@ var hud = {
 		} else this.criticalOverlay.style.display = 'none'
 	},
 	make() {
+		this.timeMessage = this.processTime()
 		this.healthBar()
-		this.damageTakenBar()
-		this.damageBar()
+		this.shieldBar()
 		this.inventory()
 		this.levelCounter()
 		this.console()
@@ -196,9 +153,9 @@ var hud = {
 }
 
 hud.Obj.appendChild(hud.health)
+hud.Obj.appendChild(hud.maxShield)
+hud.Obj.appendChild(hud.shield)
 hud.Obj.appendChild(hud.inv)
-hud.Obj.appendChild(hud.damageTaken)
-hud.Obj.appendChild(hud.damage)
 hud.Obj.appendChild(hud.levels)
 hud.Obj.appendChild(hud.upgrades)
 hud.criticalOverlay.style.position = 'fixed'
@@ -215,12 +172,6 @@ hud.health.addEventListener('mousemove', function (m) {
 }.bind(this))
 hud.inv.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.inv.offsetLeft, m.offsetY + hud.inv.offsetTop)
-}.bind(this))
-hud.damageTaken.addEventListener('mousemove', function (m) {
-	input.cursor.update(m.offsetX + hud.damageTaken.offsetLeft, m.offsetY + hud.damageTaken.offsetTop)
-}.bind(this))
-hud.damage.addEventListener('mousemove', function (m) {
-	input.cursor.update(m.offsetX + hud.damage.offsetLeft, m.offsetY + hud.damage.offsetTop)
 }.bind(this))
 hud.levels.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.levels.offsetLeft, m.offsetY + hud.levels.offsetTop)

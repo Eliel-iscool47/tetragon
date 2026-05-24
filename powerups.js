@@ -6,7 +6,14 @@ var powerUps = {
 		constructor(state, x, y, config) {
 			super(state, x, y, config)
 		}
-		draw() { }
+		draw() {
+			this.drawSelf(function () {
+				draw.fillStyle = this.color
+				draw.arc(0, 0, this.size, 0, Math.PI * 2)
+				draw.fill()
+				draw.stroke()
+			}.bind(this))
+		}
 		/**
 		 * A helper to handle standard canvas transformations and styles for power-ups.
 		 * @param {Function} callback The drawing logic for the specific power-up shape.
@@ -56,13 +63,13 @@ var powerUps = {
 			guns.choose()
 			powerUps.list = powerUps.list.filter(p => p != this)
 		},
-		draw: function () {
-			this.drawSelf(function () {
-				draw.arc(0, 0, this.size, 0, Math.PI * 2)
-				draw.fill()
-				draw.stroke()
-			}.bind(this))
-		}
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
 	},
 	heal: {
 		name: 'heal',
@@ -70,16 +77,16 @@ var powerUps = {
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing || state.player.health >= state.player.maxHealth) return undefined
-			state.player.health += upgrades.healEffect * 8
+			state.player.heal(upgrades.healEffect * 8)
 			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
 		},
-		draw: function () {
-			this.drawSelf(function () {
-				draw.arc(0, 0, this.size, 0, Math.PI * 2)
-				draw.fill()
-				draw.stroke()
-			}.bind(this))
-		}
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
 	},
 	ammo: {
 		name: 'ammo',
@@ -101,17 +108,17 @@ var powerUps = {
 			}.bind(this))
 			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
 		},
-		draw: function () {
-			this.drawSelf(function () {
-				draw.arc(0, 0, this.size, 0, Math.PI * 2)
-				draw.fill()
-				draw.stroke()
-			}.bind(this))
-		}
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
 	},
 	upgrade: {
 		name: 'upgrade',
-		color: 'hsl(200, 100%, 50%)',
+		color: 'hsl(255, 75%, 50%)',
 		size: 20,
 		effect() {
 			if (
@@ -121,30 +128,65 @@ var powerUps = {
 			upgrades.choose()
 			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
 		},
-		draw: function () {
-			this.drawSelf(function () {
-				draw.arc(0, 0, this.size, 0, Math.PI * 2)
-				draw.fill()
-				draw.stroke()
-			}.bind(this))
-		}
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
 	},
 	reroll: {
 		name: 'reroll',
-		color: 'hsl(280, 100%, 50%)',
+		color: 'hsl(310, 100%, 50%)',
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
 			upgrades.rerolls++
 			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
 		},
-		draw: function () {
-			this.drawSelf(function () {
-				draw.arc(0, 0, this.size, 0, Math.PI * 2)
-				draw.fill()
-				draw.stroke()
-			}.bind(this))
-		}
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
+	},
+	invincibility: {
+		name: 'invincibility',
+		color: 'hsl(180, 100%, 70%)',
+		size: 15,
+		effect() {
+			if (simulation.isPaused || simulation.isChoosing) return undefined
+			state.player.setInvulnerable(5 * upgrades.invulnerabilityDuration)
+			powerUps.list = powerUps.list.filter(p => p != this)
+		},
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
+	},
+	shield: {
+		name: 'shield',
+		color: 'hsl(80, 100%, 50%)',
+		size: 15,
+		effect() {
+			if (simulation.isPaused || simulation.isChoosing || state.player.shield >= state.player.maxShield) 
+				state.player.maxShield += 8 * upgrades.shieldEffect
+			else state.player.shield += 8 * upgrades.shieldEffect
+			powerUps.list = powerUps.list.filter(p => p != this)
+		},
+		// draw: function () {
+		// 	this.drawSelf(function () {
+		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
+		// 		draw.fill()
+		// 		draw.stroke()
+		// 	}.bind(this))
+		// }
 	},
 	draw: function () {
 		this.list.forEach(function (p) { return p.draw() }.bind(this))

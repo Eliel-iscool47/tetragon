@@ -263,3 +263,17 @@ function lineCircleCollision(x1, y1, x2, y2, cx, cy, r) {
 	const closestY = y1 + t * dy
 	return distance(cx, cy, closestX, closestY) <= r
 }
+/**
+ * Returns a random key from an object based on its weighted value.
+ * @param {Object} spec An object where keys are choices and values are weights.
+ */
+function weightedRand(spec) {
+	let sum = 0
+	for (let i in spec) sum += spec[i]
+	const r = Math.random() * sum
+	let cumulative = 0
+	for (let i in spec) {
+		cumulative += spec[i]
+		if (r <= cumulative) return i
+	}
+}

@@ -1,6 +1,11 @@
 //container && canvas && 2-Dimensional rendering context
 
 const dc = document.getElementById('container')
+// Update this to your deployed backend URL
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+	? 'http://localhost:3000' 
+	: 'https://your-backend-app-name.onrender.com';
+
 const main = document.getElementById('main')
 main.width = window.innerWidth
 main.height = window.innerHeight
@@ -44,7 +49,7 @@ const state = {
 	resetAll() {
 		const modules = [
 			this.simulation, this.player, this.upgrades, this.guns, this.level,
-			this.mobs, this.bullets, this.powerUps, this.collisions, this.hud, 
+			this.mobs, this.bullets, this.powerUps, this.collisions, this.hud,
 			this.input, this.particles
 		]
 		modules.forEach(mod => {
@@ -59,11 +64,15 @@ const start = document.getElementById('start')
 const controls = document.getElementById('controls')
 const controlDoc = document.getElementById('control-doc')
 const settings = document.getElementById('settings')
-const creditsButton = document.getElementById('credits-button')
-const credits = document.getElementById('credits')
+const leaderboardButton = document.getElementById('leaderboard-button')
+const leaderboardModal = document.getElementById('leaderboard-modal')
+const leaderboardList = document.getElementById('leaderboard-list')
+const feedbackButton = document.getElementById('feedback-button')
+const feedbackModal = document.getElementById('feedback-modal')
+const feedbackText = document.getElementById('feedback-text')
+const submitFeedback = document.getElementById('submit-feedback')
+const closeFeedback = document.getElementById('close-feedback')
 const pauseScreen = document.getElementById('pause-screen')
-const pauseText = pauseScreen.querySelector('h1')
-const pauseSubtext = pauseScreen.querySelector('p')
 const chooseScreen = document.getElementById('choice-screen')
 const chooseHeader = chooseScreen.querySelector('h1')
 const chooseText = document.createElement('ul')
@@ -71,19 +80,11 @@ chooseScreen.appendChild(chooseText)
 
 //styling
 
-pauseSubtext.style.fontSize = `${main.width * 0.03}px`
-pauseSubtext.style.textAlign = 'center'
-pauseSubtext.style.color = 'white'
-pauseSubtext.style.position = 'absolute'
-pauseSubtext.style.top = '50vh'
-pauseSubtext.style.left = '50%'
-pauseSubtext.style.transform = 'translate(-50%, -50%)'
-pauseText.style.position = 'absolute'
-pauseText.style.top = '15%'
-pauseText.style.left = '50%'
-pauseText.style.textAlign = 'center'
-pauseText.style.color = 'white'
-pauseText.style.transform = 'translate(-50%, -50%)'
+const settingsMenu = document.createElement('div')
+settingsMenu.id = 'settings-menu'
+dc.appendChild(settingsMenu)
+let remappingAction = null
+
 pauseScreen.style.position = 'fixed'
 pauseScreen.style.top = '0'
 pauseScreen.style.left = '0'
@@ -96,170 +97,166 @@ pauseScreen.style.display = 'none'
 dc.appendChild(start)
 dc.appendChild(controls)
 dc.appendChild(settings)
-dc.appendChild(creditsButton)
+dc.appendChild(feedbackButton)
+dc.appendChild(leaderboardButton)
 dc.appendChild(controlDoc)
-
-//start button
-
-start.style.position = 'absolute'
-start.style.top = `${main.height * 0.3}px`
-start.style.left = `${main.width * 0.4}px`
-start.style.width = `${main.width * 0.2}px`
-start.style.height = `${main.height * 0.2}px`
-start.style.cursor = 'pointer'
-
-//controls button
-
-controls.style.position = 'absolute'
-controls.style.top = `${main.height * 0.1}px`
-controls.style.left = `${main.width * 0.15}px`
-controls.style.width = `${main.width * 0.2}px`
-controls.style.height = `${main.height * 0.1}px`
-controls.style.cursor = 'pointer'
-controlDoc.style.position = 'absolute'
-controlDoc.style.top = `${main.height * 0.2}px`
-controlDoc.style.left = `${main.width * 0.15}px`
-controlDoc.style.width = `${main.width * 0.2}px`
-controlDoc.style.height = `${main.height * 0.2}px`
-controlDoc.style.fontSize = `${main.width * 0.015}px`
-controlDoc.style.overflowY = 'scroll'
-controlDoc.style.overflowX = 'hidden'
-
-//settings button
-
-settings.style.position = 'absolute'
-settings.style.top = `${main.height * 0.2}px`
-settings.style.left = `${main.width * 0.65}px`
-settings.style.width = `${main.width * 0.2}px`
-settings.style.height = `${main.height * 0.2}px`
-settings.style.cursor = 'pointer'
-
-//credits button
-
-creditsButton.style.position = 'absolute'
-creditsButton.style.top = `${main.height * 0.1}px`
-creditsButton.style.left = `${main.width * 0.425}px`
-creditsButton.style.width = `${main.width * 0.15}px`
-creditsButton.style.height = `${main.height * 0.1}px`
-creditsButton.style.cursor = 'pointer'
-
-//credits
-
-credits.style.position = 'absolute'
-credits.style.top = `${main.height * 0.1}px`
-credits.style.left = `${main.width * 0.65}px`
-credits.style.width = `${main.width * 0.35}px`
-credits.style.height = `${main.height * 0.1}px`
-credits.style.fontSize = `${main.width * 0.01}px`
-credits.style.cursor = 'pointer'
-credits.style.overflowY = 'scroll'
-credits.style.overflowX = 'hidden'
-credits.style.border = '3px solid hsl(0, 0%, 0%)'
-credits.innerHTML = `
-<h1>Credits && Info</h1>
-<h2>Credits</h2>
-<p>Eliel-isCool47: art, code, ideas</p>
-<h2>Info</h2>
-<p>Github Repo: https://github.com/Eliel-isCool47/Tetragon</p>
-<p>more info on the README</p>
-`
-credits.style.display = 'none'
 
 //button logic
 
-start.onclick = function () {
+window.addEventListener('load', () => {
+
+	const nameInput = document.getElementById('name-input')
+	nameInput.value = localStorage.getItem('tetragon-username') || ""
+
+	start.onclick = function () {
+	if (simulation.interval) clearInterval(simulation.interval)
 	simulation.init()
 }.bind(this)
-controls.onclick = function () {
-	controlDoc.innerHTML = `
-Controls<br>
-${input.keybinds.up.replace('Key', '').replace('Digit', '')}, ${input.keybinds.down.replace('Key', '').replace('Digit', '')}, ${input.keybinds.left.replace('Key', '').replace('Digit', '')}, ${input.keybinds.right.replace('Key', '').replace('Digit', '')} or Arrow Keys: Move<br>
-Left Click or ${input.keybinds.fire.replace('Key', '').replace('Digit', '')}: Shoot<br>
-Mouse move: Aim<br>
-${input.keybinds.respawn.replace('Key', '').replace('Digit', '')}: Respawn<br>
-${input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')}: Go to the Main Menu<br>
-Tab: Toggle this menu<br>
-Escape or ${input.keybinds.pause.replace('Key', '').replace('Digit', '')}: Pause<br>
-${input.keybinds.gunLeft.replace('Key', '').replace('Digit', '')}: Cycle gun left<br>
-${input.keybinds.gunRight.replace('Key', '').replace('Digit', '')}: Cycle gun right<br>
-${input.keybinds.reload.replace('Key', '').replace('Digit', '')}: Reload<br>
-`
-	controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
+
+leaderboardButton.onclick = async function () {
+	leaderboardModal.style.display = 'flex'
+	leaderboardList.innerHTML = 'Loading...'
+	try {
+		const response = await fetch(`${API_BASE_URL}/api/leaderboard`)
+		const data = await response.json()
+		if (data.length <= 0) {
+			leaderboardList.innerHTML = 'No scores yet!'
+		} else {
+			leaderboardList.innerHTML = data.map((entry, i) =>
+				`<div>${i + 1}. <b>${entry.name}</b> - Level ${entry.level}</div>`
+			).join('')
+		}
+	} catch (e) {
+		leaderboardList.innerHTML = 'Error loading scores.'
+	}
 }.bind(this)
+
+document.getElementById('close-leaderboard').onclick = function () {
+	leaderboardModal.style.display = 'none'
+}
+
+feedbackButton.onclick = function () {
+	feedbackModal.style.display = feedbackModal.style.display == 'flex' ? 'none' : 'flex'
+}.bind(this)
+
+closeFeedback.onclick = function () {
+	feedbackModal.style.display = 'none'
+}.bind(this)
+
+submitFeedback.onclick = async function () {
+	const message = feedbackText.value.trim()
+	if (!message) return alert("Please type something before sending!")
+
+	submitFeedback.disabled = true
+	submitFeedback.innerText = "Sending..."
+
+	try {
+		const response = await fetch(`${API_BASE_URL}/api/feedback`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ message })
+		})
+
+		if (response.ok) alert("Feedback sent! Thank you.")
+		else alert("Failed to send feedback.")
+	} catch (e) {
+		alert("An error occurred.")
+	} finally {
+		submitFeedback.disabled = false
+		submitFeedback.innerText = "Send"
+		feedbackModal.style.display = 'none'
+		feedbackText.value = ""
+	}
+}.bind(this)
+
 settings.onclick = function () {
 	settingsMenu.style.display = settingsMenu.style.display == 'block' ? 'none' : 'block'
 	renderSettings()
 }.bind(this)
-creditsButton.onclick = function () {
-	credits.style.display = credits.style.display == 'block' ? 'none' : 'block'
-}.bind(this)
-start.style.display = 'block'
-controls.style.display = 'block'
-settings.style.display = 'block'
-creditsButton.style.display = 'block'
-main.style.display = 'none'
-
-const settingsMenu = document.createElement('div')
-dc.appendChild(settingsMenu)
-settingsMenu.style.position = 'absolute'
-settingsMenu.style.top = `${parseFloat(settings.style.top) + parseFloat(settings.style.height)}px`
-settingsMenu.style.left = `${parseFloat(settings.style.left)}px`
-settingsMenu.style.width = `${parseFloat(settings.style.width)}px`
-settingsMenu.style.height = `fit-content`
-settingsMenu.style.maxHeight = `${main.height * 0.5}px`
-settingsMenu.style.backgroundColor = `${settings.style.backgroundColor}`
-settingsMenu.style.color = 'hsl(0, 0%, 0%)'
-settingsMenu.style.fontSize = '20px'
-settingsMenu.style.overflowY = 'scroll'
-settingsMenu.style.display = 'none'
-settingsMenu.style.padding = '20px'
-settingsMenu.style.border = '2px solid hsl(0, 0%, 10%)'
-settingsMenu.style.zIndex = '100'
-
-let remappingAction = null
 
 function renderSettings() {
-	settingsMenu.innerHTML = '<h1>Settings</h1>'
+	settingsMenu.innerHTML = '<h3>Settings</h3>'
 
-	// Difficulty Scale Slider
+	// Restart Button (only visible during gameplay)
+	if (!simulation.isMainMenu) {
+		const restartBtn = document.createElement('button')
+		restartBtn.innerText = 'Restart'
+		restartBtn.style.width = '100%'
+		restartBtn.style.padding = '10px'
+		restartBtn.style.marginBottom = '20px'
+		restartBtn.style.backgroundColor = 'hsl(0, 100%, 30%)'
+		restartBtn.style.color = 'white'
+		restartBtn.style.border = 'none'
+		restartBtn.style.borderRadius = '5px'
+		restartBtn.style.cursor = 'pointer'
+		restartBtn.onclick = () => {
+			settingsMenu.style.display = 'none'
+			simulation.init()
+		}
+		settingsMenu.appendChild(restartBtn)
+
+		const quitBtn = document.createElement('button')
+		quitBtn.innerText = 'Quit to Main Menu'
+		quitBtn.style.width = '100%'
+		quitBtn.style.padding = '10px'
+		quitBtn.style.marginBottom = '20px'
+		quitBtn.style.backgroundColor = 'hsl(0, 0%, 20%)'
+		quitBtn.style.color = 'white'
+		quitBtn.style.border = 'none'
+		quitBtn.style.borderRadius = '5px'
+		quitBtn.style.cursor = 'pointer'
+		quitBtn.onclick = () => {
+			settingsMenu.style.display = 'none'
+			simulation.mainMenu()
+		}
+		settingsMenu.appendChild(quitBtn)
+	}
+
+	// Difficulty Slider
 	const diffContainer = document.createElement('div')
-	diffContainer.style.margin = '10px 0'
-	diffContainer.innerHTML = `
-		<label style="display: block; margin-bottom: 5px;">Difficulty Scale: ${state.difficultyScale.toFixed(2)}x</label>
-		<input type="range" min="0.2" max="5" step="0.1" value="${state.difficultyScale}" style="width: 100%; cursor: pointer;">
-	`
-	const slider = diffContainer.querySelector('input')
-	slider.oninput = function (e) {
-		state.difficultyScale = parseFloat(e.target.value)
-		diffContainer.querySelector('label').innerText = `Difficulty Scale: ${state.difficultyScale.toFixed(2)}x`
-	}.bind(this)
+	diffContainer.style.marginBottom = '20px'
+	diffContainer.style.borderBottom = '1px solid #333'
+	diffContainer.style.paddingBottom = '10px'
+
+	const diffLabel = document.createElement('div')
+	diffLabel.innerText = `Difficulty Scale: ${state.difficultyScale.toFixed(1)}x`
+	diffLabel.style.marginBottom = '5px'
+
+	const diffSlider = document.createElement('input')
+	diffSlider.type = 'range'
+	diffSlider.min = '0.2'
+	diffSlider.max = '5.0'
+	diffSlider.step = '0.1'
+	diffSlider.value = state.difficultyScale
+	diffSlider.style.width = '100%'
+	diffSlider.oninput = () => {
+		state.difficultyScale = parseFloat(diffSlider.value)
+		diffLabel.innerText = `Difficulty Scale: ${state.difficultyScale.toFixed(1)}x`
+	}
+
+	diffContainer.appendChild(diffLabel)
+	diffContainer.appendChild(diffSlider)
 	settingsMenu.appendChild(diffContainer)
-	settingsMenu.appendChild(document.createElement('hr'))
 
-	settingsMenu.insertAdjacentHTML('beforeend', '<h2>Keybinds</h2><p>Click to remap. Escape to cancel.</p>')
-	const closeBtn = document.createElement('button')
-	closeBtn.innerText = 'Close'
-	closeBtn.style.fontSize = '20px'
-	closeBtn.onclick = function () {
-		settingsMenu.style.display = 'none'
-		remappingAction = null
-	}.bind(this)
-	settingsMenu.appendChild(closeBtn)
-	settingsMenu.appendChild(document.createElement('hr'))
-
-	for (const [action, key] of Object.entries(input.keybinds)) {
-		if (key == input.keybinds.testing || key == input.keybinds.allGuns || key == input.keybinds.mainMenu) continue
+	for (const action in state.input.keybinds) {
 		const container = document.createElement('div')
-		container.style.margin = '10px 0'
+		container.style.marginBottom = '10px'
+		container.style.display = 'flex'
+		container.style.justifyContent = 'space-between'
+		container.style.alignItems = 'center'
+
+		const label = document.createElement('span')
+		label.innerText = action.charAt(0).toUpperCase() + action.slice(1) + ': '
+
 		const btn = document.createElement('button')
-		btn.innerText = remappingAction === action ? 'Press any key... Escape to cancel' : `${action}: ${key.replace('Key', '').replace('Digit', '')}`
-		btn.style.fontSize = '18px'
-		btn.style.width = '400px'
-		btn.style.textAlign = 'left'
-		btn.onclick = function () {
+		btn.innerText = state.input.keybinds[action].replace('Key', '').replace('Digit', '')
+		btn.style.padding = '5px 10px'
+		btn.onclick = () => {
 			remappingAction = action
-			renderSettings()
-		}.bind(this)
+			btn.innerText = 'Press a key...'
+		}
+
+		container.appendChild(label)
 		container.appendChild(btn)
 		settingsMenu.appendChild(container)
 	}
@@ -269,11 +266,41 @@ document.addEventListener('keydown', function (e) {
 	if (remappingAction && settingsMenu.style.display === 'block') {
 		e.preventDefault()
 		if (e.code !== 'Escape') {
-			input.keybinds[remappingAction] = e.code
-			localStorage.setItem('tetragon-keybinds', JSON.stringify(input.keybinds))
+			state.input.keybinds[remappingAction] = e.code
+			localStorage.setItem('tetragon-keybinds', JSON.stringify(state.input.keybinds))
 		}
-		if (!input.preventDefaultList.includes(e.code)) input.preventDefaultList.push(e.code)
+		if (!state.input.preventDefaultList.includes(e.code)) state.input.preventDefaultList.push(e.code)
 		remappingAction = null
 		renderSettings()
 	}
 }.bind(this))
+
+start.style.display = 'block'
+controls.style.display = 'block'
+settings.style.display = 'block'
+leaderboardButton.style.display = 'block'
+feedbackButton.style.display = 'block'
+main.style.display = 'none'
+
+renderSettings() // Initial render
+
+document.getElementById('submit-score').onclick = async function () {
+	const playerName = nameInput.value.trim() || "Anonymous"
+	const score = state.lastScore
+
+	localStorage.setItem('tetragon-username', playerName)
+
+	try {
+		await fetch(`${API_BASE_URL}/api/score`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: playerName, level: score })
+		})
+	} catch (err) {
+		console.error("Failed to submit score", err)
+	}
+
+	document.getElementById('name-modal').style.display = 'none'
+}.bind(this)
+
+});
