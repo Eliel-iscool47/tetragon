@@ -175,18 +175,15 @@ var powerUps = {
 		color: 'hsl(80, 100%, 50%)',
 		size: 15,
 		effect() {
-			if (simulation.isPaused || simulation.isChoosing || state.player.shield >= state.player.maxShield) 
-				state.player.maxShield += 8 * upgrades.shieldEffect
-			else state.player.shield += 8 * upgrades.shieldEffect
+			if (
+				simulation.isPaused || 
+				simulation.isChoosing || 
+				state.player.shield >= 
+				state.player.maxShield
+			) state.player.maxShield += 10 * upgrades.shieldEffect
+			state.player.shield += 10 * upgrades.shieldEffect
 			powerUps.list = powerUps.list.filter(p => p != this)
 		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
 	},
 	draw: function () {
 		this.list.forEach(function (p) { return p.draw() }.bind(this))
