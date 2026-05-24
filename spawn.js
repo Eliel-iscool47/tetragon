@@ -1,16 +1,16 @@
 const default_mobSpawn = {
 	bosses: {
 		voidBoss: 10,
-		summonerBoss: 10,
-		triangleBoss: 10,
-		dodgerBoss: 10,
+		summonerBoss: 12,
+		triangleBoss: 6,
+		dodgerBoss: 15,
 		pentagonBoss: 10,
-		hexagonBoss: 10,
+		hexagonBoss: 3,
 		twinBoss: 5, // Twins are rare/difficult
-		octagonBoss: 10,
-		sniperBoss: 10,
-		minefieldBoss: 10,
-		ghostBoss: 1000 // New Boss!
+		octagonBoss: 8,
+		sniperBoss: 7,
+		minefieldBoss: 9,
+		ghostBoss: 10 // New Boss!
 	},
 	randomBoss(x, y) {
 		const choice = weightedRand(this.bosses)
