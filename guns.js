@@ -203,7 +203,7 @@ var guns = {
 		Choose a gun:
 		<br>
 		${Math.ceil(upgrades.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
-		${buttons.cancel}
+		${buttons.cancelButton()}
 			<br><br>
 		${this.options.filter(function (g) { return g != undefined }.bind(this)).map(function (g) {
 			return `<button class="gun-button"

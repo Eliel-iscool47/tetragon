@@ -86,6 +86,9 @@ var particles = {
 			if (dist < this.state.player.size / 2) {
 				this.state.player.heal(this.healAmount) // Only heal on actual contact
 				this.active = false
+			} else if (this.state.simulation.time - this.timeSpawned > this.duration) {
+				this.active = false
+				this.state.player.heal(this.healAmount)
 			}
 		}
 	},

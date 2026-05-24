@@ -62,50 +62,34 @@ var state = {
 
 //HTML element objects
 
-var start = document.getElementById('start')
-var controls = document.getElementById('controls')
-var controlDoc = document.getElementById('control-doc')
-var settings = document.getElementById('settings')
-var leaderboardButton = document.getElementById('leaderboard-button')
-var leaderboardModal = document.getElementById('leaderboard-modal')
-var leaderboardList = document.getElementById('leaderboard-list')
-var feedbackButton = document.getElementById('feedback-button')
-var feedbackModal = document.getElementById('feedback-modal')
-var feedbackText = document.getElementById('feedback-text')
-var submitFeedback = document.getElementById('submit-feedback')
-var closeFeedback = document.getElementById('close-feedback')
-var pauseScreen = document.getElementById('pause-screen')
-var chooseScreen = document.getElementById('choice-screen')
-var chooseHeader = chooseScreen.querySelector('h1')
-const chooseText = document.createElement('ul')
-chooseScreen.appendChild(chooseText)
+var start, controls, controlDoc, settings, leaderboardButton, leaderboardModal, leaderboardList, 
+    feedbackButton, pauseScreen, chooseScreen;
 
 //styling
 
-const settingsMenu = document.createElement('div')
-settingsMenu.id = 'settings-menu'
-dc.appendChild(settingsMenu)
+var settingsMenu;
 let remappingAction = null
 
-pauseScreen.style.position = 'fixed'
-pauseScreen.style.top = '0'
-pauseScreen.style.left = '0'
-pauseScreen.style.width = '100vw'
-pauseScreen.style.height = '100vh'
-pauseScreen.style.display = 'none'
-
 //appending children
-
-dc.appendChild(start)
-dc.appendChild(controls)
-dc.appendChild(settings)
-dc.appendChild(feedbackButton)
-dc.appendChild(leaderboardButton)
-dc.appendChild(controlDoc)
 
 //button logic
 
 window.addEventListener('load', () => {
+	// Initialize elements inside the load listener to ensure they aren't null
+	start = document.getElementById('start')
+	controls = document.getElementById('controls')
+	controlDoc = document.getElementById('control-doc')
+	settings = document.getElementById('settings')
+	leaderboardButton = document.getElementById('leaderboard-button')
+	leaderboardModal = document.getElementById('leaderboard-modal')
+	leaderboardList = document.getElementById('leaderboard-list')
+	feedbackButton = document.getElementById('feedback-button')
+	pauseScreen = document.getElementById('pause-screen')
+	chooseScreen = document.getElementById('choice-screen')
+
+	settingsMenu = document.createElement('div')
+	settingsMenu.id = 'settings-menu'
+	dc.appendChild(settingsMenu)
 
 	const nameInput = document.getElementById('name-input')
 	nameInput.value = localStorage.getItem('tetragon-username') || ""
@@ -118,6 +102,9 @@ window.addEventListener('load', () => {
 leaderboardButton.onclick = async function () {
 	leaderboardModal.style.display = 'flex'
 	leaderboardList.innerHTML = 'Loading...'
+
+	// Attempt re-initialization if script loaded late
+	if (!supabaseClient && window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 	if (!supabaseClient) {
 		leaderboardList.innerHTML = 'Error: Supabase not initialized.';
@@ -149,36 +136,8 @@ document.getElementById('close-leaderboard').onclick = function () {
 }
 
 feedbackButton.onclick = function () {
-	feedbackModal.style.display = feedbackModal.style.display == 'flex' ? 'none' : 'flex'
-}.bind(this)
-
-closeFeedback.onclick = function () {
-	feedbackModal.style.display = 'none'
-}.bind(this)
-
-submitFeedback.onclick = async function () {
-	const message = feedbackText.value.trim()
-	if (!message) return alert("Please type something before sending!")
-
-	submitFeedback.disabled = true
-	submitFeedback.innerText = "Sending..."
-
-	try {
-		const { error } = await supabaseClient
-			.from('feedback')
-			.insert([{ message }]);
-
-		if (!error) alert("Feedback sent! Thank you.")
-		else alert("Failed to send feedback.")
-	} catch (e) {
-		alert("An error occurred.")
-	} finally {
-		submitFeedback.disabled = false
-		submitFeedback.innerText = "Send"
-		feedbackModal.style.display = 'none'
-		feedbackText.value = ""
-	}
-}.bind(this)
+	window.open("https://forms.gle/QinmVfLSQpMya29R9")
+}
 
 settings.onclick = function () {
 	settingsMenu.style.display = settingsMenu.style.display == 'block' ? 'none' : 'block'
@@ -286,15 +245,17 @@ document.addEventListener('keydown', function (e) {
 	}
 }.bind(this))
 
-start.style.display = 'block'
-controls.style.display = 'block'
-settings.style.display = 'block'
-leaderboardButton.style.display = 'block'
-feedbackButton.style.display = 'block'
-document.getElementById('name-modal').style.display = 'none'
-main.style.display = 'none'
+	// Initial UI State
+	start.style.display = 'block'
+	controls.style.display = 'block'
+	settings.style.display = 'block'
+	leaderboardButton.style.display = 'block'
+	feedbackButton.style.display = 'block'
+	pauseScreen.style.display = 'none'
+	document.getElementById('name-modal').style.display = 'none'
+	main.style.display = 'none'
 
-renderSettings() // Initial render
+	renderSettings() // Initial render
 
 document.getElementById('submit-score').onclick = async function () {
 	const playerName = nameInput.value.trim() || "Anonymous"

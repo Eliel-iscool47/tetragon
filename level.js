@@ -23,7 +23,7 @@ var level = {
 	get current() { return this._current },
 	set current(val) { this._current = val },
 
-	_loadedLevels: [], // Will store levels loaded from JSON
+	_loadedLevels: [],
 	get levels() {
 		return this._loadedLevels
 	},
@@ -255,6 +255,7 @@ var level = {
 				},
 			]
 		}
+		// return { intermission: 15, time: 0, current: 0, config: {}, _loadedLevels: this._loadedLevels }
 	},
 
 	set defaults(val) { throw new Error('level.defaults is read-only') },

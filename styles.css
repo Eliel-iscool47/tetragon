@@ -28,7 +28,7 @@ br {
 #menu-title {
 	position: absolute;
 	top: 5vh;
-	left: 50%;
+	left: 35%;
 	transform: translateX(-50%);
 	font-size: 120px;
 	font-weight: 900;
@@ -106,6 +106,7 @@ br {
 	margin: 0;
 	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	padding: 0;
+	z-index: 5;
 	font: 48px "DM Sans"
 }
 
@@ -127,6 +128,7 @@ br {
 	cursor: pointer;
 	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	overflow: hidden;
+	z-index: 5;
 	font: 60px "DM Sans"
 }
 
@@ -147,6 +149,7 @@ br {
 	cursor: pointer;
 	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 	overflow: hidden;
+	z-index: 5;
 	font: 36px "DM Sans"
 }
 
@@ -233,6 +236,7 @@ br {
 	border-color: black;
 	cursor: pointer;
 	overflow: hidden;
+	z-index: 5;
 	font: 36px "DM Sans"
 }
 
@@ -253,6 +257,7 @@ br {
 	border-color: black;
 	cursor: pointer;
 	overflow: hidden;
+	z-index: 5;
 	font: 36px "DM Sans"
 }
 
@@ -405,13 +410,13 @@ br {
 	width: 100%;
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.65);
-	display: flex;
+	display: none;
 	justify-content: center;
 	align-items: flex-start;
 	color: white;
 	font-size: 40px;
 	font-style: normal;
-	z-index: 10;
+	z-index: 50;
 }
 
 #pause-screen h1 {
@@ -463,7 +468,7 @@ br {
 	color: white;
 	font-size: 24px;
 	font-style: normal;
-	z-index: -10;
+	z-index: 40;
 }
 
 /* Styled Text */

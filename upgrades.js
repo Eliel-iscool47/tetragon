@@ -212,7 +212,7 @@ var upgrades = {
 		Choose an upgrade:
 		<br>
 		${Math.ceil(this.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
-		${buttons.cancel}
+		${buttons.cancelButton()}
 			<br><br>
 		${this.options.filter(function (u) { return u != undefined }.bind(this)).map(function (upg) {
 			return `<button class="upgrade-button"

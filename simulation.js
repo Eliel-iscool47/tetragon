@@ -212,7 +212,7 @@ ${this.consoleMessage}
 		state.player.health = Math.min(state.player.health, state.player.maxHealth)
 		upgrades.applyRegen()
 		if (!this.isPaused && !this.isChoosing) guns.logic()
-		pauseScreen.style.display = this.isPaused ? 'block' : 'none'
+		pauseScreen.style.display = this.isPaused ? 'flex' : 'none'
 		chooseScreen.style.display = this.isChoosing ? 'block' : 'none'
 		if (!this.isPaused && !this.isChoosing) this.time += 1 / this.fps
 		state.player.draw()

@@ -95,7 +95,7 @@ var collisions = {
 			if (state.player.checkCollision(mob)) if (!mob.onCollide()) return false
 
 			// Bullet/Explosion collision via grid
-			this.grid.query(mob.pos.x, mob.pos.y, function (e) {
+			this.grid.query(mob.pos.x, mob.pos.y, (e) => {
 				if (e.isExplosion) {
 					if (!e.targetsPlayerOnly && 
 						e.timeSinceLastAttack <= 
@@ -126,7 +126,7 @@ var collisions = {
 						e.piercing--
 					}
 				}
-			}.bind(this))
+			})
 			const fireList = state.bullets.firePoolList ?? []
 			fireList.forEach(function (f) {
 				if (distance(mob.pos.x, mob.pos.y, f.pos.x, f.pos.y) <= f.size + mob.size / 2) {
