@@ -16,11 +16,13 @@ The game's controls are the following:
 * **Restart**: `R` *(while paused/choosing/dead)*
 * **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.09)
+# II: Recent Updates (v1.10: Grid and Glory)
 
-* **Upgrades**: Added new upgrade `Smart Bounces`: Bouncy Balls gain a homing effect towards enemies
-* **Mechanics**: Removed the shield mechanic because it was too OP.
-* **Bug Fixes**: Fixed *the bug*. I also fixed the bug where the vampirism's particles wouldn't spawn. 
+* **Leaderboards**: Full Supabase integration. High scores are now automatically submitted to a global leaderboard using a persistent name set in the **Settings** menu.
+* **Visuals**: Added a subtle geometric background grid for better scale awareness. Missiles and Bouncy Balls now have unique particle trail effects.
+* **Guidance**: Missile homing logic updated to a steering-based system, providing much smoother and more effective target tracking.
+* **UX**: Added submission status notifications to the death screen to provide real-time feedback for high score uploads.
+* **Mechanics**: The level counter flashes red when there's less than 3 seconds left until the next level.
 
 ---
 
@@ -33,10 +35,15 @@ The project utilizes a centralized `state` object (defined in `main.js`) to mana
 - **Standardized Resets**: Every game module ( `player`, `guns`, `mobs`, etc.) implements a `defaults` getter and a `reset()` method. Calling `state.resetAll()` performs an `Object.assign` to restore the game to its pristine initial state.
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
-### b: Data-Driven Leveling
-- **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
+### b: Global Leaderboard & Persistence
+- **Supabase Integration**: The game communicates with a Supabase backend to store and retrieve high scores.
+- **Persistent Profile**: Usernames are stored in `localStorage`, allowing for automatic identification without interruptive popups.
+- **Async Feedback**: The death screen utilizes a reactive status message system to inform players of the leaderboard submission progress.
 
 ### c: Data-Driven Leveling
+- **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
+
+### d: Level System
 - **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
 - **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
 
@@ -50,6 +57,7 @@ The game features a difficulty slider in the Settings menu ranging from **0.2x t
 - **Melee (Knife)**: A high-damage sweeping attack with a visual fade-out slash.
 - **Ballistics**: A wide variety of weapons including Rifles, Snipers, Shotguns, and Miniguns.
 - **Specialty**: Homing Missiles that accelerate towards their target, Balls 😋, Flamethrowers, and instant-hit Lasers.
+  - **Steering Guidance**: Homing projectiles use a steering-force algorithm rather than direct angle assignment, allowing for natural arc-based movement.
 
 ## 3: Advanced Upgrades
 The upgrade system supports prerequisites via a `requirements` property. Notable mechanics include:
@@ -73,10 +81,11 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 
 - **Collision Grid**: A spatial partitioning grid (150px cells) optimizes collision checks between hundreds of bullets and mobs. (could be a lie)
 - **Visual Polish**:
+  - **Geometric Background**: A low-opacity grid rendered in the simulation background to provide a frame of reference for player movement.
   - **Muzzle Flashes**: Triggered on weapon fire.
-  - **Particle System**: Manages lifesteal tracers and blood/vampire effects.
-  - **Shadow Glow**: Used on projectiles for a "bullet-hell" aesthetic.
-- **Persistence**: Player keybinds are automatically saved to `localStorage` and persist across sessions.
+  - **Particle System**: Manages lifesteal tracers, smoke trails for missiles, particle ribbons for bouncy balls, and more.
+  - **Shadow Glow**: Used on projectiles and the player for a "bullet-hell" aesthetic, with color shifting based on projectile speed.
+- **Persistence**: Settings are automatically saved to `localStorage` and persist across sessions.
 
 ---
 
@@ -97,7 +106,7 @@ The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTM
 # VI: Planned Updates
 
 - **Mobile Support**: I am planning to add support for mobile devices by July 31st.
-- **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I might reädd them in the future.
+- **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I might reädd them in the future. It's not guaranteed, nor likely, that they return.
 
 <!-- Maintenance Note: 
 When adding new modules, register them in the state object in main.js 

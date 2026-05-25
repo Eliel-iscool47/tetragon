@@ -102,6 +102,14 @@ class Player extends Entity {
 		draw.textAlign = 'center'
 		draw.fillText('Game Over', main.width / 2, main.height / 2)
 		draw.font = `${(main.width + main.height) / 40}px 'DM Sans'`
+		
+		// Draw the leaderboard submission status
+		draw.fillStyle = 'rgba(255, 255, 255, 0.7)'
+		draw.font = `${(main.width + main.height) / 80}px 'DM Sans'`
+		draw.fillText(this.state.simulation.scoreStatus, main.width / 2, main.height / 2 + 130)
+
+		draw.fillStyle = 'hsl(0, 0%, 0%)'
+		draw.font = `${(main.width + main.height) / 40}px 'DM Sans'`
 		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn\nor ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, main.width / 2, main.height / 2 + 75, main.width)
 		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
 	}
@@ -111,19 +119,11 @@ class Player extends Entity {
 		const score = Math.round(this.state.level.current)
 		const highScore = Number(localStorage.getItem('tetragon-high-score') || 0)
 		if (score > highScore) {
+			this.state.simulation.scoreStatus = "New High Score!"
 			localStorage.setItem('tetragon-high-score', score)
-
-			// Only show the submission modal if a new high score is achieved
-			this.state.lastScore = score;
-			document.getElementById('name-modal').style.display = 'flex';
-
-			// Ensure the container is visible but the main menu buttons are hidden
-			dc.style.display = 'block';
-			start.style.display = 'none';
-			settings.style.display = 'none';
-			controls.style.display = 'none';
-			feedbackButton.style.display = 'none';
-			leaderboardButton.style.display = 'none';
+			if (window.submitHighScore) window.submitHighScore(score)
+		} else {
+			this.state.simulation.scoreStatus = ""
 		}
 
 		this.state.simulation.wipe()

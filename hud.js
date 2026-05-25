@@ -36,13 +36,13 @@ var hud = {
 	processTime() {
 		switch (true) {
 			case simulation.time < 60:
-				return `${simulation.time.toFixed(1)}s`
+				return `${round(simulation.time, 1)}s`
 				break
 			case simulation.time < 3600:
-				return `${Math.floor(simulation.time / 60)}m ${(simulation.time % 60).toFixed(1)}s`
+				return `${Math.floor(simulation.time / 60)}m ${round(simulation.time % 60, 1)}s`
 				break
 			default:
-				return `${Math.floor(simulation.time / 3600)}h ${Math.floor((simulation.time % 3600) / 1)}m ${Math.round(simulation.time % 60)}s`
+				return `${Math.floor(simulation.time / 3600)}h ${Math.floor((simulation.time % 3600) / 60)}m ${round(simulation.time % 60, 1)}s`
 				break
 		}
 	},
@@ -109,15 +109,25 @@ var hud = {
 		`
 	},
 	levelCounter() {
-		this.levels.style.backgroundColor = 'hsla(0, 0%, 70%, 0.65)'
+		const remaining = level.intermission - (simulation.time - level.time)
+		const isIntermission = state.level.isWon()
+
+		if (isIntermission && remaining < 3 && remaining > 0) {
+			// Pulse red with high frequency to indicate urgency
+			const pulse = 0.5 + 0.5 * Math.sin(simulation.time * 20)
+			this.levels.style.backgroundColor = `hsla(0, 100%, 50%, ${0.4 + pulse * 0.4})`
+			this.levels.style.color = 'white'
+		} else {
+			this.levels.style.backgroundColor = 'hsla(0, 0%, 70%, 0.65)'
+			this.levels.style.color = 'black'
+		}
+
 		this.levels.style.width = '180px'
 		this.levels.style.height = '50px'
-		this.levels.style.color = 'black'
-		// this.levels.style.font = '20px Consolas'
 		this.levels.style.textAlign = 'center'
 		this.levels.style.left = `${(main.width * 0.5) - 200}px`
 		this.levels.style.top = '0'
-		this.levels.innerText = (!state.level.isWon() ? `Level ${level.current}` : `Level ${level.current + 1} in ${level.intermission - Math.round(simulation.time - level.time)}s`) +
+		this.levels.innerText = (!isIntermission ? `Level ${level.current}` : `Level ${level.current + 1} in ${round(remaining, 1)}s`) +
 			`\n${this.timeMessage}`
 	},
 	criticalHealth() {

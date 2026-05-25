@@ -21,7 +21,7 @@ var bullets = {
 			this.pos.y += Math.sin(this.angle) * this.speed
 		}
 		takeDamage(amount) {
-			this.piercing --
+			this.piercing--
 		}
 	},
 	explosions: {
@@ -200,6 +200,7 @@ var bullets = {
 				x: state.input.cursor.x,
 				y: state.input.cursor.y
 			},
+			steerStrength: 0.15,
 			draw: function () {
 				this.drawSelf(function () {
 					const pulse = 0.5 + 0.5 * Math.sin(this.state.simulation.time * 20)
@@ -209,7 +210,7 @@ var bullets = {
 					// Add a glow effect to the missile body
 					draw.shadowBlur = 10 + pulse * 10
 					draw.shadowColor = glowColor
-					
+
 					draw.fillStyle = "hsl(220, 60%, 40%)"
 					draw.fillRect(-15, -5, 30, 10)
 
@@ -235,25 +236,31 @@ var bullets = {
 			},
 			update: function () {
 				if (!this.state.simulation) return undefined
-				this.target.x = this.state.input.cursor.x
-				this.target.y = this.state.input.cursor.y
-
-				// Move towards the target
-				this.angle = angle(this.target.x, this.target.y, this.pos.x, this.pos.y) + this.angleOffset
-				this.state.mobs.list.forEach(function (m) {
-					if (
-						distance(this.pos.x, this.pos.y, m.pos.x, m.pos.y) <=
-						this.size * m.size &&
-						m.class != 'projectile' && !m.isInvulnerable
-					) {
-						this.target.x = m.pos.x
-						this.target.y = m.pos.y
+				let nearest = null
+				let minDist = 1000 // High search radius for missiles
+				this.state.mobs.list.forEach(m => {
+					if (m.class != 'projectile' && !m.isInvulnerable) {
+						const d = distance(this.pos.x, this.pos.y, m.pos.x, m.pos.y)
+						if (d < minDist) {
+							minDist = d
+							nearest = m
+						}
 					}
-				}.bind(this))
-				this.angle = angle(this.target.x, this.target.y, this.pos.x, this.pos.y) + this.angleOffset
+				})
+
+				if (!nearest) nearest = { pos: { x: this.state.input.cursor.x, y: this.state.input.cursor.y } }
+
+				const targetAngle = angle(nearest.pos.x, nearest.pos.y, this.pos.x, this.pos.y)
+				let diff = targetAngle - this.angle
+				while (diff < -Math.PI) diff += Math.PI * 2
+				while (diff > Math.PI) diff -= Math.PI * 2
+				this.angle += diff * this.steerStrength // Steer strength for missiles
+
+
 				this.pos.x += Math.cos(this.angle) * this.speed
 				this.pos.y += Math.sin(this.angle) * this.speed
 				this.speed = Math.min(30, this.speed + 0.15)
+				this.steerStrength = Math.min(1, this.steerStrength + 0.0006)
 
 				// Spawn smoke particle for trail effect
 				if (this.state.simulation.time % 0.05 < 1 / this.state.simulation.fps) {
@@ -262,7 +269,7 @@ var bullets = {
 						angle: this.angle + Math.PI + rand(-0.5, 0.5), // Opposite direction with spread
 						speed: rand(0.2, 1.0), // Slight outward speed
 						size: rand(3, 6) // Randomize size slightly
-					});
+					})
 				}
 			}
 		}))
@@ -306,7 +313,7 @@ var bullets = {
 						let diff = targetAngle - this.angle
 						while (diff < -Math.PI) diff += Math.PI * 2
 						while (diff > Math.PI) diff -= Math.PI * 2
-						this.angle += diff * 0.05 // Steer strength
+						this.angle += diff * 0.08 // Steer strength
 					}
 				}
 
@@ -317,7 +324,7 @@ var bullets = {
 				if (this.state.simulation.time % 0.03 < 1 / this.state.simulation.fps) {
 					this.state.particles.spawn(this.pos.x, this.pos.y, {
 						...this.state.particles.bouncyBallTrail
-					});
+					})
 				}
 			},
 			draw: function () {

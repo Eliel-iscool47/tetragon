@@ -4,6 +4,11 @@ var simulation = {
 	get collisions() { return this._collisions },
 	set collisions(val) { this._collisions = val },
 
+	_scoreStatus: "",
+	get scoreStatus() { return this._scoreStatus },
+	set scoreStatus(val) { this._scoreStatus = val },
+
+	_deathMessage: "",
 
 	_isChoosing: false,
 	get isChoosing() { return this._isChoosing },
@@ -105,6 +110,7 @@ ${val}
 			isTesting: false,
 			time: 0,
 			isMainMenu: true,
+			scoreStatus: "",
 			crosshairColor: 'black',
 			Particles: [],
 			fps: 60,
@@ -167,6 +173,29 @@ ${this.consoleMessage}
 	wipe() {
 		state.resetAll()
 	},
+	background() {
+		const step = 100
+		draw.save()
+		draw.strokeStyle = 'hsla(0, 0%, 30%, 0.20)'
+		draw.lineWidth = 3
+
+		// Vertical lines
+		for (let x = 0; x <= main.width; x += step) {
+			draw.beginPath()
+			draw.moveTo(x, 0)
+			draw.lineTo(x, main.height)
+			draw.stroke()
+		}
+
+		// Horizontal lines
+		for (let y = 0; y <= main.height; y += step) {
+			draw.beginPath()
+			draw.moveTo(0, y)
+			draw.lineTo(main.width, y)
+			draw.stroke()
+		}
+		draw.restore()
+	},
 	/**
 	 * This function is responsible for the game's loop. If it breaks, the whole canvas stops.
 	 */
@@ -175,8 +204,10 @@ ${this.consoleMessage}
 		main.style.top = '0px'
 		main.style.left = '0px'
 		draw.clearRect(0, 0, main.width, main.height)
+		this.background()
 		input.keyLogic()
 		main.style.display = this.isMainMenu || this.isChoosing ? 'none' : 'block'
+		nameModal.style.display = this.isPaused ? 'block' : 'none'
 		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
 		if (this.isMainMenu) {
 			this.mainMenu()

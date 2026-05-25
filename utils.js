@@ -56,6 +56,15 @@ function now() {
 	return Date.now() / 1000
 }
 /**
+ * Rounds a number to a certain precision
+ * @param {number} num 
+ * @param {number} places 
+ * @returns 
+ */
+function round(num, places) {
+	return parseFloat(num.toFixed(places))
+}
+/**
  * Checks if the value is null or undefined.
  * @param {*} val the value to check.
  */

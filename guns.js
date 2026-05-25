@@ -27,7 +27,7 @@ var guns = {
 			this.piercing = config.piercing || 1
 			this.isMuzzleFlash = config.isMuzzleFlash ?? true
 			this.reloadAnimation = config.reloadAnimation ?? function () { }
-			this.reloadTime = this.magSize > 1 ? (config.reloadTime || 1) : 1 / this.fireRate
+			this.reloadTime = this.magSize != 1 ? (config.reloadTime || 1) : 1 / this.fireRate
 			this.isReloading = false
 			this.reloadStartTime = 0
 			this.unlockables = [...config.unlockables || []]
@@ -328,8 +328,8 @@ guns.missiles = new guns.Gun({
 	name: 'missiles',
 	description: `Launch a ${text('homing', 'homing')} missile that tracks nearby mobs<br>3 ${text('ammo', 'missiles')} per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 50,
-	magSize: 1,
-	magazines: 50,
+	magSize: 3,
+	magazines: 20,
 	damage: 4,
 	fireRate: 1.4,
 	bulletDuration: 20,

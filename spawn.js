@@ -1,16 +1,16 @@
 const default_mobSpawn = {
 	bosses: {
-		voidBoss: 10,
+		voidBoss: 12,
 		summonerBoss: 12,
-		triangleBoss: 6,
-		dodgerBoss: 15,
+		triangleBoss: 10,
+		stalkerBoss: 12,
 		pentagonBoss: 10,
-		hexagonBoss: 3,
+		hexagonBoss: 5, // Hexagons are rare/annoying
 		twinBoss: 5, // Twins are rare/difficult
-		octagonBoss: 8,
-		sniperBoss: 7,
-		minefieldBoss: 9,
-		ghostBoss: 10 // New Boss!
+		octagonBoss: 9,
+		sniperBoss: 8,
+		minefieldBoss: 10,
+		ghostBoss: 10 
 	},
 	randomBoss(x, y) {
 		const choice = weightedRand(this.bosses)
@@ -676,9 +676,9 @@ const default_mobSpawn = {
 			}
 		}))
 	},
-	dodgerBoss(x, y) {
+	stalkerBoss(x, y) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
-			type: 'dodger',
+			type: 'stalker',
 			class: 'boss',
 			health: 25,
 			damage: 20,
@@ -689,26 +689,51 @@ const default_mobSpawn = {
 			anchor: { x, y },
 			target: { x, y },
 			range: 300,
+			chaseUntil: 0,
 			update: function () {
-				if ((simulation.time - this.timeSpawned) % 5 > 2) {
-					if (distance(this.pos.x, this.pos.y, this.target.x, this.target.y) < 10) {
-						/* Pick a new random target within the circular range of the anchor point */
-						const moveAngle = Math.random() * Math.PI * 2
-						const dist = Math.random() * this.range
-						this.target.x = clamp(this.anchor.x + Math.cos(moveAngle) * dist, 0, main.width)
-						this.target.y = clamp(this.anchor.y + Math.sin(moveAngle) * dist, 0, main.height)
-						const me = this
-					}
-				} else {
+				const time = this.state.simulation.time
+				const isChasing = time < this.chaseUntil
+
+				if (isChasing) {
+					// Randomly chase the player for 3 seconds
 					this.target.x = this.state.player.pos.x
 					this.target.y = this.state.player.pos.y
+
+					// Leave a menacing trail while chasing
+					if (time % 0.05 < 1 / this.state.simulation.fps) {
+						this.state.particles.spawn(this.pos.x, this.pos.y, {
+							...this.state.particles.bouncyBallTrail,
+							color: 'hsl(0, 100%, 50%)',
+							size: this.size * 0.4
+						})
+					}
+				} else {
+					// Choose a target and go to it
+					if (distance(this.pos.x, this.pos.y, this.target.x, this.target.y) < 20) {
+						const moveAngle = Math.random() * Math.PI * 2
+						const dist = Math.random() * this.range
+						this.target.x = clamp(this.anchor.x + Math.cos(moveAngle) * dist, 50, main.width - 50)
+						this.target.y = clamp(this.anchor.y + Math.sin(moveAngle) * dist, 50, main.height - 50)
+					}
+					// 0.5% chance per frame (~once every 3 seconds) to start a 3-second chase
+					if (percentChance(0.005)) this.chaseUntil = time + 3
 				}
-				this.angle /*const moveAngle*/ = angle(this.pos.x, this.pos.y, this.target.x, this.target.y)
+
+				this.angle = angle(this.pos.x, this.pos.y, this.target.x, this.target.y)
 				this.pos.x -= Math.cos(this.angle) * this.speed
 				this.pos.y -= Math.sin(this.angle) * this.speed
 			},
 			draw: function () {
 				this.drawSelf(function () {
+					const isChasing = this.state.simulation.time < this.chaseUntil
+					if (isChasing) {
+						draw.fillStyle = 'hsl(0, 100%, 50%)'
+						draw.shadowBlur = 20
+						draw.shadowColor = 'red'
+					} else {
+						draw.fillStyle = this.color
+					}
+
 					draw.beginPath()
 					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
 					draw.fill()
