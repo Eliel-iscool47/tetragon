@@ -21,8 +21,62 @@ document.body.style.overflow = 'hidden'
 main.style.position = 'fixed'
 main.style.top = '0'
 main.style.left = '0'
-main.style.width = '100vw'
-main.style.height = '100vh'
+main.style.zIndex = '-1'
+
+const style = document.createElement('style')
+style.innerHTML = `
+	.gun-button, .upgrade-button, .reroll-button, .cancel-button {
+		background: rgba(0, 0, 0, 0.05);
+		border: 1px solid rgba(0, 0, 0, 0.15);
+		color: black;
+		border-radius: 8px;
+		cursor: pointer;
+		font-family: 'DM Sans', sans-serif;
+		transition: background 0.2s;
+		padding: 10px;
+	}
+	.reroll-button, .cancel-button { position: absolute; }
+	.gun-button, .upgrade-button { position: relative; width: 80%; margin: 10px auto; display: block; }
+	.gun-button:hover, .upgrade-button:hover { background: rgba(0, 0, 0, 0.1); }
+	@media (max-width: 768px) {
+		#HUD { font-size: 12px; }
+		#inventory, #upgrade-list { width: 140px !important; font-size: 14px !important; }
+		#level-counter { width: 140px !important; left: 50% !important; transform: translateX(-50%) !important; }
+	}
+	#mobile-controls {
+		z-index: 1000;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		pointer-events: none;
+	}
+	#move-base, #aim-base {
+		transition: transform 0.1s;
+	}
+	#move-base {
+		transform-origin: bottom left;
+	}
+	#aim-base {
+		transform-origin: bottom right;
+	}
+	::-webkit-scrollbar {
+		width: 8px;
+	}
+	::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.05);
+	}
+	::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 4px;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: rgba(0, 0, 0, 0.3);
+	}
+`
+document.head.appendChild(style)
+
 const font = document.createElement('link')
 font.href = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
 font.rel = "stylesheet"
@@ -63,18 +117,69 @@ var state = {
 //HTML element objects
 
 var start, controls, controlDoc, settings, leaderboardButton, leaderboardModal, leaderboardList,
-	feedbackButton, pauseScreen, chooseScreen
+	feedbackButton, pauseScreen, chooseScreen, title
 
 //styling
 
 var settingsMenu
 let remappingAction = null
 
-//appending children
+//mobile controls
 
-//button logic
+var mobileControls
+function updateMobileFireVisibility() {
+	if (document.getElementById('mobile-fire')) {
+		document.getElementById('mobile-fire').style.display = state.input.isAutoFire ? 'none' : 'block'
+	}
+}
+function updateJoystickScale() {
+	const scale = state.input.joystickSize
+	if (document.getElementById('move-base')) document.getElementById('move-base').style.transform = `scale(${scale})`
+	if (document.getElementById('aim-base')) document.getElementById('aim-base').style.transform = `scale(${scale})`
+}
+
+//
 
 window.addEventListener('load', () => {
+	title = document.getElementById('title')
+	mobileControls = document.getElementById('mobile-controls')
+
+	// Setup Mobile Controls HTML
+	if (mobileControls) {
+		mobileControls.style.pointerEvents = 'none'
+		mobileControls.innerHTML = `
+			<div id="move-base" style="position: absolute; bottom: 8vh; left: 8vh; width: 18vh; height: 18vh; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); touch-action: none; pointer-events: auto;">
+				<div id="move-thumb" style="position: absolute; top: 6.5vh; left: 6.5vh; width: 5vh; height: 5vh; background: white; border-radius: 50%; opacity: 0.5; pointer-events: none;"></div>
+			</div>
+			<div id="aim-base" style="position: absolute; bottom: 8vh; right: 8vh; width: 18vh; height: 18vh; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); touch-action: none; pointer-events: auto;">
+				<div id="aim-thumb" style="position: absolute; top: 6.5vh; left: 6.5vh; width: 5vh; height: 5vh; background: #ff4444; border-radius: 50%; opacity: 0.5; pointer-events: none;"></div>
+			</div>
+			<button id="mobile-fire" style="position: absolute; bottom: 8vh; right: 28vh; width: 12vh; height: 12vh; background: rgba(255,68,68,0.3); color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; font-family: 'DM Sans'; font-size: 18px; font-weight: bold; z-index: 1000; touch-action: none; pointer-events: auto;">FIRE</button>
+			<button id="mobile-menu-toggle" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.5); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Toggle Menus</button>
+			<button id="mobile-gun-cycle" style="position: absolute; top: 80px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.5); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Cycle Guns</button>
+		`
+		const fireBtn = document.getElementById('mobile-fire')
+		if (fireBtn) {
+			const startFire = (e) => { e.preventDefault(); if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire') }
+			const stopFire = (e) => { e.preventDefault(); input.pressedKeys = input.pressedKeys.filter(k => k !== 'MobileFire') }
+			fireBtn.addEventListener('touchstart', startFire)
+			fireBtn.addEventListener('touchend', stopFire)
+			fireBtn.addEventListener('touchcancel', stopFire)
+		}
+
+		document.getElementById('mobile-menu-toggle').onclick = (e) => {
+			e.preventDefault()
+			hud.showMobileMenu = !hud.showMobileMenu
+		}
+		document.getElementById('mobile-gun-cycle').onclick = (e) => {
+			e.preventDefault()
+			input.gunRight()
+		}
+		updateJoystickScale()
+		updateMobileFireVisibility()
+		input.initJoystick()
+	}
+
 	// Initialize elements inside the load listener to ensure they aren't null
 	start = document.getElementById('start')
 	controls = document.getElementById('controls')
@@ -95,6 +200,43 @@ window.addEventListener('load', () => {
 		if (simulation.interval) clearInterval(simulation.interval)
 		simulation.init()
 	}.bind(this)
+
+	controls.onclick = function () {
+		controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
+	}
+
+	// Ensure controls are styled and populated
+	controlDoc.style.position = 'fixed'
+	controlDoc.style.top = '50%'
+	controlDoc.style.left = '50%'
+	controlDoc.style.transform = 'translate(-50%, -50%)'
+	controlDoc.style.zIndex = '1000'
+
+	const updateControls = () => {
+		controlDoc.innerHTML = `
+			<div style="background: rgba(245, 245, 245, 0.98); padding: 30px; border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); color: black; min-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: 'DM Sans', sans-serif;">
+				<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Controls</h2>
+				<div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+					${Object.entries(state.input.keybinds).map(([action, key]) => `
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.1em;">
+							<span style="color: #555; margin-right: 20px;">${action.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</span>
+							<kbd style="background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; font-family: monospace; box-shadow: 0 2px 0 #bbb; color: #333;">${key.replace('Key', '').replace('Digit', '')}</kbd>
+						</div>
+					`).join('')}
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.1em; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 12px;">
+						<span style="color: #555;">Fire (Alt):</span>
+						<kbd style="background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; font-family: monospace; box-shadow: 0 2px 0 #bbb; color: #333;">Left Click</kbd>
+					</div>
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.1em;">
+						<span style="color: #555;">Toggle Menu:</span>
+						<kbd style="background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; font-family: monospace; box-shadow: 0 2px 0 #bbb; color: #333;">Tab</kbd>
+					</div>
+				</div>
+				<button onclick="this.closest('#control-doc').style.display='none'" style="width: 100%; margin-top: 20px; padding: 12px; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; font-family: 'DM Sans', sans-serif;">Close</button>
+			</div>
+		`
+	}
+	updateControls()
 
 	leaderboardButton.onclick = async function () {
 		leaderboardModal.style.display = 'flex'
@@ -138,6 +280,7 @@ window.addEventListener('load', () => {
 
 	settings.onclick = function () {
 		settingsMenu.style.display = settingsMenu.style.display == 'block' ? 'none' : 'block'
+		settingsMenu.style.color = 'black'
 		renderSettings()
 	}.bind(this)
 
@@ -177,6 +320,62 @@ window.addEventListener('load', () => {
 				simulation.mainMenu()
 			}
 			settingsMenu.appendChild(quitBtn)
+		}
+
+		// Joystick Size Slider (Mobile Only)
+		if (simulation.isMobile) {
+			const joyContainer = document.createElement('div')
+			joyContainer.style.marginBottom = '20px'
+			joyContainer.style.borderBottom = '1px solid #333'
+			joyContainer.style.paddingBottom = '10px'
+
+			const joyLabel = document.createElement('div')
+			joyLabel.innerText = `Joystick Size: ${state.input.joystickSize.toFixed(1)}x`
+			joyLabel.style.marginBottom = '5px'
+
+			const joySlider = document.createElement('input')
+			joySlider.type = 'range'
+			joySlider.min = '0.5'
+			joySlider.max = '2.5'
+			joySlider.step = '0.1'
+			joySlider.value = state.input.joystickSize
+			joySlider.style.width = '100%'
+			joySlider.oninput = () => {
+				state.input.joystickSize = parseFloat(joySlider.value)
+				localStorage.setItem('tetragon-joystick-size', joySlider.value)
+				joyLabel.innerText = `Joystick Size: ${state.input.joystickSize.toFixed(1)}x`
+				updateJoystickScale()
+			}
+
+			joyContainer.appendChild(joyLabel)
+			joyContainer.appendChild(joySlider)
+			settingsMenu.appendChild(joyContainer)
+		}
+
+		// Auto-fire Toggle (Mobile Only)
+		if (simulation.isMobile) {
+			const autoFireContainer = document.createElement('div')
+			autoFireContainer.style.marginBottom = '20px'
+			autoFireContainer.style.display = 'flex'
+			autoFireContainer.style.justifyContent = 'space-between'
+			autoFireContainer.style.alignItems = 'center'
+
+			const autoFireLabel = document.createElement('span')
+			autoFireLabel.innerText = 'Auto-fire:'
+
+			const autoFireBtn = document.createElement('button')
+			autoFireBtn.innerText = state.input.isAutoFire ? 'ON' : 'OFF'
+			autoFireBtn.style.padding = '5px 15px'
+			autoFireBtn.onclick = () => {
+				state.input.isAutoFire = !state.input.isAutoFire
+				localStorage.setItem('tetragon-auto-fire', state.input.isAutoFire)
+				renderSettings()
+				updateMobileFireVisibility()
+			}
+
+			autoFireContainer.appendChild(autoFireLabel)
+			autoFireContainer.appendChild(autoFireBtn)
+			settingsMenu.appendChild(autoFireContainer)
 		}
 
 		// Difficulty Slider
@@ -221,9 +420,9 @@ window.addEventListener('load', () => {
 		nameInput.value = localStorage.getItem('tetragon-username') || "Anonymous"
 		nameInput.style.width = '100%'
 		nameInput.style.padding = '8px'
-		nameInput.style.backgroundColor = '#111'
-		nameInput.style.color = 'white'
-		nameInput.style.border = '1px solid #444'
+		nameInput.style.backgroundColor = '#f0f0f0'
+		nameInput.style.color = 'black'
+		nameInput.style.border = '1px solid #ccc'
 		nameInput.oninput = () => localStorage.setItem('tetragon-username', nameInput.value.trim())
 
 		nameContainer.appendChild(nameLabel)
@@ -274,10 +473,16 @@ window.addEventListener('load', () => {
 	leaderboardButton.style.display = 'block'
 	feedbackButton.style.display = 'block'
 	pauseScreen.style.display = 'none'
+	if (title) title.style.display = 'block'
 	document.getElementById('name-modal').style.display = 'none'
-	main.style.display = 'none'
+	main.style.display = 'block'
 
 	renderSettings() // Initial render
+
+	// Start the background animation loop for the main menu
+	if (!simulation.interval) {
+		simulation.interval = setInterval(simulation.gameLoop.bind(simulation), 1000 / simulation.fps)
+	}
 
 	window.submitHighScore = async function (score) {
 		const playerName = localStorage.getItem('tetragon-username') || "Anonymous"

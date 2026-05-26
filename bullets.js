@@ -519,7 +519,7 @@ var bullets = {
 		draw.fill()
 	},
 	move() {
-		if (simulation.isPaused) return undefined
+		if (simulation.isPaused || simulation.isChoosing) return undefined
 		this.list.forEach(function (b) { return b.update() }.bind(this))
 	},
 	draw() {

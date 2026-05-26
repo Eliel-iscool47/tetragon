@@ -1,25 +1,25 @@
 var collisions = {
 	center: {
-		x: main.width / 2,
-		y: main.height / 2,
+		x: 750,
+		y: 400,
 	},
 	border: {
 		left: 25,
-		right: main.width - 25, // Set safe defaults initially
+		right: 1475, // Set safe defaults initially
 		top: 25,
-		bottom: main.height - 25,
+		bottom: 775,
 	},
 	get defaults() {
 		return {
 			center: {
-				x: main.width / 2,
-				y: main.height / 2,
+				x: 750,
+				y: 400,
 			},
 			border: {
 				left: 25,
-				right: main.width - state.player.size / 2,
+				right: 1500 - state.player.size / 2,
 				top: 25,
-				bottom: main.height - state.player.size / 2,
+				bottom: 800 - state.player.size / 2,
 			}
 		}
 	},
@@ -35,8 +35,8 @@ var collisions = {
 		cols: 0,
 		rows: 0,
 		init() {
-			this.cols = Math.ceil(main.width / this.size) + 1
-			this.rows = Math.ceil(main.height / this.size) + 1
+			this.cols = Math.ceil(1500 / this.size) + 1
+			this.rows = Math.ceil(800 / this.size) + 1
 			this.cells = Array.from({ length: this.cols * this.rows }, () => [])
 		},
 		clear() {
@@ -84,7 +84,8 @@ var collisions = {
 
 		mobs.list = mobs.list.filter(function (mob) {
 			// Check for death or out-of-bounds projectiles
-			if (mob.health <= 0 || (!inCanvas(mob.pos.x, mob.pos.y, main) && mob.class == 'projectile')) {
+			const isOutOfBounds = mob.pos.x < -100 || mob.pos.x > 1600 || mob.pos.y < -100 || mob.pos.y > 900
+			if (mob.health <= 0 || (isOutOfBounds && mob.class == 'projectile')) {
 				if (mob.health <= 0) mob.die()
 				return false
 			}

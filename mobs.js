@@ -22,7 +22,7 @@ var mobs = {
 				...config
 			})
 			this.timeSpawned = this.state.simulation.time
-			this.timeSinceLastAttack = 0
+			this.timeSinceLastAttack = this.state.simulation.time
 			this.lastDamageTime = 0
 			this.maxHealth = config.maxHealth || this.health
 		}

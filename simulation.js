@@ -34,21 +34,20 @@ ${val}
 			pauseScreen.innerHTML = `
 			<div style="
 				display: flex;
-				width: 85%; 
-				max-height: 85vh; 
-				background: rgba(0, 0, 0, 0.9); 
+				width: 90%; 
+				height: 85%;
+				margin: 5% auto;
+				background: rgba(245, 245, 245, 0.95); 
 				padding: 40px; 
-				margin-top: 5vh; 
 				border-radius: 20px; 
-				border: 1px solid rgba(255, 255, 255, 0.1);
-				box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+				border: 1px solid rgba(0, 0, 0, 0.1);
+				box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+				color: black;
 			">
 				<div style="flex: 2; overflow-y: auto; padding-right: 30px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.3) transparent;">
-					<div style="text-align: left; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
-						<h2 style="font-size: 28px; color: #aaa; margin-bottom: 10px;">Equipped Weapon:</h2>
+					<div style="text-align: left; margin-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 20px;">
+						<h2 style="font-size: 28px; color: #555; margin-bottom: 10px;">Equipped Weapon:</h2>
 						${guns.equippedGun ? `
-							<div style="font-size: 22px; color: #fff;">
-								<span style="color: hsl(115, 100%, 60%); font-weight: bold; text-transform: uppercase;">${guns.equippedGun.name}</span>
 								<div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
 									<span>${text('damage', 'Damage')}: ${(guns.equippedGun.damage * state.player.damageDone).toFixed(2)}</span>
 									<span>${text('fire-rate', 'Fire Rate')}: ${(guns.equippedGun.fireRate * upgrades.fireRate).toFixed(2)}/s</span>
@@ -77,8 +76,8 @@ ${val}
 				</div>
 
 				<div style="flex: 1; border-left: 2px solid rgba(255, 255, 255, 0.1); padding-left: 30px; text-align: left;">
-					<h2 style="font-size: 28px; color: #aaa; margin-bottom: 20px;">Statistics</h2>
-					<div style="font-size: 20px; line-height: 2; color: #fff;">
+					<h2 style="font-size: 28px; color: #555; margin-bottom: 20px;">Statistics</h2>
+					<div style="font-size: 20px; line-height: 2; color: #000;">
 						<div style="margin-bottom: 10px;">${text('health', 'Health')}: <span style="float: right;">${Math.round(state.player.health)} / ${Math.round(state.player.maxHealth)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage', 'Global Damage')}: <span style="float: right;">x${state.player.damageDone.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage-taken', 'Damage Taken')}: <span style="float: right;">x${state.player.damageTaken.toFixed(2)}</span></div>
@@ -95,6 +94,13 @@ ${val}
 	_isTesting: false,
 	get isTesting() { return this._isTesting },
 	set isTesting(val) { this._isTesting = val },
+
+	_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || new URLSearchParams(window.location.search).has('mobile'),
+	get isMobile() { return this._isMobile },
+
+	joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
+
+	isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
 
 	_time: 0,
 	get time() { return this._time },
@@ -113,7 +119,11 @@ ${val}
 			scoreStatus: "",
 			crosshairColor: 'black',
 			Particles: [],
+			menuParticles: [],
 			fps: 60,
+			_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || new URLSearchParams(window.location.search).has('mobile'),
+			isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
+			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
 		}
 	},
 
@@ -128,6 +138,7 @@ ${val}
 	interval: undefined,
 	crosshairColor: 'black',
 	Particles: [],
+	menuParticles: [],
 	log(msg, style) {
 		style ??= 'color: black; font-size: 14px;'
 		this.consoleMessage = `
@@ -153,6 +164,44 @@ ${this.consoleMessage}
 	exitTest() {
 		this.isTesting = false
 	},
+	drawMenuBackground() {
+		main.style.cursor = !this.isMainMenu && !this.isPaused && !this.isChoosing && !this.isDead ? "none" : "default"
+		if (this.menuParticles.length < 15) {
+			this.menuParticles.push({
+				x: rand(0, 1500),
+				y: rand(0, 800),
+				size: rand(50, 200),
+				angle: rand(0, Math.PI * 2),
+				rot: rand(-0.005, 0.005),
+				speed: rand(0.1, 0.4),
+				points: randInt(3, 6),
+				color: `hsla(${rand(180, 260)}, 60%, 50%, 0.06)` // Faded blue/purple geometric shapes
+			})
+		}
+
+		this.menuParticles.forEach(p => {
+			p.angle += p.rot
+			p.x += Math.cos(p.angle) * p.speed
+			p.y += Math.sin(p.angle) * p.speed
+
+			if (p.x < -200) p.x = 1700
+			if (p.x > 1700) p.x = -200
+			if (p.y < -200) p.y = 1000
+			if (p.y > 1000) p.y = -200
+
+			draw.save()
+			draw.translate(p.x, p.y)
+			draw.rotate(p.angle)
+			draw.fillStyle = p.color
+			draw.strokeStyle = 'rgba(255, 255, 255, 0.03)'
+			draw.lineWidth = 1
+			draw.beginPath()
+			polygon(0, 0, p.size, p.points)
+			draw.fill()
+			draw.stroke()
+			draw.restore()
+		})
+	},
 	mainMenu() {
 		pauseScreen.style.display = 'none'
 		nameModal.style.display = 'none'
@@ -161,13 +210,14 @@ ${this.consoleMessage}
 		settings.style.display = 'block'
 		leaderboardButton.style.display = 'block'
 		feedbackButton.style.display = 'block'
-		main.style.display = 'none'
+		main.style.display = 'block'
+		const titleElement = document.getElementById('title')
+		if (titleElement) titleElement.style.display = 'block'
 		document.title = 'Tetragon: Main Menu'
-		if (this.interval) clearInterval(this.interval)
-		this.interval = undefined
 		simulation.time = 0
 		hud.Obj.style.display = 'none'
 		dc.style.display = 'block'
+		dc.style.pointerEvents = 'auto'
 		this.wipe()
 	},
 	wipe() {
@@ -176,22 +226,25 @@ ${this.consoleMessage}
 	background() {
 		const step = 100
 		draw.save()
+		draw.fillStyle = 'hsl(0, 0%, 80%)'
+		draw.fillRect(0, 0, 1500, 800)
+		
 		draw.strokeStyle = 'hsla(0, 0%, 30%, 0.20)'
 		draw.lineWidth = 3
 
 		// Vertical lines
-		for (let x = 0; x <= main.width; x += step) {
+		for (let x = 0; x <= 1500; x += step) {
 			draw.beginPath()
 			draw.moveTo(x, 0)
-			draw.lineTo(x, main.height)
+			draw.lineTo(x, 800)
 			draw.stroke()
 		}
 
 		// Horizontal lines
-		for (let y = 0; y <= main.height; y += step) {
+		for (let y = 0; y <= 800; y += step) {
 			draw.beginPath()
 			draw.moveTo(0, y)
-			draw.lineTo(main.width, y)
+			draw.lineTo(1500, y)
 			draw.stroke()
 		}
 		draw.restore()
@@ -204,17 +257,30 @@ ${this.consoleMessage}
 		main.style.top = '0px'
 		main.style.left = '0px'
 		draw.clearRect(0, 0, main.width, main.height)
-		this.background()
+
+		const scaleX = main.width / 1500
+		const scaleY = main.height / 800
+
+
 		input.keyLogic()
-		main.style.display = this.isMainMenu || this.isChoosing ? 'none' : 'block'
+		if (this.isMobile) input.updateJoysticks()
 		nameModal.style.display = this.isPaused ? 'block' : 'none'
-		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
+		const showMobile = this.isMobile && !this.isPaused && !this.isChoosing && !this.isDead
+		if (mobileControls) mobileControls.style.display = showMobile ? 'block' : 'none'
+
+		draw.save()
+		draw.scale(scaleX, scaleY)
+		this.background()
+
 		if (this.isMainMenu) {
-			this.mainMenu()
-			dc.style.display = 'block'
-			return undefined
+			if (mobileControls) mobileControls.style.display = this.isMobile ? 'block' : 'none'
+			hud.Obj.style.display = 'none'
+			this.drawMenuBackground()
+			draw.restore()
+			return undefined	
 		}
-		main.style.cursor = 'none'
+		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isDead ? 'none' : 'block'
+		main.style.cursor = !this.isMainMenu && !this.isPaused && !this.isChoosing && !this.isDead ? "none" : "default"
 		if (
 			this.time - state.player.lastDamageTime < 0.1 &&
 			!this.isDead &&
@@ -226,7 +292,6 @@ ${this.consoleMessage}
 			main.style.top = '0px'
 			main.style.left = '0px'
 		}
-		dc.style.display = 'none'
 		main.style.filter = `saturate(${this.isDead ? 100 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)}%)`
 		if (this.isDead) {
 			main.style.cursor = 'default'
@@ -246,12 +311,13 @@ ${this.consoleMessage}
 		pauseScreen.style.display = this.isPaused ? 'flex' : 'none'
 		chooseScreen.style.display = this.isChoosing ? 'block' : 'none'
 		if (!this.isPaused && !this.isChoosing) this.time += 1 / this.fps
+
 		state.player.draw()
 		guns.equippedGun?.drawReload()
 		collisions.border.left = state.player.size / 2
-		collisions.border.right = main.width - state.player.size / 2
+		collisions.border.right = 1500 - state.player.size / 2
 		collisions.border.top = state.player.size / 2
-		collisions.border.bottom = main.height - state.player.size / 2
+		collisions.border.bottom = 800 - state.player.size / 2
 		mobs.drawMobs()
 		mobs.healthBars()
 		// this.particles = this.particles.filter(p => {
@@ -301,13 +367,15 @@ ${this.consoleMessage}
 		bullets.killSlashes()
 		bullets.drawFirePools()
 		bullets.killFirePools()
+		this.crosshair(16)
+		draw.restore() // End World Scaling
+
 		if (this.isTesting) this.crosshairColor = 'hsl(40,100%,50%)'
 		else this.crosshairColor = 'black'
 		hud.make()
 		collisions.loop()
 		bullets.move()
 		mobs.loop()
-		this.crosshair(16)
 	},
 	init() {
 		if (this.interval) clearInterval(this.interval)
@@ -316,12 +384,24 @@ ${this.consoleMessage}
 		this.wipe()
 
 		main.style.display = 'block'
+		main.width = window.innerWidth
+		main.height = window.innerHeight
 		this.isMainMenu = false
 		this.isPaused = false
 		this.isDead = false
 		this.isTesting = false
 		this.time = 0
-		dc.style.display = 'none'
+		const titleElement = document.getElementById('title')
+		if (titleElement) titleElement.style.display = 'none'
+		start.style.display = 'none'
+		controls.style.display = 'none'
+		settings.style.display = 'none'
+		leaderboardButton.style.display = 'none'
+		feedbackButton.style.display = 'none'
+		dc.style.display = 'block'
+		dc.style.pointerEvents = 'none'
+		pauseScreen.style.pointerEvents = 'auto'
+		chooseScreen.style.pointerEvents = 'auto'
 		main.style.cursor = 'default'
 		pauseScreen.style.display = 'none'
 		document.getElementById('name-modal').style.display = 'none'

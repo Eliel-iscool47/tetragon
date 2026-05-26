@@ -186,37 +186,27 @@ var guns = {
 		if (!simulation.isChoosing) simulation.isChoosing = true
 		buttons.currentChoose = this
 		chooseScreen.style.display = 'block'
-		chooseScreen.style.position = 'absolute'
-		chooseScreen.style.width = `${main.width}px`
-		chooseScreen.style.left = `${main.width * 0}px`
-		chooseScreen.style.top = `0`
-		chooseScreen.style.margin = '0'
-		chooseScreen.style.padding = '0'
-		chooseScreen.style.height = `${main.height}px`
-		chooseScreen.style.color = 'white'
-		chooseScreen.style.textAlign = 'left'
-		chooseScreen.style.overflowX = 'hidden'
-		chooseScreen.style.overflowY = 'scroll'
+		chooseScreen.style.width = '100%'
+		chooseScreen.style.height = '100%'
+		chooseScreen.style.left = '0'
+		chooseScreen.style.top = '0'
+		chooseScreen.style.color = 'black'
+		chooseScreen.style.overflowY = 'auto'
 		chooseScreen.style.position = 'fixed'
 		chooseScreen.innerHTML = `
-		<br>
-		Choose a gun:
-		<br>
-		${Math.ceil(upgrades.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
-		${buttons.cancelButton()}
-			<br><br>
-		${this.options.filter(function (g) { return g != undefined }.bind(this)).map(function (g) {
-			return `<button class="gun-button"
-			style="
-			width: ${parseFloat(chooseScreen.style.width) * 0.6}px; 
-			height: ${parseFloat(chooseScreen.style.height) / Math.floor(upgrades.optionsPerPowerUp * 1.5)}px; 
-			left: 100px;
-			top: ${(this.options.indexOf(g) * 1 * parseFloat(chooseScreen.style.height) / upgrades.optionsPerPowerUp) + 180}px;
-			" 
-			onclick='
-				guns.${g.id}.get(); 	
-				simulation.isChoosing = false'>${g.name}: ${g.description}</button>`
-		}.bind(this)).join('<br>')}
+		<div style="padding-top: 15vh; text-align: center; width: 100%;">
+			<div style="font-size: 24px; margin-bottom: 20px;">Choose a gun:</div>
+			${Math.ceil(upgrades.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
+			${buttons.cancelButton()}
+			<div style="padding: 20px 0;">
+				${this.options.filter(g => g !== undefined).map(g => `
+					<button class="gun-button" onclick='guns.${g.id}.get(); simulation.isChoosing = false'>
+						<strong>${g.name}</strong>: ${g.description}
+					</button>
+				`).join('')}
+			</div>
+			<div style="height: 50px;"></div>
+		</div>
 		`
 	}
 }

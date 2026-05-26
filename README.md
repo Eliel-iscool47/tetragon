@@ -16,13 +16,14 @@ The game's controls are the following:
 * **Restart**: `R` *(while paused/choosing/dead)*
 * **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.10: Grid and Glory)
+# II: Recent Updates (v1.11: Tetragon on mobile!)
 
-* **Leaderboards**: Full Supabase integration. High scores are now automatically submitted to a global leaderboard using a persistent name set in the **Settings** menu.
+<!-- * **Leaderboards**: Full Supabase integration. High scores are now automatically submitted to a global leaderboard using a persistent name set in the **Settings** menu.
 * **Visuals**: Added a subtle geometric background grid for better scale awareness. Missiles and Bouncy Balls now have unique particle trail effects.
 * **Guidance**: Missile homing logic updated to a steering-based system, providing much smoother and more effective target tracking.
 * **UX**: Added submission status notifications to the death screen to provide real-time feedback for high score uploads.
-* **Mechanics**: The level counter flashes red when there's less than 3 seconds left until the next level.
+* **Mechanics**: The level counter flashes red when there's less than 3 seconds left until the next level. -->
+* **Mobile Support**: Mobile controls have been added. I hope they work.
 
 ---
 

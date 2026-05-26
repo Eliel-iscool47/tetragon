@@ -197,34 +197,30 @@ var upgrades = {
 		if (!simulation.isChoosing) simulation.isChoosing = true
 		buttons.currentChoose = this
 		chooseScreen.style.display = 'block'
-		chooseScreen.style.width = `${main.width}px`
-		chooseScreen.style.height = `${main.height}px`
+				chooseScreen.style.width = '100%'
+		chooseScreen.style.height = '100%'
 		chooseScreen.style.margin = '0'
 		chooseScreen.style.padding = '0'
-		chooseScreen.style.color = 'white'
+		chooseScreen.style.color = 'black'
 		chooseScreen.style.textAlign = 'center'
-		chooseScreen.style.overflowY = 'scroll'
-		chooseScreen.style.overflowX = 'scroll'
+		chooseScreen.style.overflowY = 'auto'
+		chooseScreen.style.overflowX = 'hidden'
 		chooseScreen.style.position = 'fixed'
 		this.randomizeOptions()
 		chooseScreen.innerHTML = `
-		<br>
-		Choose an upgrade:
-		<br>
-		${Math.ceil(this.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
-		${buttons.cancelButton()}
-			<br><br>
-		${this.options.filter(function (u) { return u != undefined }.bind(this)).map(function (upg) {
-			return `<button class="upgrade-button"
-			style="
-			width: ${parseFloat(chooseScreen.style.width) * 0.6}px; 
-			height: ${parseFloat(chooseScreen.style.height) / Math.floor(this.optionsPerPowerUp * 1.5) + 50}px; 
-			left: 100px;
-			top: ${(this.options.indexOf(upg) * 1.1 * parseFloat(chooseScreen.style.height) / this.optionsPerPowerUp) + 200}px;
-			" 
-			onclick='upgrades.get("${upg.id}"); simulation.isChoosing = false;'>${upg.name}:<br>
-		${upg.description}</button>`
-		}.bind(this)).join('<br>')}
+		<div style="padding-top: 15vh; text-align: center; width: 100%;">
+			<div style="font-size: 24px; margin-bottom: 20px;">Choose an upgrade:</div>
+			${Math.ceil(this.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
+			${buttons.cancelButton()}
+			<div style="padding: 20px 0;">
+				${this.options.filter(upg => upg !== undefined).map(upg => `
+					<button class="upgrade-button" onclick='upgrades.get("${upg.id}"); simulation.isChoosing = false;'>
+						<strong>${upg.name}</strong>:<br>${upg.description}
+					</button>
+				`).join('')}
+			</div>
+			<div style="height: 50px;"></div>
+		</div>
 		`
 	},
 	apply() {

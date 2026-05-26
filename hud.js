@@ -20,11 +20,14 @@ var hud = {
 	get displayMaxHealth() { return this._displayMaxHealth },
 	set displayMaxHealth(val) { this._displayMaxHealth = val },
 
+	showMobileMenu: false,
+
 	get defaults() {
 		return {
 			displayHealth: 100,
 			displayMaxHealth: 100,
-			timeMessage: ''
+			timeMessage: '',
+			showMobileMenu: false
 		}
 	},
 
@@ -56,16 +59,20 @@ var hud = {
 		this.maxHealth.style.width = `${this.displayMaxHealth * 2}px`
 	},
 	upgradeList() {
+		if (simulation.isMobile && !this.showMobileMenu) {
+			this.upgrades.style.display = 'none'
+			return
+		}
 		this.upgrades.style.display = 'block'
 		this.upgrades.style.position = 'absolute'
 		this.upgrades.style.backgroundColor = 'hsla(0, 0%, 70%, 0.65)'
-		this.upgrades.style.width = `${main.width * 0.125}px`
+		this.upgrades.style.width = simulation.isMobile ? '120px' : '180px'
 		upgrades.uniqueCollected = [...new Set(upgrades.collected)]
 		this.upgrades.style.height = `${upgrades.uniqueCollected.length * 50}px`
-		this.upgrades.style.left = `${main.width - 25 - parseFloat(this.upgrades.style.width)}px`
+		this.upgrades.style.right = '2vw'
 		this.upgrades.style.top = '0px'
 		this.upgrades.style.color = 'black'
-		this.upgrades.style.fontSize = '15px'
+		this.upgrades.style.fontSize = simulation.isMobile ? '12px' : '15px'
 		this.upgrades.style.textAlign = 'left'
 		this.upgrades.innerHTML = `
 		${upgrades.uniqueCollected.map(function (upg) {
@@ -76,21 +83,26 @@ var hud = {
 	console() {
 		this.inGameConsole.style.display = 'block'
 		this.inGameConsole.style.backgroundColor = 'hsla(0, 0%, 60%, 0.65)'
-		this.inGameConsole.style.width = `300px`
+		this.inGameConsole.style.width = simulation.isMobile ? '200px' : '300px'
 		this.inGameConsole.style.height = `fit-content`
-		this.inGameConsole.style.maxHeight = `220px`
+		this.inGameConsole.style.maxHeight = simulation.isMobile ? '150px' : '220px'
 		this.inGameConsole.style.overflowY = `scroll`
 		this.inGameConsole.style.left = `0px`
-		this.inGameConsole.style.top = `${main.height - parseFloat(this.inGameConsole.style.maxHeight)}px`
+		this.inGameConsole.style.bottom = '0px'
+		this.inGameConsole.style.position = 'absolute'
 		this.inGameConsole.style.color = 'black'
 		this.inGameConsole.style.textAlign = 'left'
-		this.inGameConsole.style.fontSize = '15px'
+		this.inGameConsole.style.fontSize = simulation.isMobile ? '12px' : '15px'
 		this.inGameConsole.innerHTML = `
 		Console:
 		${simulation.consoleMessage}
 		`
 	},
 	inventory() {
+		if (simulation.isMobile && !this.showMobileMenu) {
+			this.inv.style.display = 'none'
+			return
+		}
 		this.inv.style.display = 'block'
 		this.inv.style.backgroundColor = 'hsla(0, 0%, 70%, 0.65)'
 		this.inv.style.width = '320px'
@@ -122,10 +134,11 @@ var hud = {
 			this.levels.style.color = 'black'
 		}
 
-		this.levels.style.width = '180px'
+		this.levels.style.width = simulation.isMobile ? '140px' : '200px'
 		this.levels.style.height = '50px'
 		this.levels.style.textAlign = 'center'
-		this.levels.style.left = `${(main.width * 0.5) - 200}px`
+		this.levels.style.left = '50%'
+		this.levels.style.transform = 'translateX(-50%)'
 		this.levels.style.top = '0'
 		this.levels.innerText = (!isIntermission ? `Level ${level.current}` : `Level ${level.current + 1} in ${round(remaining, 1)}s`) +
 			`\n${this.timeMessage}`
@@ -146,6 +159,14 @@ var hud = {
 		this.criticalHealth()
 	}
 }
+
+hud.Obj.style.pointerEvents = 'none'
+hud.health.style.pointerEvents = 'auto'
+hud.inv.style.pointerEvents = 'auto'
+hud.levels.style.pointerEvents = 'auto'
+hud.upgrades.style.pointerEvents = 'auto'
+hud.inGameConsole.style.pointerEvents = 'auto'
+hud.criticalOverlay.style.pointerEvents = 'none'
 
 hud.Obj.appendChild(hud.health)
 hud.Obj.appendChild(hud.inv)

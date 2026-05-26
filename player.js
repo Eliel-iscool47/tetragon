@@ -87,7 +87,7 @@ class Player extends Entity {
 	set velocity(val) { this._velocity = Math.max(val, 1) }
 
 	setInvulnerable(duration) {
-		this._invulnerableUntil = this.state.simulation.time + duration
+		this._invulnerableUntil = Math.max(this.state.simulation.time, this._invulnerableUntil) + duration
 	}
 
 	setSpeedBoost(duration) {

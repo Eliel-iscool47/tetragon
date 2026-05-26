@@ -273,8 +273,8 @@ const default_mobSpawn = {
 				// Fire lasers from each of the 5 corners occasionally
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let i = 0; i < 5; i++) {
-						const cornerAngle = this.angle + (i * Math.PI * 2) / 5
-						spawn.pentagonLaser(this.pos.x, this.pos.y, cornerAngle)
+						const cornerOffset = (i * Math.PI * 2) / 5
+						spawn.pentagonLaser(this.pos.x, this.pos.y, cornerOffset, this)
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
@@ -316,7 +316,7 @@ const default_mobSpawn = {
 			boss.timeSinceLastAttack = simulation.time
 		}
 	},
-	pentagonLaser(x, y, angle, target) {
+	pentagonLaser(x, y, angleOffset, parent) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'pentagon laser',
 			class: 'projectile',
@@ -325,15 +325,22 @@ const default_mobSpawn = {
 			size: 1,
 			length: 2000,
 			speed: 0,
-			angle: angle,
+			angleOffset: angleOffset,
 			attackRate: 5, // Hits every 0.2 seconds
 			timeSpawned: state.simulation.time,
 			duration: 0.5,
 			color: 'hsl(180, 100%, 50%)',
+			parent: parent,
 			update: function () {
 				if (this.state.simulation.time - this.timeSpawned > this.duration) {
 					this.health = 0
 					return
+				}
+
+				if (this.parent) {
+					this.pos.x = this.parent.pos.x
+					this.pos.y = this.parent.pos.y
+					this.angle = this.parent.angle + this.angleOffset // Sync with boss spin
 				}
 
 				const endX = this.pos.x - Math.cos(this.angle) * this.length
@@ -403,7 +410,7 @@ const default_mobSpawn = {
 			}
 		}))
 	},
-	hexagonMinion(x, y) {
+	hexagonMinion(x, y, angle) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'hexagon minion',
 			class: 'projectile',
@@ -413,12 +420,9 @@ const default_mobSpawn = {
 			size: 10,
 			speed: 7,
 			dropChance: 0.3,
+			angle: angle,
 			color: 'hsl(30, 100%, 50%)',
-			update: function () {
-				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
-				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
-				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
-			},
+			update: function () { this.moveInAngle() },
 			draw: function () {
 				this.drawSelf(function () {
 					draw.beginPath()
@@ -445,7 +449,7 @@ const default_mobSpawn = {
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let index = 0; index < 8; index++) {
-						spawn.octagonBullet(this.pos.x, this.pos.y, (index * Math.PI * 0.25) + this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1))
+						spawn.octagonBullet(this.pos.x, this.pos.y, (index * Math.PI * 0.25) + this.angle + rand(-0.3, 0.3))
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
@@ -473,10 +477,7 @@ const default_mobSpawn = {
 			dropChance: 0.3,
 			angle: angle,
 			color: 'hsl(30, 100%, 50%)',
-			update: function () {
-				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
-				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
-			},
+			update: function () { this.moveInAngle() },
 			draw: function () {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
