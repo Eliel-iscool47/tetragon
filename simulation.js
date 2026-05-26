@@ -298,11 +298,13 @@ ${this.consoleMessage}
 			state.player.deathScreen()
 			hud.Obj.style.display = 'none'
 			pauseScreen.style.display = 'none'
+			draw.restore()
 			return undefined
 		}
 		if (state.player.health <= 0) {
 			state.player.kill()
 			this.isDead = true
+			draw.restore()
 			return undefined
 		}
 		state.player.health = Math.min(state.player.health, state.player.maxHealth)

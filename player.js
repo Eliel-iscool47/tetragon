@@ -96,21 +96,22 @@ class Player extends Entity {
 
 	deathScreen() {
 		draw.fillStyle = 'hsl(0, 100%, 30%)'
-		draw.fillRect(0, 0, main.width, main.height)
+		draw.fillRect(0, 0, 1500, 800) // Fill virtual world
 		draw.fillStyle = 'hsl(0, 0%, 0%)'
-		draw.font = `${(main.width + main.height) / 20}px 'DM Sans'`
+		draw.font = `115px 'DM Sans'`
 		draw.textAlign = 'center'
-		draw.fillText('Game Over', main.width / 2, main.height / 2)
-		draw.font = `${(main.width + main.height) / 40}px 'DM Sans'`
+		draw.fillText('Game Over', 750, 400)
 		
 		// Draw the leaderboard submission status
 		draw.fillStyle = 'rgba(255, 255, 255, 0.7)'
-		draw.font = `${(main.width + main.height) / 80}px 'DM Sans'`
-		draw.fillText(this.state.simulation.scoreStatus, main.width / 2, main.height / 2 + 130)
+		draw.font = `28px 'DM Sans'`
+		draw.fillText(this.state.simulation.scoreStatus, 750, 530)
 
 		draw.fillStyle = 'hsl(0, 0%, 0%)'
-		draw.font = `${(main.width + main.height) / 40}px 'DM Sans'`
-		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn\nor ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, main.width / 2, main.height / 2 + 75, main.width)
+		draw.font = `57px 'DM Sans'`
+		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, 750, 475)
+		draw.font = `30px 'DM Sans'`
+		draw.fillText(`or ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, 750, 510)
 		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
 	}
 

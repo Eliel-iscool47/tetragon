@@ -84,7 +84,7 @@ var collisions = {
 
 		mobs.list = mobs.list.filter(function (mob) {
 			// Check for death or out-of-bounds projectiles
-			const isOutOfBounds = mob.pos.x < -100 || mob.pos.x > 1600 || mob.pos.y < -100 || mob.pos.y > 900
+			const isOutOfBounds = mob.pos.x < -200 || mob.pos.x > 1700 || mob.pos.y < -200 || mob.pos.y > 1000
 			if (mob.health <= 0 || (isOutOfBounds && mob.class == 'projectile')) {
 				if (mob.health <= 0) mob.die()
 				return false
@@ -97,6 +97,9 @@ var collisions = {
 
 			// Bullet/Explosion collision via grid
 			this.grid.query(mob.pos.x, mob.pos.y, (e) => {
+				// Fix: Projectiles (boss bullets/lasers) should not be destroyed by player fire
+				if (mob.class === 'projectile') return 
+
 				if (e.isExplosion) {
 					if (!e.targetsPlayerOnly && 
 						e.timeSinceLastAttack <= 
@@ -130,6 +133,7 @@ var collisions = {
 			})
 			const fireList = state.bullets.firePoolList ?? []
 			fireList.forEach(function (f) {
+				if (mob.class === 'projectile') return // Fire pools shouldn't destroy boss bullets
 				if (distance(mob.pos.x, mob.pos.y, f.pos.x, f.pos.y) <= f.size + mob.size / 2) {
 					mob.takeDamage(f.damage * state.player.damageDone)
 				}

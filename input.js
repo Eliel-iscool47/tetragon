@@ -120,7 +120,7 @@ var input = {
 			joystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0 },
 			aimJoystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0 },
 			isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
-			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
+			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0")
 		}
 	},
 
@@ -261,22 +261,26 @@ var input = {
 		const lerpAmount = 0.25 // Adjust for more/less "smoothness"
 		const update = (id, thumbId, stateRef) => {
 			const thumb = document.getElementById(thumbId)
-			if (!thumb) return
+			const base = document.getElementById(id)
+			if (!thumb || !base) return
+			const maxRadius = base.offsetWidth / 2
 			// Smoothly interpolate visual position toward the input target
-			stateRef.visualX = lerp(stateRef.visualX, stateRef.moveX * 50, lerpAmount)
-			stateRef.visualY = lerp(stateRef.visualY, stateRef.moveY * 50, lerpAmount)
+			stateRef.visualX = lerp(stateRef.visualX, stateRef.moveX * maxRadius, lerpAmount)
+			stateRef.visualY = lerp(stateRef.visualY, stateRef.moveY * maxRadius, lerpAmount)
 			thumb.style.transform = `translate(${stateRef.visualX}px, ${stateRef.visualY}px)`
 		}
 		update('move-base', 'move-thumb', this.joystick)
 		update('aim-base', 'aim-thumb', this.aimJoystick)
 	},
-	_setupJoystick(baseId, thumbId, stateRef) {
+	_setupJoystick(baseId, thumbId, stateKey) {
 		const base = document.getElementById(baseId)
 		if (!base) return
 		let touchId = null
+		let rect = base.getBoundingClientRect()
 
 		const processInput = (touch) => {
-			const rect = base.getBoundingClientRect()
+			const stateRef = this[stateKey] // Dynamic lookup to survive resets
+			if (!rect) rect = base.getBoundingClientRect()
 			const centerX = rect.left + rect.width / 2
 			const centerY = rect.top + rect.height / 2
 
@@ -296,9 +300,10 @@ var input = {
 
 		base.addEventListener('touchstart', (e) => {
 			e.preventDefault()
+			rect = base.getBoundingClientRect()
 			const touch = e.changedTouches[0]
 			touchId = touch.identifier
-			stateRef.active = true
+			this[stateKey].active = true
 			processInput(touch)
 		}, { passive: false })
 
@@ -315,17 +320,17 @@ var input = {
 			const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId)
 			if (touch) {
 				touchId = null
-				stateRef.active = false
-				stateRef.moveX = 0
-				stateRef.moveY = 0
+				this[stateKey].active = false
+				this[stateKey].moveX = 0
+				this[stateKey].moveY = 0
 			}
 		}
-		base.addEventListener('touchend', end)
-		base.addEventListener('touchcancel', end)
+		window.addEventListener('touchend', end)
+		window.addEventListener('touchcancel', end)
 	},
 	initJoystick() {
-		this._setupJoystick('move-base', 'move-thumb', this.joystick)
-		this._setupJoystick('aim-base', 'aim-thumb', this.aimJoystick)
+		this._setupJoystick('move-base', 'move-thumb', 'joystick')
+		this._setupJoystick('aim-base', 'aim-thumb', 'aimJoystick')
 	},
 }
 

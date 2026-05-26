@@ -284,14 +284,14 @@ var bullets = {
 			piercing: guns.bouncyBalls.piercing,
 			update: function () {
 				const radius = this.size / 2
-				if (this.pos.x < radius || this.pos.x > main.width - radius) {
+				if (this.pos.x < radius || this.pos.x > 1500 - radius) {
 					this.angle = Math.PI - this.angle + rand(-0.05, 0.05)
-					this.pos.x = clamp(this.pos.x, radius, main.width - radius)
+					this.pos.x = clamp(this.pos.x, radius, 1500 - radius)
 					this.speed = Math.min(30, this.speed + 0.8)
 				}
-				if (this.pos.y < radius || this.pos.y > main.height - radius) {
+				if (this.pos.y < radius || this.pos.y > 800 - radius) {
 					this.angle = -this.angle + rand(-0.05, 0.05)
-					this.pos.y = clamp(this.pos.y, radius, main.height - radius)
+					this.pos.y = clamp(this.pos.y, radius, 800 - radius)
 					this.speed = Math.min(30, this.speed + 0.8)
 				}
 

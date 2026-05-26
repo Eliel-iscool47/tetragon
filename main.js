@@ -126,7 +126,7 @@ let remappingAction = null
 
 //mobile controls
 
-var mobileControls
+var mobileControls = null
 function updateMobileFireVisibility() {
 	if (document.getElementById('mobile-fire')) {
 		document.getElementById('mobile-fire').style.display = state.input.isAutoFire ? 'none' : 'block'
@@ -142,10 +142,16 @@ function updateJoystickScale() {
 
 window.addEventListener('load', () => {
 	title = document.getElementById('title')
-	mobileControls = document.getElementById('mobile-controls')
+	
+	// Ensure the mobile controls container exists
+	mobileControls = document.getElementById('mobile-controls') 
+	if (!mobileControls) {
+		mobileControls = document.createElement('div')
+		mobileControls.id = 'mobile-controls'
+		document.body.appendChild(mobileControls)
+	}
 
-	// Setup Mobile Controls HTML
-	if (mobileControls) {
+	if (simulation.isMobile) {
 		mobileControls.style.pointerEvents = 'none'
 		mobileControls.innerHTML = `
 			<div id="move-base" style="position: absolute; bottom: 8vh; left: 8vh; width: 18vh; height: 18vh; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); touch-action: none; pointer-events: auto;">
@@ -177,7 +183,8 @@ window.addEventListener('load', () => {
 		}
 		updateJoystickScale()
 		updateMobileFireVisibility()
-		input.initJoystick()
+		// Small timeout ensures DOM elements are ready for event listeners
+		setTimeout(() => input.initJoystick(), 50)
 	}
 
 	// Initialize elements inside the load listener to ensure they aren't null
