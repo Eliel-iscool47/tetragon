@@ -74,6 +74,23 @@ style.innerHTML = `
 	::-webkit-scrollbar-thumb:hover {
 		background: rgba(0, 0, 0, 0.3);
 	}
+	#settings-menu {
+		display: none;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: rgba(245, 245, 245, 0.98);
+		padding: 30px;
+		border-radius: 15px;
+		border: 1px solid rgba(0,0,0,0.1);
+		color: black;
+		min-width: 320px;
+		box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+		z-index: 2000;
+		max-height: 80vh;
+		overflow-y: auto;
+	}
 `
 document.head.appendChild(style)
 
@@ -160,9 +177,11 @@ window.addEventListener('load', () => {
 			<div id="aim-base" style="position: absolute; bottom: 8vh; right: 8vh; width: 18vh; height: 18vh; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); touch-action: none; pointer-events: auto;">
 				<div id="aim-thumb" style="position: absolute; top: 6.5vh; left: 6.5vh; width: 5vh; height: 5vh; background: #ff4444; border-radius: 50%; opacity: 0.5; pointer-events: none;"></div>
 			</div>
-			<button id="mobile-fire" style="position: absolute; bottom: 8vh; right: 28vh; width: 12vh; height: 12vh; background: rgba(255,68,68,0.3); color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; font-family: 'DM Sans'; font-size: 18px; font-weight: bold; z-index: 1000; touch-action: none; pointer-events: auto;">FIRE</button>
-			<button id="mobile-menu-toggle" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.5); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Toggle Menus</button>
-			<button id="mobile-gun-cycle" style="position: absolute; top: 80px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.5); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Cycle Guns</button>
+			<button id="mobile-fire" style="position: absolute; bottom: 8vh; right: 28vh; width: 12vh; height: 12vh; background: rgba(255,68,68,0.15); color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; font-family: 'DM Sans'; font-size: 18px; font-weight: bold; z-index: 1000; touch-action: none; pointer-events: auto;">FIRE</button>
+			<button id="mobile-pause" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Pause</button>
+			<button id="mobile-debug" style="position: absolute; top: 80px; left: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Debug</button>
+			<button id="mobile-menu-toggle" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Toggle Menus</button>
+			<button id="mobile-gun-cycle" style="position: absolute; top: 80px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Cycle Guns</button>
 		`
 		const fireBtn = document.getElementById('mobile-fire')
 		if (fireBtn) {
@@ -181,10 +200,18 @@ window.addEventListener('load', () => {
 			e.preventDefault()
 			input.gunRight()
 		}
+		document.getElementById('mobile-pause').onclick = (e) => {
+			e.preventDefault()
+			input.pause()
+		}
+		document.getElementById('mobile-debug').onclick = (e) => {
+			e.preventDefault()
+				input.toggleDebug()
+		}
 		updateJoystickScale()
 		updateMobileFireVisibility()
 		// Small timeout ensures DOM elements are ready for event listeners
-		setTimeout(() => input.initJoystick(), 50)
+		setTimeout(() => input.initJoystick(), 100) // Increased timeout for robustness
 	}
 
 	// Initialize elements inside the load listener to ensure they aren't null
@@ -199,9 +226,13 @@ window.addEventListener('load', () => {
 	pauseScreen = document.getElementById('pause-screen')
 	chooseScreen = document.getElementById('choice-screen')
 
-	settingsMenu = document.createElement('div')
-	settingsMenu.id = 'settings-menu'
-	dc.appendChild(settingsMenu)
+	if (!document.getElementById('settings-menu')) {
+		settingsMenu = document.createElement('div')
+		settingsMenu.id = 'settings-menu'
+		document.body.appendChild(settingsMenu)
+	}
+
+	if (controlDoc) controlDoc.style.display = 'none'
 
 	start.onclick = function () {
 		if (simulation.interval) clearInterval(simulation.interval)
@@ -209,7 +240,10 @@ window.addEventListener('load', () => {
 	}.bind(this)
 
 	controls.onclick = function () {
-		controlDoc.style.display = controlDoc.style.display == 'block' ? 'none' : 'block'
+		if (controlDoc) {
+			const isVisible = controlDoc.style.display === 'block'
+			controlDoc.style.display = isVisible ? 'none' : 'block'
+		}
 	}
 
 	// Ensure controls are styled and populated
@@ -286,13 +320,13 @@ window.addEventListener('load', () => {
 	}
 
 	settings.onclick = function () {
-		settingsMenu.style.display = settingsMenu.style.display == 'block' ? 'none' : 'block'
-		settingsMenu.style.color = 'black'
-		renderSettings()
+		const isVisible = settingsMenu.style.display === 'block'
+		settingsMenu.style.display = isVisible ? 'none' : 'block'
+		if (!isVisible) renderSettings()
 	}.bind(this)
 
 	function renderSettings() {
-		settingsMenu.innerHTML = '<h3>Settings</h3>'
+		settingsMenu.innerHTML = '<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Settings</h2>'
 
 		// Restart Button (only visible during gameplay)
 		if (!simulation.isMainMenu) {

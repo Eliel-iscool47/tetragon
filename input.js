@@ -15,7 +15,7 @@ var input = {
 		left: "KeyA",
 		right: "KeyD",
 		fire: "KeyF",
-		testing: "KeyT",
+		debug: "KeyT",
 		pause: "KeyP",
 		gunLeft: "KeyQ",
 		gunRight: "KeyE",
@@ -28,24 +28,26 @@ var input = {
 		active: false,
 		moveX: 0,
 		moveY: 0,
-		visualX: 0,
-		visualY: 0
+		visualX: 0, // For smooth thumb movement
+		visualY: 0, // For smooth thumb movement
+		touchId: null, // To track individual touches
 	},
 	aimJoystick: {
 		active: false,
 		moveX: 0,
 		moveY: 0,
-		visualX: 0,
-		visualY: 0
+		visualX: 0, // For smooth thumb movement
+		visualY: 0, // For smooth thumb movement
+		touchId: null, // To track individual touches
 	},
 	isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
 	joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
 	cursor: {
-		_x: collisions.center.x,
+		_x: 0, // Initialized to 0, will be set correctly in reset()
 		get x() { return this._x },
 		set x(val) { this._x = val },
 
-		_y: collisions.center.y,
+		_y: 0, // Initialized to 0, will be set correctly in reset()
 		get y() { return this._y },
 		set y(val) { this._y = val },
 
@@ -54,11 +56,11 @@ var input = {
 		set angle(val) { this._angle = val },
 
 		update(posX, posY) {
-			const scaleX = main.width / 1500
-			const scaleY = main.height / 800
+			const scaleX = main.width / (state.simulation?.world?.width || 1500)
+			const scaleY = main.height / (state.simulation?.world?.height || 800)
 			this._x = posX / scaleX
 			this._y = posY / scaleY
-			if (!simulation.isPaused && state.player)
+			if (!state.simulation?.isPaused && state.player)
 				this._angle = angle(this._x, this._y, state.player.pos.x, state.player.pos.y)
 		},
 	},
@@ -67,7 +69,7 @@ var input = {
 			simulation.log("guns.equippedGun == undefined")
 			return undefined
 		}
-		if ((!simulation.isTesting &&
+		if ((!simulation.isDebug &&
 			guns.equippedGun.ammo > 0 &&
 			simulation.time - guns.lastBulletShot < 1 / (
 				guns.equippedGun.fireRate * upgrades.fireRate
@@ -101,10 +103,10 @@ var input = {
 		if (!isNullish(guns.equippedGun)) guns.equippedGun.reload()
 	},
 	allGuns() {
-		if (simulation.isTesting) guns.allGuns()
+		if (simulation.isDebug) guns.allGuns()
 	},
-	testing() {
-		simulation.isTesting = !simulation.isTesting
+	toggleDebug() {
+		simulation.isDebug = !simulation.isDebug
 	},
 	pause() {
 		simulation.isPaused = !simulation.isPaused
@@ -117,17 +119,24 @@ var input = {
 	get defaults() {
 		return { 
 			pressedKeys: [],
-			joystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0 },
-			aimJoystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0 },
+			joystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0, touchId: null },
+			aimJoystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0, touchId: null },
 			isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
-			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0")
+			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
+			cursor: { // Ensure cursor defaults are set based on collisions.center
+				_x: state.collisions.center.x,
+				_y: state.collisions.center.y,
+				_angle: 0,
+			}
 		}
 	},
 
 	set defaults(val) { throw new Error('input.defaults is read-only') },
 
 	reset() {
-		Object.assign(this, this.defaults)
+		const { cursor, ...rest } = this.defaults
+		Object.assign(this, rest)
+		Object.assign(this.cursor, cursor)
 	},
 
 	respawn() {
@@ -163,8 +172,8 @@ var input = {
 				case this.keybinds.gunRight:
 					this.gunRight()
 					break
-				case this.keybinds.testing:
-					this.testing()
+				case this.keybinds.debug:
+					this.toggleDebug()
 					break
 				case this.keybinds.pause:
 					this.pause()
@@ -191,7 +200,8 @@ var input = {
 	},
 	keyLogic() {
 		this.gamepadLogic()
-		if (!simulation.isPaused && !simulation.isChoosing) {
+		if (!(simulation.isPaused || simulation.isChoosing || simulation.isDead)) {
+			// Moving
 			let moveX = 0
 			let moveY = 0
 
@@ -229,6 +239,12 @@ var input = {
 				// Directly set world coordinates for the cursor
 				this.cursor.x = state.player.pos.x + this.aimJoystick.moveX * 200
 				this.cursor.y = state.player.pos.y + this.aimJoystick.moveY * 200
+				this.cursor.angle = angle(
+					this.cursor.x,
+					this.cursor.y,
+					state.player.pos.x,
+					state.player.pos.y,
+				)
 				
 				if (Math.sqrt(this.aimJoystick.moveX ** 2 + this.aimJoystick.moveY ** 2) > 0.3) this.fire()
 			}
@@ -279,7 +295,7 @@ var input = {
 		let rect = base.getBoundingClientRect()
 
 		const processInput = (touch) => {
-			const stateRef = this[stateKey] // Dynamic lookup to survive resets
+			const stateRef = this[stateKey] // Dynamic lookup for the current joystick object
 			if (!rect) rect = base.getBoundingClientRect()
 			const centerX = rect.left + rect.width / 2
 			const centerY = rect.top + rect.height / 2
@@ -302,7 +318,7 @@ var input = {
 			e.preventDefault()
 			rect = base.getBoundingClientRect()
 			const touch = e.changedTouches[0]
-			touchId = touch.identifier
+			touchId = touch.identifier // Store the identifier for this touch
 			this[stateKey].active = true
 			processInput(touch)
 		}, { passive: false })
@@ -310,7 +326,7 @@ var input = {
 		window.addEventListener('touchmove', (e) => {
 			if (touchId === null) return
 			const touch = Array.from(e.touches).find(t => t.identifier === touchId)
-			if (touch) {
+			if (touch && this[stateKey].active) { // Only process if this joystick is active and the touch matches
 				e.preventDefault()
 				processInput(touch)
 			}
@@ -319,10 +335,10 @@ var input = {
 		const end = (e) => {
 			const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId)
 			if (touch) {
-				touchId = null
-				this[stateKey].active = false
-				this[stateKey].moveX = 0
-				this[stateKey].moveY = 0
+				touchId = null // Clear the touch ID
+				this[stateKey].active = false // Deactivate joystick
+				this[stateKey].moveX = 0 // Reset movement
+				this[stateKey].moveY = 0 // Reset movement
 			}
 		}
 		window.addEventListener('touchend', end)
@@ -338,8 +354,9 @@ var input = {
 window.addEventListener("resize", function (r) {
 	main.width = window.innerWidth
 	main.height = window.innerHeight
-	collisions.border.right = 1500 - (state.player?.size || 50) / 2
-	collisions.border.bottom = 800 - (state.player?.size || 50) / 2
+	const world = state.simulation.world || { width: 1500, height: 800 }
+	collisions.border.right = world.width - (state.player?.size || 50) / 2
+	collisions.border.bottom = world.height - (state.player?.size || 50) / 2
 	draw.clearRect(0, 0, main.width, main.height)
 	collisions.grid.init()
 })

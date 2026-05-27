@@ -59,6 +59,7 @@ var particles = {
 		this.list.forEach(function (p) { return p.draw() }.bind(this))
 	},
 	update() {
+		if (simulation.isPaused || simulation.isChoosing) return undefined
 		for (let i = this.list.length - 1; i >= 0; i--) {
 			const p = this.list[i]
 			p.update()
@@ -160,6 +161,27 @@ var particles = {
 			draw.fillStyle = this.color;
 			// Shrink the trail particle over its lifetime
 			draw.arc(this.pos.x, this.pos.y, this.size * alpha, 0, Math.PI * 2);
+			draw.fill();
+			draw.restore();
+		},
+		update() {
+			if (this.state.simulation.time - this.timeSpawned > this.duration) {
+				this.active = false
+			}
+		}
+	},
+	hexagonTrail: {
+		size: 8,
+		color: 'hsl(30, 100%, 50%)',
+		duration: 0.4,
+		draw() {
+			const elapsed = this.state.simulation.time - this.timeSpawned;
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1);
+			draw.save();
+			draw.globalAlpha = alpha * 0.4;
+			draw.beginPath();
+			polygon(this.pos.x, this.pos.y, this.size * alpha, 6, this.angle);
+			draw.fillStyle = this.color;
 			draw.fill();
 			draw.restore();
 		},

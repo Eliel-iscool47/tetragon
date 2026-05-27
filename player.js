@@ -9,11 +9,15 @@ class Player extends Entity {
 			_damageDone: 1,
 			_lastDamageTime: -(10 ** 299),
 			_damageTaken: 1,
+			_damageBoostUntil: 0,
+			_defenseBoostUntil: 0,
 			_isInvulnerable: false,
 			_invulnerableUntil: 0,
 			_speedBoostUntil: 0,
 			_size: 50,
+			_killer: null,
 			_velocity: 5,
+			_deathAlpha: 0,
 			color: 'hsl(215, 100%, 45%)',
 		})
 	}
@@ -25,10 +29,14 @@ class Player extends Entity {
 			_damageDone: 1,
 			_lastDamageTime: -(10 ** 299),
 			_damageTaken: 1,
+			_damageBoostUntil: 0,
+			_defenseBoostUntil: 0,
 			_isInvulnerable: false,
 			_invulnerableUntil: 0,
 			_speedBoostUntil: 0,
 			_size: 50,
+			_deathAlpha: 0,
+			_killer: null,
 			_velocity: 5,
 			color: 'hsl(215, 100%, 45%)',
 			pos: { x: main.width / 2, y: main.height / 2 }
@@ -37,7 +45,7 @@ class Player extends Entity {
 
 	set defaults(val) { throw new Error('player.defaults is read-only') }
 
-	takeDamage(amount) {
+	takeDamage(amount, source) {
 		if (this.isInvulnerable) return
 		let damage = amount * this.damageTaken
 
@@ -52,6 +60,7 @@ class Player extends Entity {
 		})
 
 		this.lastDamageTime = this.state.simulation.time
+		if (source) this._killer = source
 		this.state.upgrades.lastHealthRegen = this.state.simulation.time
 	}
 
@@ -64,14 +73,24 @@ class Player extends Entity {
 		this.health = Math.min(this.health, val)
 	}
 
-	get damageDone() { return this._damageDone }
-	set damageDone(val) { this._damageDone = Math.abs(val) }
+	get damageDone() { 
+		return this.state.simulation.time < this._damageBoostUntil ? this._damageDone * 2.0 : this._damageDone 
+	}
+	set damageDone(val) { 
+		const multiplier = this.state.simulation.time < this._damageBoostUntil ? 2.0 : 1
+		this._damageDone = Math.abs(val / multiplier) 
+	}
 
 	get lastDamageTime() { return this._lastDamageTime }
 	set lastDamageTime(val) { this._lastDamageTime = val }
 
-	get damageTaken() { return this._damageTaken }
-	set damageTaken(val) { this._damageTaken = val }
+	get damageTaken() { 
+		return this.state.simulation.time < this._defenseBoostUntil ? this._damageTaken * 0.5 : this._damageTaken 
+	}
+	set damageTaken(val) { 
+		const multiplier = this.state.simulation.time < this._defenseBoostUntil ? 0.5 : 1
+		this._damageTaken = val / multiplier 
+	}
 
 	get isInvulnerable() { return this._isInvulnerable || this.state.simulation.time < this._invulnerableUntil }
 	set isInvulnerable(val) { this._isInvulnerable = !!val }
@@ -84,10 +103,23 @@ class Player extends Entity {
 	get velocity() { 
 		return this.state.simulation.time < this._speedBoostUntil ? this._velocity * 1.6 : this._velocity 
 	}
-	set velocity(val) { this._velocity = Math.max(val, 1) }
+	set velocity(val) {
+		// If the player is currently boosted, we need to divide the incoming value by the multiplier
+		// to ensure we only update the underlying base velocity (_velocity).
+		const multiplier = this.state.simulation.time < this._speedBoostUntil ? 1.6 : 1
+		this._velocity = Math.max(val / multiplier, 1)
+	}
 
 	setInvulnerable(duration) {
 		this._invulnerableUntil = Math.max(this.state.simulation.time, this._invulnerableUntil) + duration
+	}
+
+	setDamageBoost(duration) {
+		this._damageBoostUntil = this.state.simulation.time + duration
+	}
+
+	setDefenseBoost(duration) {
+		this._defenseBoostUntil = this.state.simulation.time + duration
 	}
 
 	setSpeedBoost(duration) {
@@ -95,28 +127,92 @@ class Player extends Entity {
 	}
 
 	deathScreen() {
-		draw.fillStyle = 'hsl(0, 100%, 30%)'
-		draw.fillRect(0, 0, 1500, 800) // Fill virtual world
-		draw.fillStyle = 'hsl(0, 0%, 0%)'
+		const pulse = 1 + Math.sin(this.state.simulation.time * 5) * 0.1
+		this._deathAlpha = Math.min(1, this._deathAlpha + 0.015)
+		draw.save()
+		draw.globalAlpha = this._deathAlpha
+		draw.fillStyle = 'hsl(0, 100%, 40%)'
+		draw.fillRect(0, 0, this.state.simulation.world.width, this.state.simulation.world.height) // Fill virtual world
+
+		draw.save()
+		draw.translate(this.state.simulation.world.width / 2, this.state.simulation.world.height / 2)
+		draw.scale(pulse, pulse)
+		draw.fillStyle = 'hsl(0, 0%, 100%)'
 		draw.font = `115px 'DM Sans'`
 		draw.textAlign = 'center'
-		draw.fillText('Game Over', 750, 400)
+		draw.textBaseline = 'middle'
+		draw.fillText('Game Over', 0, -20)
+		draw.restore()
+
+		// Draw the random death message
+		draw.textAlign = 'center'
+		draw.fillStyle = 'rgba(255, 255, 255, 0.8)'
+		draw.font = `italic 30px 'DM Sans'`
+		draw.fillText(this.state.simulation.deathMessage, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 55)
 		
 		// Draw the leaderboard submission status
-		draw.fillStyle = 'rgba(255, 255, 255, 0.7)'
-		draw.font = `28px 'DM Sans'`
-		draw.fillText(this.state.simulation.scoreStatus, 750, 530)
+		draw.textAlign = 'center'
+		draw.fillStyle = 'rgb(55, 215, 255)'
+		draw.font = `28px \'DM Sans\'`
+		draw.fillText(this.state.simulation.scoreStatus, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
 
-		draw.fillStyle = 'hsl(0, 0%, 0%)'
-		draw.font = `57px 'DM Sans'`
-		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, 750, 475)
-		draw.font = `30px 'DM Sans'`
-		draw.fillText(`or ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, 750, 510)
+		draw.fillStyle = 'hsl(0, 0%, 100%)'
+		draw.font = `50px 'DM Sans'`
+		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 95)
+		draw.font = `25px 'DM Sans'`
+		draw.fillText(`or ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
 		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
+		draw.restore()
 	}
 
 	kill() {
 		this.health = 0
+
+		let message = ""
+		const killer = this._killer
+
+		if (killer && killer.class === 'boss') {
+			const bossMessages = [
+				`Boss's brutal blow, your battle's been brought low.`,
+				`Felled by a foe, your final flow.`,
+				`The ${killer.type} triumphs, your time is now through.`,
+				`A boss's big bash, your body's a dash.`
+			]
+			message = bossMessages[Math.floor(Math.random() * bossMessages.length)]
+		} else {
+			const genericMessages = [
+				"Try dodging next time!",
+				"Womp womp.",
+				"Skill issue?",
+				"That's gotta hurt.",
+				"F in the chat.",
+				"Better luck next time!",
+				"Geometric failure.",
+				"You were doing so well...",
+				"Get good.",
+				"Square up next time.",
+				"Albert Epstein better than bro",
+			]
+			
+			if (killer && Math.random() < 0.4) {
+				const imagineMessages = [
+					`Imagine dying to a ${killer.type}, what a tragic tale!`,
+					`Picture perishing to a ${killer.type}, a pitiful plight!`,
+					`Conceive collapsing to a ${killer.type}, quite the cruel caper!`,
+					`Fancy falling to a ${killer.type}, a foolish, final feat!`,
+					`Dream of demise by a ${killer.type}, a dreadful, dire deed!`,
+					`Envision ending by a ${killer.type}, an embarrassing exit!`,
+					`Consider crumbling to a ${killer.type}, a calamitous conclusion!`,
+					`Reflect on ruin by a ${killer.type}, a regrettable, rapid rest!`
+				]
+				message = imagineMessages[Math.floor(Math.random() * imagineMessages.length)]
+			} else {
+				message = genericMessages[Math.floor(Math.random() * genericMessages.length)]
+			}
+		}
+
+		this.state.simulation.deathMessage = message
+
 		const score = Math.round(this.state.level.current)
 		const highScore = Number(localStorage.getItem('tetragon-high-score') || 0)
 		if (score > highScore) {
@@ -127,7 +223,6 @@ class Player extends Entity {
 			this.state.simulation.scoreStatus = ""
 		}
 
-		this.state.simulation.wipe()
 		this.state.simulation.isDead = true
 		this.state.simulation.isMainMenu = false
 		this.state.simulation.isPaused = false

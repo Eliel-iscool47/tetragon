@@ -308,7 +308,7 @@ br {
 
 #leaderboard-modal {
 	position: absolute;
-	bottom: -89vh;
+	bottom: -60vh;
 	left: 2vw;
 	background-color: rgba(0, 0, 0, 0.95);
 	padding: 30px;

@@ -284,14 +284,14 @@ var bullets = {
 			piercing: guns.bouncyBalls.piercing,
 			update: function () {
 				const radius = this.size / 2
-				if (this.pos.x < radius || this.pos.x > 1500 - radius) {
+				if (this.pos.x < radius || this.pos.x > state.simulation.world.width - radius) {
 					this.angle = Math.PI - this.angle + rand(-0.05, 0.05)
-					this.pos.x = clamp(this.pos.x, radius, 1500 - radius)
+					this.pos.x = clamp(this.pos.x, radius, state.simulation.world.width - radius)
 					this.speed = Math.min(30, this.speed + 0.8)
 				}
-				if (this.pos.y < radius || this.pos.y > 800 - radius) {
+				if (this.pos.y < radius || this.pos.y > state.simulation.world.height - radius) {
 					this.angle = -this.angle + rand(-0.05, 0.05)
-					this.pos.y = clamp(this.pos.y, radius, 800 - radius)
+					this.pos.y = clamp(this.pos.y, radius, state.simulation.world.height - radius)
 					this.speed = Math.min(30, this.speed + 0.8)
 				}
 
@@ -449,7 +449,9 @@ var bullets = {
 			damage: damage ?? this.explosions.damageDone,
 			time: simulation.time,
 			color: upgrades.isExplosionColorful ? `hsl(${rand(0, 360)}, 100%, 50%)` : this.explosions.color,
-			timeSinceLastAttack: simulation.time,
+			type: 'explosion',
+			// Initialize to the past so it can damage mobs on the first frame it exists
+			timeSinceLastAttack: simulation.time - 1,
 			targetsPlayerOnly: targetsPlayerOnly,
 		})
 	},

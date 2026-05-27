@@ -6,12 +6,12 @@ var hud = {
 	inv: document.getElementById('inventory'),
 	levels: document.getElementById('level-counter'),
 	timer: document.getElementById('timer'),
-	inGameConsole: document.getElementById('console'),
 	_timeMessage: ``,
 	get timeMessage() { return this._timeMessage },
 	set timeMessage(val) { this._timeMessage = val },
 
 	criticalOverlay: document.createElement('div'),
+	debugBadge: document.createElement('div'),
 	_displayHealth: 100,
 	get displayHealth() { return this._displayHealth },
 	set displayHealth(val) { this._displayHealth = val },
@@ -77,26 +77,7 @@ var hud = {
 		this.upgrades.innerHTML = `
 		${upgrades.uniqueCollected.map(function (upg) {
 			return countOccurrences(upgrades.collected, upg) > 1 ? `${upg.name} (${countOccurrences(upgrades.collected, upg)})` : `${upg.name}`
-		}.bind(this)).join('<br>')}
-		`
-	},
-	console() {
-		this.inGameConsole.style.display = 'block'
-		this.inGameConsole.style.backgroundColor = 'hsla(0, 0%, 60%, 0.65)'
-		this.inGameConsole.style.width = simulation.isMobile ? '200px' : '300px'
-		this.inGameConsole.style.height = `fit-content`
-		this.inGameConsole.style.maxHeight = simulation.isMobile ? '150px' : '220px'
-		this.inGameConsole.style.overflowY = `scroll`
-		this.inGameConsole.style.left = `0px`
-		this.inGameConsole.style.bottom = '0px'
-		this.inGameConsole.style.position = 'absolute'
-		this.inGameConsole.style.color = 'black'
-		this.inGameConsole.style.textAlign = 'left'
-		this.inGameConsole.style.fontSize = simulation.isMobile ? '12px' : '15px'
-		this.inGameConsole.innerHTML = `
-		Console:
-		${simulation.consoleMessage}
-		`
+		}).join(`<br/>`)}`
 	},
 	inventory() {
 		if (simulation.isMobile && !this.showMobileMenu) {
@@ -149,14 +130,21 @@ var hud = {
 			this.criticalOverlay.style.opacity = `${(1 - (state.player.health / (state.player.maxHealth * 0.3))) * (0.5 + 0.5 * Math.sin(simulation.time * 10))}`
 		} else this.criticalOverlay.style.display = 'none'
 	},
+	debugIndicator() {
+		if (simulation.isDebug) {
+			this.debugBadge.style.display = 'block'
+		} else {
+			this.debugBadge.style.display = 'none'
+		}
+	},
 	make() {
 		this.timeMessage = this.processTime()
 		this.healthBar()
 		this.inventory()
 		this.levelCounter()
-		this.console()
 		this.upgradeList()
 		this.criticalHealth()
+		this.debugIndicator()
 	}
 }
 
@@ -165,7 +153,6 @@ hud.health.style.pointerEvents = 'auto'
 hud.inv.style.pointerEvents = 'auto'
 hud.levels.style.pointerEvents = 'auto'
 hud.upgrades.style.pointerEvents = 'auto'
-hud.inGameConsole.style.pointerEvents = 'auto'
 hud.criticalOverlay.style.pointerEvents = 'none'
 
 hud.Obj.appendChild(hud.health)
@@ -181,6 +168,12 @@ hud.criticalOverlay.style.pointerEvents = 'none'
 hud.criticalOverlay.style.boxShadow = 'inset 0 0 150px red'
 hud.criticalOverlay.style.zIndex = '-1'
 hud.Obj.appendChild(hud.criticalOverlay)
+
+hud.debugBadge.id = 'debug-badge'
+hud.debugBadge.innerText = 'DEBUG'
+hud.debugBadge.style.pointerEvents = 'none'
+hud.Obj.appendChild(hud.debugBadge)
+
 hud.health.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.health.offsetLeft, m.offsetY + hud.health.offsetTop)
 }.bind(this))
@@ -192,7 +185,4 @@ hud.levels.addEventListener('mousemove', function (m) {
 }.bind(this))
 hud.upgrades.addEventListener('mousemove', function (m) {
 	input.cursor.update(m.offsetX + hud.upgrades.offsetLeft, m.offsetY + hud.upgrades.offsetTop)
-}.bind(this))
-hud.inGameConsole.addEventListener('mousemove', function (m) {
-	input.cursor.update(m.offsetX + hud.inGameConsole.offsetLeft, m.offsetY + hud.inGameConsole.offsetTop)
 }.bind(this))

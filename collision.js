@@ -1,25 +1,25 @@
 var collisions = {
 	center: {
-		x: 750,
-		y: 400,
+		x: 0, // Initialized to 0, will be set correctly in reset()
+		y: 0, // Initialized to 0, will be set correctly in reset()
 	},
 	border: {
 		left: 25,
-		right: 1475, // Set safe defaults initially
+		right: 0, // Initialized to 0, will be set correctly in reset()
 		top: 25,
-		bottom: 775,
+		bottom: 0, // Initialized to 0, will be set correctly in reset()
 	},
 	get defaults() {
 		return {
 			center: {
-				x: 750,
-				y: 400,
+				x: (state.simulation?.world?.width || 1500) / 2,
+				y: (state.simulation?.world?.height || 800) / 2,
 			},
 			border: {
 				left: 25,
-				right: 1500 - state.player.size / 2,
+				right: (state.simulation?.world?.width || 1500) - (state.player?.size || 50) / 2,
 				top: 25,
-				bottom: 800 - state.player.size / 2,
+				bottom: (state.simulation?.world?.height || 800) - (state.player?.size || 50) / 2,
 			}
 		}
 	},
@@ -30,13 +30,13 @@ var collisions = {
 		Object.assign(this, this.defaults)
 	},
 	grid: {
-		size: 150,
+		size: 100,
 		cells: [],
 		cols: 0,
 		rows: 0,
 		init() {
-			this.cols = Math.ceil(1500 / this.size) + 1
-			this.rows = Math.ceil(800 / this.size) + 1
+			this.cols = Math.ceil((state.simulation?.world?.width || 1500) / this.size) + 1
+			this.rows = Math.ceil((state.simulation?.world?.height || 800) / this.size) + 1
 			this.cells = Array.from({ length: this.cols * this.rows }, () => [])
 		},
 		clear() {
@@ -60,9 +60,11 @@ var collisions = {
 				for (let j = -1; j <= 1; j++) {
 					const ny = cy + j
 					if (ny < 0 || ny >= this.rows) continue
-					const cell = this.cells[nx + ny * this.cols]
-					for (let k = 0, kLen = cell.length; k < kLen; k++) {
-						callback(cell[k])
+					const cell = this.cells[nx + ny * this.cols];
+					if (cell) {
+						for (let k = 0, kLen = cell.length; k < kLen; k++) {
+							callback(cell[k]);
+						}
 					}
 				}
 			}
@@ -74,17 +76,21 @@ var collisions = {
 		state.player.pos.y = clamp(state.player.pos.y, collisions.border.top, collisions.border.bottom)
 
 		this.grid.clear()
-		for (let i = 0; i < bullets.list.length; i++) {
-			this.grid.add(bullets.list[i])
-		}
+		bullets.list.forEach(function (b) {
+			this.grid.add(b)
+		}.bind(this))
+
+		const explosionsToUpdate = new Set();
+
 		for (let i = 0; i < bullets.explosionList.length; i++) {
 			bullets.explosionList[i].isExplosion = true
 			this.grid.add(bullets.explosionList[i])
 		}
 
 		mobs.list = mobs.list.filter(function (mob) {
+			const world = state.simulation.world || { width: 1500, height: 800 }
 			// Check for death or out-of-bounds projectiles
-			const isOutOfBounds = mob.pos.x < -200 || mob.pos.x > 1700 || mob.pos.y < -200 || mob.pos.y > 1000
+			const isOutOfBounds = mob.pos.x < -200 || mob.pos.x > world.width + 200 || mob.pos.y < -200 || mob.pos.y > world.height + 200
 			if (mob.health <= 0 || (isOutOfBounds && mob.class == 'projectile')) {
 				if (mob.health <= 0) mob.die()
 				return false
@@ -107,7 +113,7 @@ var collisions = {
 						mob.checkCollision(e)
 					) {
 						mob.takeDamage(e.damage * state.player.damageDone)
-						e.timeSinceLastAttack = simulation.time
+						explosionsToUpdate.add(e)
 					}
 				} else {
 					if (e.piercing > 0 && mob.checkCollision(e)) {
@@ -140,9 +146,14 @@ var collisions = {
 			})
 			return true
 		}.bind(this))
+
+		// Update explosion timers only after all mobs have been checked for this frame
+		// This ensures all mobs in the radius take damage before the cooldown starts
+		explosionsToUpdate.forEach(e => e.timeSinceLastAttack = simulation.time)
+
 		bullets.explosionList.forEach(function (xp) {
 			if (distance(state.player.pos.x, state.player.pos.y, xp.pos.x, xp.pos.y) <= xp.size / 2 + state.player.size / 2 && xp.timeSinceLastAttack < simulation.time - 0.05) {
-				state.player.takeDamage(xp.damage)
+				state.player.takeDamage(xp.damage, xp)
 				xp.timeSinceLastAttack = simulation.time
 				upgrades.lastHealthRegen = simulation.time
 			}

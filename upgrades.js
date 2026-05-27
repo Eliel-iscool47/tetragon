@@ -4,8 +4,14 @@ var upgrades = {
 	set ammoYield(val) { this._ammoYield = val },
 
 	_fireRate: 1,
-	get fireRate() { return this._fireRate },
-	set fireRate(val) { this._fireRate = val },
+	_fireRateBoostUntil: 0,
+	get fireRate() { 
+		return simulation.time < this._fireRateBoostUntil ? this._fireRate * 1.5 : this._fireRate 
+	},
+	set fireRate(val) { 
+		const multiplier = simulation.time < this._fireRateBoostUntil ? 1.5 : 1
+		this._fireRate = val / multiplier 
+	},
 
 	_rerolls: 0,
 	get rerolls() { return this._rerolls },
@@ -75,7 +81,7 @@ var upgrades = {
 	get knifeRange() { return this._knifeRange },
 	set knifeRange(val) { this._knifeRange = val },
 
-	_knifeDuration: 0.3,
+	_knifeDuration: 0.15,
 	get knifeDuration() { return this._knifeDuration },
 	set knifeDuration(val) { this._knifeDuration = val },
 
@@ -197,7 +203,7 @@ var upgrades = {
 		if (!simulation.isChoosing) simulation.isChoosing = true
 		buttons.currentChoose = this
 		chooseScreen.style.display = 'block'
-				chooseScreen.style.width = '100%'
+		chooseScreen.style.width = '100%'
 		chooseScreen.style.height = '100%'
 		chooseScreen.style.margin = '0'
 		chooseScreen.style.padding = '0'
@@ -215,7 +221,7 @@ var upgrades = {
 			<div style="padding: 20px 0;">
 				${this.options.filter(upg => upg !== undefined).map(upg => `
 					<button class="upgrade-button" onclick='upgrades.get("${upg.id}"); simulation.isChoosing = false;'>
-						<strong>${upg.name}</strong>:<br>${upg.description}
+						<strong>${upg.name}${countOccurrences(this.collected, upg.id) > 0 ? ` (${countOccurences(this.collected, upg.id)})` : ''}</strong>:<br>${upg.description}
 					</button>
 				`).join('')}
 			</div>
@@ -274,6 +280,7 @@ var upgrades = {
 		return {
 			_ammoYield: 1,
 			_fireRate: 1,
+			_fireRateBoostUntil: 0,
 			_rerolls: 0,
 			_optionsPerPowerUp: 3,
 			_healEffect: 1,
@@ -293,7 +300,7 @@ var upgrades = {
 			_isVampire: false,
 			_vampireHealAmmount: 0.1,
 			_knifeRange: 1,
-			_knifeDuration: 0.3,
+			_knifeDuration: 0.15,
 			_missileExplosionDamage: 1,
 			_missileExplosionSize: 1,
 			_grenadeExplosionDamage: 1,
@@ -335,6 +342,9 @@ var upgrades = {
 			this.lastHealthRegen = simulation.time
 		}
 	},
+	setFireRateBoost(duration) {
+		this._fireRateBoostUntil = simulation.time + duration
+	}
 }
 
 upgrades.militarism = new upgrades.Upgrade({

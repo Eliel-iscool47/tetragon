@@ -10,7 +10,7 @@ const default_mobSpawn = {
 		octagonBoss: 9,
 		sniperBoss: 8,
 		minefieldBoss: 10,
-		ghostBoss: 10 
+		ghostBoss: 10
 	},
 	randomBoss(x, y) {
 		const choice = weightedRand(this.bosses)
@@ -394,7 +394,8 @@ const default_mobSpawn = {
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let i = 0; i < 3; i++) {
-						spawn.hexagonMinion(this.pos.x - Math.cos(this.angle + (i * Math.PI) / 1.5) * this.size, this.pos.y - Math.sin(this.angle + (i * Math.PI) / 1.5) * this.size)
+						const minionAngle = this.angle + (i - 1) * 0.4
+						spawn.hexagonMinion(this.pos.x, this.pos.y, minionAngle)
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
@@ -410,7 +411,7 @@ const default_mobSpawn = {
 			}
 		}))
 	},
-	hexagonMinion(x, y, angle) {
+	hexagonMinion(x, y, spawnAngle) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'hexagon minion',
 			class: 'projectile',
@@ -420,16 +421,34 @@ const default_mobSpawn = {
 			size: 10,
 			speed: 7,
 			dropChance: 0.3,
-			angle: angle,
+			angle: spawnAngle ?? angle(x, y, state.player.pos.x, state.player.pos.y),
 			color: 'hsl(30, 100%, 50%)',
-			update: function () { this.moveInAngle() },
+			update: function () {
+				// Homing logic: steer toward player
+				const targetAngle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
+				let diff = targetAngle - this.angle
+				while (diff < -Math.PI) diff += Math.PI * 2
+				while (diff > Math.PI) diff -= Math.PI * 2
+
+				// Apply a slight steering force to make them "swervy" but avoidable
+				this.angle += diff * 0.04
+				this.moveInAngle()
+
+				// Spawn trail particle
+				if (this.state.simulation.time - this.timeSpawned > 0.05 && this.state.simulation.time % 0.05 < 1 / this.state.simulation.fps) {
+					this.state.particles.spawn(this.pos.x, this.pos.y, {
+						...this.state.particles.hexagonTrail,
+						angle: this.angle
+					})
+				}
+			},
 			draw: function () {
-				this.drawSelf(function () {
+				this.drawSelf(() => {
 					draw.beginPath()
 					polygon(0, 0, this.size / 2, 6)
 					draw.fill()
 					draw.stroke()
-				}.bind(this))
+				})
 			}
 		}))
 	},
@@ -449,7 +468,7 @@ const default_mobSpawn = {
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let index = 0; index < 8; index++) {
-						spawn.octagonBullet(this.pos.x, this.pos.y, (index * Math.PI * 0.25) + this.angle + rand(-0.3, 0.3))
+						spawn.octagonBullet(this.pos.x, this.pos.y, (index * Math.PI * 0.25) + this.angle)
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
@@ -713,8 +732,8 @@ const default_mobSpawn = {
 					if (distance(this.pos.x, this.pos.y, this.target.x, this.target.y) < 20) {
 						const moveAngle = Math.random() * Math.PI * 2
 						const dist = Math.random() * this.range
-						this.target.x = clamp(this.anchor.x + Math.cos(moveAngle) * dist, 50, main.width - 50)
-						this.target.y = clamp(this.anchor.y + Math.sin(moveAngle) * dist, 50, main.height - 50)
+						this.target.x = clamp(this.anchor.x + Math.cos(moveAngle) * dist, 50, state.simulation.world.width - 50)
+						this.target.y = clamp(this.anchor.y + Math.sin(moveAngle) * dist, 50, state.simulation.world.height - 50)
 					}
 					// 0.5% chance per frame (~once every 3 seconds) to start a 3-second chase
 					if (percentChance(0.005)) this.chaseUntil = time + 3

@@ -117,6 +117,15 @@ var guns = {
 		shoot() {
 			if (this.isReloading) return undefined
 			if (this.ammo <= 0) {
+				if (this.magazines <= 0 && this.magSize !== Infinity) {
+					state.particles.spawn(state.player.pos.x, state.player.pos.y - 40, {
+						...state.particles.textPopup,
+						text: "OUT OF AMMO",
+						color: "hsl(0, 100%, 60%)",
+						size: 30,
+						duration: 0.5
+					})
+				}
 				this.ammo = 0
 				this.reload()
 				return undefined
@@ -317,7 +326,7 @@ guns.missiles = new guns.Gun({
 	id: 'missiles',
 	name: 'missiles',
 	description: `Launch a ${text('homing', 'homing')} missile that tracks nearby mobs<br>3 ${text('ammo', 'missiles')} per ${text('ammo', 'magazine')}`,
-	defaultAmmo: 50,
+	defaultAmmo: 60,
 	magSize: 3,
 	magazines: 20,
 	damage: 4,
@@ -410,16 +419,16 @@ guns.laser = new guns.Gun({
 guns.knife = new guns.Gun({
 	id: 'knife',
 	name: 'Knife',
-	description: `Quickly stab enemies with a knife<br>1 ${text('ammo', 'knife')} per ${text('ammo', 'magazine')}`,
-	defaultAmmo: 30,
-	magSize: 1,
-	magazines: 30,
-	damage: 12,
-	fireRate: 5,
-	bulletDuration: 0.2,
+	description: `Quickly stab enemies with a knife<br>Doesn't use ${text('ammo', 'ammo')}`,
+	defaultAmmo: Infinity,
+	magSize: Infinity,
+	magazines: Infinity,
+	damage: 15,
+	fireRate: 6,
+	bulletDuration: 0.15,
 	isMuzzleFlash: false,
 	unlockables: ['knife', 'bullets'],
-	reloadTime: 0.2,
+	reloadTime: 0,
 	shoot() {
 		bullets.slash(state.player.pos.x, state.player.pos.y, state.input.cursor.angle)
 		const range = state.player.size * 1.5 * state.upgrades.knifeRange

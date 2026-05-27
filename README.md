@@ -16,14 +16,19 @@ The game's controls are the following:
 * **Restart**: `R` *(while paused/choosing/dead)*
 * **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.11: Tetragon on mobile!)
+# II: Recent Updates (v1.12: Visual Vigor & Logical Rigor)
 
-<!-- * **Leaderboards**: Full Supabase integration. High scores are now automatically submitted to a global leaderboard using a persistent name set in the **Settings** menu.
-* **Visuals**: Added a subtle geometric background grid for better scale awareness. Missiles and Bouncy Balls now have unique particle trail effects.
-* **Guidance**: Missile homing logic updated to a steering-based system, providing much smoother and more effective target tracking.
-* **UX**: Added submission status notifications to the death screen to provide real-time feedback for high score uploads.
-* **Mechanics**: The level counter flashes red when there's less than 3 seconds left until the next level. -->
-* **Mobile Support**: Mobile controls have been added. I hope they work.
+* **HUD Cleanup**: Removed the cluttered in-game console. Ammo depletion is now signaled via a red "OUT OF AMMO" popup directly over the player.
+* **Animated Death Screen**: Implemented a smooth fade-in for the death overlay. The game world now desaturates to grayscale upon death while the UI remains vibrant red.
+* **Contextual Taunts**: Added a variety of random death messages, including specific taunts if you are killed by a Boss or "Imagine" taunts for regular enemies. Albert Epstein is cannon in the Tetragon Universe.
+* **Combat Logic Fixes**: 
+    * Fixed a major bug where Explosions/AoE damage would only hit one enemy per frame.
+    * Standardized property setters to prevent permanent upgrades from compounding incorrectly with temporary power-ups (e.g., permanent speed boosts no longer "bake in" the multiplier from Overdrive).
+* **Visual Improvements**: 
+    * Improved "Game Over" pulsing animation for better centering.
+    * Added visual trails and homing logic to Hexagon Minions.
+    * Added a "DEBUG" badge in the HUD to clearly indicate when debug mode is active.
+* **UX**: Inventory and Upgrade lists are now visible by default on non-mobile devices.
 
 ---
 
@@ -40,6 +45,10 @@ The project utilizes a centralized `state` object (defined in `main.js`) to mana
 - **Supabase Integration**: The game communicates with a Supabase backend to store and retrieve high scores.
 - **Persistent Profile**: Usernames are stored in `localStorage`, allowing for automatic identification without interruptive popups.
 - **Async Feedback**: The death screen utilizes a reactive status message system to inform players of the leaderboard submission progress.
+- **Property Protection**: Implemented defensive setters for `velocity`, `damageDone`, and `fireRate`. These setters automatically "un-multiply" temporary buffs before applying permanent upgrades, preventing exponential stat leakage.
+
+### b: Rendering System
+- **Context Filtering**: Utilizes `draw.filter` to apply real-time desaturation to the game world based on player health or death state without affecting the UI layer.
 
 ### c: Data-Driven Leveling
 - **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
@@ -80,7 +89,7 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 
 ## 5: Technical Implementation Details
 
-- **Collision Grid**: A spatial partitioning grid (150px cells) optimizes collision checks between hundreds of bullets and mobs. (could be a lie)
+- **Collision Grid**: A spatial partitioning grid (100px cells) optimizes collision checks. Includes defensive boundary checks to prevent `TypeError` during coordinate queries.
 - **Visual Polish**:
   - **Geometric Background**: A low-opacity grid rendered in the simulation background to provide a frame of reference for player movement.
   - **Muzzle Flashes**: Triggered on weapon fire.

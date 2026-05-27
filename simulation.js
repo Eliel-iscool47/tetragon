@@ -9,17 +9,12 @@ var simulation = {
 	set scoreStatus(val) { this._scoreStatus = val },
 
 	_deathMessage: "",
+	get deathMessage() { return this._deathMessage },
+	set deathMessage(val) { this._deathMessage = val },
 
 	_isChoosing: false,
 	get isChoosing() { return this._isChoosing },
 	set isChoosing(val) { this._isChoosing = val },
-
-	_consoleMessage: ``,
-	get consoleMessage() { return this._consoleMessage },
-	set consoleMessage(val) {
-		this._consoleMessage = `
-${val}
-` },
 
 	_isDead: false,
 	get isDead() { return this._isDead },
@@ -37,47 +32,49 @@ ${val}
 				width: 90%; 
 				height: 85%;
 				margin: 5% auto;
-				background: rgba(245, 245, 245, 0.95); 
+				background: rgba(15, 15, 15, 0.95); 
 				padding: 40px; 
 				border-radius: 20px; 
-				border: 1px solid rgba(0, 0, 0, 0.1);
-				box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
-				color: black;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+				color: white;
 			">
-				<div style="flex: 2; overflow-y: auto; padding-right: 30px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.3) transparent;">
-					<div style="text-align: left; margin-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 20px;">
-						<h2 style="font-size: 28px; color: #555; margin-bottom: 10px;">Equipped Weapon:</h2>
+				<div style="flex: 2; overflow-y: auto; padding-right: 30px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent;">
+					<div style="text-align: left; margin-bottom: 30px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 20px;">
+						<h2 style="font-size: 28px; color: #aaa; margin-bottom: 10px;">Equipped Weapon:</h2>
 						${guns.equippedGun ? `
+							<div style="font-size: 22px; color: #fff;">
+								<span style="color: hsl(115, 100%, 60%) ; font-weight: bold; text-transform: uppercase;">${guns.equippedGun.name}</span>
 								<div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
 									<span>${text('damage', 'Damage')}: ${(guns.equippedGun.damage * state.player.damageDone).toFixed(2)}</span>
 									<span>${text('fire-rate', 'Fire Rate')}: ${(guns.equippedGun.fireRate * upgrades.fireRate).toFixed(2)}/s</span>
 								</div>
 							</div>
-						` : `<p style="font-size: 20px; color: #666; font-style: italic;">No weapon equipped.</p>`}
+						` : `<p style="font-size: 20px; color: #888; font-style: italic;">No weapon equipped.</p>`}
 					</div>
 
 					<div style="text-align: left;">
-						<h2 style="font-size: 28px; color: #aaa; margin-bottom: 20px;">Collected Upgrades:</h2>
+						<h2 style="font-size: 28px; color: #555; margin-bottom: 20px;">Collected Upgrades:</h2>
 						${unique.length > 0 ? unique.map(upg => {
 				const count = upgrades.collected.filter(u => u === upg).length
 				return `
-								<div style="margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border-left: 5px solid hsl(215, 100%, 50%);">
+								<div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 0, 0, 0.03); border-radius: 10px; border-left: 5px solid hsl(215, 100%, 50%);">
 									<div style="font-size: 24px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
 										<span>${upg.name}</span>
 										${count > 1 ? text('ammo', 'x' + count) : ''}
 									</div>
-									<div style="font-size: 18px; margin-top: 8px; line-height: 1.5; color: #ccc;">
+									<div style="font-size: 18px; margin-top: 8px; line-height: 1.5; color: #333;">
 										${upg.description}
 									</div>
 								</div>`
-			}).join('') : `<p style="font-size: 20px; color: #666; font-style: italic;">No upgrades collected yet.</p>`}
+			}).join('') : `<p style="font-size: 20px; color: #888; font-style: italic;">No upgrades collected yet.</p>`}
 					</div>
 					<p style="margin-top: 30px; font-size: 18px; opacity: 0.5;">Press ${input.keybinds.pause.replace('Key', '').replace('Digit', '')} to Resume</p>
 				</div>
 
-				<div style="flex: 1; border-left: 2px solid rgba(255, 255, 255, 0.1); padding-left: 30px; text-align: left;">
-					<h2 style="font-size: 28px; color: #555; margin-bottom: 20px;">Statistics</h2>
-					<div style="font-size: 20px; line-height: 2; color: #000;">
+				<div style="flex: 1; border-left: 2px solid rgba(0, 0, 0, 0.1); padding-left: 30px; text-align: left;">
+					<h2 style="font-size: 28px; color: #aaa; margin-bottom: 20px;">Statistics</h2>
+					<div style="font-size: 20px; line-height: 2; color: #fff;">
 						<div style="margin-bottom: 10px;">${text('health', 'Health')}: <span style="float: right;">${Math.round(state.player.health)} / ${Math.round(state.player.maxHealth)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage', 'Global Damage')}: <span style="float: right;">x${state.player.damageDone.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage-taken', 'Damage Taken')}: <span style="float: right;">x${state.player.damageTaken.toFixed(2)}</span></div>
@@ -91,16 +88,15 @@ ${val}
 		}
 	},
 
-	_isTesting: false,
-	get isTesting() { return this._isTesting },
-	set isTesting(val) { this._isTesting = val },
+	_isDebug: false,
+	get isDebug() { return this._isDebug },
+	set isDebug(val) { this._isDebug = val },
 
-	_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || new URLSearchParams(window.location.search).has('mobile'),
+	_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0),
 	get isMobile() { return this._isMobile },
 
-	joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
-
-	isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
+	_world: { width: 1500, height: 800 },
+	get world() { return this._world },
 
 	_time: 0,
 	get time() { return this._time },
@@ -110,20 +106,19 @@ ${val}
 		return {
 			collisions,
 			isChoosing: false,
-			consoleMessage: '',
 			isDead: false,
 			isPaused: false,
-			isTesting: false,
+			isDebug: false,
 			time: 0,
 			isMainMenu: true,
+			_world: { width: 1500, height: 800 },
 			scoreStatus: "",
+			deathMessage: "",
 			crosshairColor: 'black',
 			Particles: [],
 			menuParticles: [],
 			fps: 60,
-			_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0) || new URLSearchParams(window.location.search).has('mobile'),
-			isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
-			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
+			_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0),
 		}
 	},
 
@@ -139,18 +134,11 @@ ${val}
 	crosshairColor: 'black',
 	Particles: [],
 	menuParticles: [],
-	log(msg, style) {
-		style ??= 'color: black; font-size: 14px;'
-		this.consoleMessage = `
-<span style="${style}">${msg}</span><br>
-${this.consoleMessage}
-		`
+	log(msg) {
+		console.log(`[Simulation Log]: ${msg}`);
 	},
 	error(msg) {
-		this.log(msg, `
-			background-color: red; 
-			font-size: 16px;
-			`)
+		console.error(`[Simulation Error]: ${msg}`);
 	},
 	pause() {
 		this.isPaused = true
@@ -158,18 +146,11 @@ ${this.consoleMessage}
 	resume() {
 		this.isPaused = false
 	},
-	test() {
-		this.isTesting = true
-	},
-	exitTest() {
-		this.isTesting = false
-	},
 	drawMenuBackground() {
-		main.style.cursor = !this.isMainMenu && !this.isPaused && !this.isChoosing && !this.isDead ? "none" : "default"
 		if (this.menuParticles.length < 15) {
 			this.menuParticles.push({
-				x: rand(0, 1500),
-				y: rand(0, 800),
+				x: rand(0, this.world.width),
+				y: rand(0, this.world.height),
 				size: rand(50, 200),
 				angle: rand(0, Math.PI * 2),
 				rot: rand(-0.005, 0.005),
@@ -184,10 +165,10 @@ ${this.consoleMessage}
 			p.x += Math.cos(p.angle) * p.speed
 			p.y += Math.sin(p.angle) * p.speed
 
-			if (p.x < -200) p.x = 1700
-			if (p.x > 1700) p.x = -200
-			if (p.y < -200) p.y = 1000
-			if (p.y > 1000) p.y = -200
+			if (p.x < -200) p.x = this.world.width + 200
+			if (p.x > this.world.width + 200) p.x = -200
+			if (p.y < -200) p.y = this.world.height + 200
+			if (p.y > this.world.height + 200) p.y = -200
 
 			draw.save()
 			draw.translate(p.x, p.y)
@@ -211,13 +192,10 @@ ${this.consoleMessage}
 		leaderboardButton.style.display = 'block'
 		feedbackButton.style.display = 'block'
 		main.style.display = 'block'
-		const titleElement = document.getElementById('title')
-		if (titleElement) titleElement.style.display = 'block'
 		document.title = 'Tetragon: Main Menu'
 		simulation.time = 0
 		hud.Obj.style.display = 'none'
 		dc.style.display = 'block'
-		dc.style.pointerEvents = 'auto'
 		this.wipe()
 	},
 	wipe() {
@@ -227,24 +205,24 @@ ${this.consoleMessage}
 		const step = 100
 		draw.save()
 		draw.fillStyle = 'hsl(0, 0%, 80%)'
-		draw.fillRect(0, 0, 1500, 800)
+		draw.fillRect(0, 0, this.world.width, this.world.height)
 		
 		draw.strokeStyle = 'hsla(0, 0%, 30%, 0.20)'
 		draw.lineWidth = 3
 
 		// Vertical lines
-		for (let x = 0; x <= 1500; x += step) {
+		for (let x = 0; x <= this.world.width; x += step) {
 			draw.beginPath()
 			draw.moveTo(x, 0)
-			draw.lineTo(x, 800)
+			draw.lineTo(x, this.world.height)
 			draw.stroke()
 		}
 
 		// Horizontal lines
-		for (let y = 0; y <= 800; y += step) {
+		for (let y = 0; y <= this.world.height; y += step) {
 			draw.beginPath()
 			draw.moveTo(0, y)
-			draw.lineTo(1500, y)
+			draw.lineTo(this.world.width, y)
 			draw.stroke()
 		}
 		draw.restore()
@@ -258,33 +236,34 @@ ${this.consoleMessage}
 		main.style.left = '0px'
 		draw.clearRect(0, 0, main.width, main.height)
 
-		const scaleX = main.width / 1500
-		const scaleY = main.height / 800
-
+		const scaleX = main.width / this.world.width
+		const scaleY = main.height / this.world.height
 
 		input.keyLogic()
-		if (this.isMobile) input.updateJoysticks()
 		nameModal.style.display = this.isPaused ? 'block' : 'none'
-		const showMobile = this.isMobile && !this.isPaused && !this.isChoosing && !this.isDead
-		if (mobileControls) mobileControls.style.display = showMobile ? 'block' : 'none'
+		mobileControls.style.display = this.isMobile && !this.isPaused && !this.isChoosing && !this.isMainMenu && !this.isDead ? 'block' : 'none'
+		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
 
 		draw.save()
 		draw.scale(scaleX, scaleY)
+
+		const saturation = this.isDead ? 0 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)
+		draw.filter = `saturate(${saturation}%)`
 		this.background()
 
 		if (this.isMainMenu) {
-			if (mobileControls) mobileControls.style.display = this.isMobile ? 'block' : 'none'
-			hud.Obj.style.display = 'none'
 			this.drawMenuBackground()
 			draw.restore()
-			return undefined	
+			main.style.cursor = "default"
+			return undefined
 		}
-		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isDead ? 'none' : 'block'
 		main.style.cursor = !this.isMainMenu && !this.isPaused && !this.isChoosing && !this.isDead ? "none" : "default"
 		if (
 			this.time - state.player.lastDamageTime < 0.1 &&
 			!this.isDead &&
-			!this.isPaused
+			!this.isPaused &&
+			!this.isChoosing &&
+			!this.isMainMenu
 		) {
 			main.style.top = `${rand(-10, 10)}px`
 			main.style.left = `${rand(-10, 10)}px`
@@ -292,21 +271,8 @@ ${this.consoleMessage}
 			main.style.top = '0px'
 			main.style.left = '0px'
 		}
-		main.style.filter = `saturate(${this.isDead ? 100 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)}%)`
-		if (this.isDead) {
-			main.style.cursor = 'default'
-			state.player.deathScreen()
-			hud.Obj.style.display = 'none'
-			pauseScreen.style.display = 'none'
-			draw.restore()
-			return undefined
-		}
-		if (state.player.health <= 0) {
-			state.player.kill()
-			this.isDead = true
-			draw.restore()
-			return undefined
-		}
+		dc.style.display = 'none'
+		main.style.filter = 'none'
 		state.player.health = Math.min(state.player.health, state.player.maxHealth)
 		upgrades.applyRegen()
 		if (!this.isPaused && !this.isChoosing) guns.logic()
@@ -317,21 +283,11 @@ ${this.consoleMessage}
 		state.player.draw()
 		guns.equippedGun?.drawReload()
 		collisions.border.left = state.player.size / 2
-		collisions.border.right = 1500 - state.player.size / 2
+		collisions.border.right = this.world.width - state.player.size / 2
 		collisions.border.top = state.player.size / 2
-		collisions.border.bottom = 800 - state.player.size / 2
+		collisions.border.bottom = this.world.height - state.player.size / 2
 		mobs.drawMobs()
 		mobs.healthBars()
-		// this.particles = this.particles.filter(p => {
-		// 	p.t += 0.05
-		// 	const px = lerp(p.x, player.pos.x, p.t)
-		// 	const py = lerp(p.y, player.pos.y, p.t)
-		// 	draw.fillStyle = 'hsl(0, 100%, 22.5%)'
-		// 	draw.beginPath()
-		// 	draw.arc(px, py, 4, 0, Math.PI * 2)
-		// 	draw.fill()
-		// 	return p.t < 1
-		// })
 		particles.draw()
 		particles.update()
 		powerUps.draw()
@@ -369,10 +325,51 @@ ${this.consoleMessage}
 		bullets.killSlashes()
 		bullets.drawFirePools()
 		bullets.killFirePools()
+
+		draw.filter = 'none'
+
+		if (this.isDead) {
+			main.style.cursor = 'default'
+			state.player.deathScreen()
+			hud.Obj.style.display = 'none'
+			pauseScreen.style.display = 'none'
+			draw.restore()
+			return undefined
+		}
+		if (state.player.health <= 0) {
+			state.player.kill()
+			this.isDead = true
+			draw.restore()
+			main.style.cursor = 'default'
+			return undefined
+		}
+
 		this.crosshair(16)
 		draw.restore() // End World Scaling
 
-		if (this.isTesting) this.crosshairColor = 'hsl(40,100%,50%)'
+		if (this.isDebug) {
+			this.crosshairColor = 'hsl(40,100%,50%)'
+			
+			// Debug Text Overlay
+			draw.save()
+			draw.fillStyle = 'rgba(0, 0, 0, 0.6)'
+			draw.fillRect(20, 20, 200, 105)
+			draw.strokeStyle = 'white'
+			draw.lineWidth = 1
+			draw.strokeRect(20, 20, 200, 105)
+
+			draw.fillStyle = 'white'
+			draw.font = 'bold 16px "DM Sans"'
+			draw.fillText(`DEBUG INFO`, 35, 45)
+			draw.font = '14px monospace'
+			const mCount = mobs.list.filter(m => m.class !== 'projectile').length
+			const pCount = mobs.list.filter(m => m.class === 'projectile').length
+			const bCount = bullets.list.length
+			draw.fillText(`Mobs:        ${mCount}`, 35, 70)
+			draw.fillText(`Projectiles: ${pCount}`, 35, 87)
+			draw.fillText(`Bullets:     ${bCount}`, 35, 104)
+			draw.restore()
+		}
 		else this.crosshairColor = 'black'
 		hud.make()
 		collisions.loop()
@@ -391,19 +388,9 @@ ${this.consoleMessage}
 		this.isMainMenu = false
 		this.isPaused = false
 		this.isDead = false
-		this.isTesting = false
+		this.isDebug = false
 		this.time = 0
-		const titleElement = document.getElementById('title')
-		if (titleElement) titleElement.style.display = 'none'
-		start.style.display = 'none'
-		controls.style.display = 'none'
-		settings.style.display = 'none'
-		leaderboardButton.style.display = 'none'
-		feedbackButton.style.display = 'none'
-		dc.style.display = 'block'
-		dc.style.pointerEvents = 'none'
-		pauseScreen.style.pointerEvents = 'auto'
-		chooseScreen.style.pointerEvents = 'auto'
+		dc.style.display = 'none'
 		main.style.cursor = 'default'
 		pauseScreen.style.display = 'none'
 		document.getElementById('name-modal').style.display = 'none'

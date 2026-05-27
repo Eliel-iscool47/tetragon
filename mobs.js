@@ -31,7 +31,7 @@ var mobs = {
 		 * @returns {boolean} Whether the mob should remain in the game list.
 		 */
 		onCollide() {
-			this.state.player.takeDamage(this.damage)
+			this.state.player.takeDamage(this.damage, this)
 			this.state.upgrades.lastHealthRegen = this.state.simulation.time
 			this.state.simulation.shake = 5
 			this.timeSinceLastAttack = this.state.simulation.time
