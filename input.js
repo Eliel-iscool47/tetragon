@@ -41,6 +41,7 @@ var input = {
 		touchId: null, // To track individual touches
 	},
 	isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
+	showMobileControls: localStorage.getItem('tetragon-show-mobile-controls') !== 'false',
 	joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
 	cursor: {
 		_x: 0, // Initialized to 0, will be set correctly in reset()
@@ -122,6 +123,7 @@ var input = {
 			joystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0, touchId: null },
 			aimJoystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0, touchId: null },
 			isAutoFire: localStorage.getItem('tetragon-auto-fire') !== 'false',
+			showMobileControls: localStorage.getItem('tetragon-show-mobile-controls') !== 'false',
 			joystickSize: parseFloat(localStorage.getItem('tetragon-joystick-size') || "1.0"),
 			cursor: { // Ensure cursor defaults are set based on collisions.center
 				_x: state.collisions.center.x,
@@ -140,13 +142,6 @@ var input = {
 	},
 
 	respawn() {
-		if (
-			!simulation.isPaused &&
-			!simulation.isChoosing &&
-			!simulation.isDead &&
-			!simulation.isMainMenu
-		) return undefined
-
 		simulation.init()
 	},
 	clickLogic(click) {
@@ -219,7 +214,7 @@ var input = {
 			}
 
 			// Joystick (Mobile)
-			if (simulation.isMobile && this.joystick.active) {
+			if ((simulation.isMobile || this.showMobileControls) && this.joystick.active) {
 				moveX += this.joystick.moveX
 				moveY += this.joystick.moveY
 			}
@@ -235,7 +230,7 @@ var input = {
 			}
 
 			// Aim Joystick (Mobile)
-			if (simulation.isMobile && this.aimJoystick.active) {
+			if ((simulation.isMobile || this.showMobileControls) && this.aimJoystick.active) {
 				// Directly set world coordinates for the cursor
 				this.cursor.x = state.player.pos.x + this.aimJoystick.moveX * 200
 				this.cursor.y = state.player.pos.y + this.aimJoystick.moveY * 200
@@ -246,7 +241,7 @@ var input = {
 					state.player.pos.y,
 				)
 				
-				if (Math.sqrt(this.aimJoystick.moveX ** 2 + this.aimJoystick.moveY ** 2) > 0.3) this.fire()
+				if (this.isAutoFire && Math.sqrt(this.aimJoystick.moveX ** 2 + this.aimJoystick.moveY ** 2) > 0.3) this.fire()
 			}
 		}
 		this.pressedKeys.forEach(function (k) {

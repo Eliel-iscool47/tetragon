@@ -20,14 +20,14 @@ var hud = {
 	get displayMaxHealth() { return this._displayMaxHealth },
 	set displayMaxHealth(val) { this._displayMaxHealth = val },
 
-	showMobileMenu: false,
+	showMobileMenu: true,
 
 	get defaults() {
 		return {
 			displayHealth: 100,
 			displayMaxHealth: 100,
 			timeMessage: '',
-			showMobileMenu: false
+			showMobileMenu: true
 		}
 	},
 

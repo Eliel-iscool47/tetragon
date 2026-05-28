@@ -203,18 +203,19 @@ var guns = {
 		chooseScreen.style.overflowY = 'auto'
 		chooseScreen.style.position = 'fixed'
 		chooseScreen.innerHTML = `
-		<div style="padding-top: 15vh; text-align: center; width: 100%;">
-			<div style="font-size: 24px; margin-bottom: 20px;">Choose a gun:</div>
-			${Math.ceil(upgrades.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
-			${buttons.cancelButton()}
-			<div style="padding: 20px 0;">
-				${this.options.filter(g => g !== undefined).map(g => `
-					<button class="gun-button" onclick='guns.${g.id}.get(); simulation.isChoosing = false'>
-						<strong>${g.name}</strong>: ${g.description}
-					</button>
-				`).join('')}
+		<div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+			<div style="position: sticky; top: 0; background: rgb(20, 20, 20); width: 100%; padding: 20px 0; z-index: 100; display: flex; flex-direction: column; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; color: white;">
+				<div style="font-size: 28px; font-weight: bold;">Choose a gun:</div>
+				${Math.ceil(upgrades.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
+				${buttons.cancelButton()}
 			</div>
-			<div style="height: 50px;"></div>
+			<div style="padding: 20px 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+			${this.options.filter(g => g !== undefined).map(g => `
+				<button class="gun-button" style="width: 85%; max-width: 500px; padding: 15px;" onclick='guns.${g.id}.get(); simulation.isChoosing = false'>
+					<strong>${g.name}</strong>: ${g.description}
+				</button>
+			`).join('')}
+			</div>
 		</div>
 		`
 	}

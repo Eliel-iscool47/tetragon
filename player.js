@@ -155,12 +155,14 @@ class Player extends Entity {
 		draw.fillStyle = 'rgb(55, 215, 255)'
 		draw.font = `28px \'DM Sans\'`
 		draw.fillText(this.state.simulation.scoreStatus, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
-
-		draw.fillStyle = 'hsl(0, 0%, 100%)'
-		draw.font = `50px 'DM Sans'`
-		draw.fillText(`press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to respawn`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 95)
-		draw.font = `25px 'DM Sans'`
-		draw.fillText(`or ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} to go back to the main menu`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
+		
+		if (!this.state.simulation.isMobile) {
+			draw.fillStyle = 'hsl(0, 0%, 100%)'
+			draw.font = `50px 'DM Sans'`
+			draw.fillText(`Press ${this.state.input.keybinds.respawn.replace('Key', '').replace('Digit', '')} to Respawn`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 95)
+			draw.font = `25px 'DM Sans'`
+			draw.fillText(`or ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} for Main Menu`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
+		}
 		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
 		draw.restore()
 	}

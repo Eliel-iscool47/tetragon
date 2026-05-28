@@ -214,18 +214,19 @@ var upgrades = {
 		chooseScreen.style.position = 'fixed'
 		this.randomizeOptions()
 		chooseScreen.innerHTML = `
-		<div style="padding-top: 15vh; text-align: center; width: 100%;">
-			<div style="font-size: 24px; margin-bottom: 20px;">Choose an upgrade:</div>
-			${Math.ceil(this.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
-			${buttons.cancelButton()}
-			<div style="padding: 20px 0;">
-				${this.options.filter(upg => upg !== undefined).map(upg => `
-					<button class="upgrade-button" onclick='upgrades.get("${upg.id}"); simulation.isChoosing = false;'>
-						<strong>${upg.name}${countOccurrences(this.collected, upg.id) > 0 ? ` (${countOccurences(this.collected, upg.id)})` : ''}</strong>:<br>${upg.description}
-					</button>
-				`).join('')}
+		<div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+			<div style="position: sticky; top: 0; background: rgb(20, 20, 20); width: 100%; padding: 20px 0; z-index: 100; display: flex; flex-direction: column; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; color: white;">
+				<div style="font-size: 28px; font-weight: bold;">Choose an upgrade:</div>
+				${Math.ceil(this.rerolls - 0.5) > 0 ? buttons.rerollButton() : ''}
+				${buttons.cancelButton()}
 			</div>
-			<div style="height: 50px;"></div>
+			<div style="padding: 20px 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+			${this.options.filter(upg => upg !== undefined).map(upg => `
+				<button class="upgrade-button" style="width: 85%; max-width: 500px; padding: 15px;" onclick='upgrades.get("${upg.id}"); simulation.isChoosing = false;'>
+					<strong>${upg.name}${countOccurrences(this.collected, upg.id) > 0 ? ` (${countOccurrences(this.collected, upg.id)})` : ''}</strong>:<br>${upg.description}
+				</button>
+			`).join('')}
+			</div>
 		</div>
 		`
 	},

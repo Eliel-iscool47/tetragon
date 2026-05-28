@@ -16,20 +16,15 @@ The game's controls are the following:
 * **Restart**: `R` *(while paused/choosing/dead)*
 * **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.12: Visual Vigor & Logical Rigor)
-
-* **HUD Cleanup**: Removed the cluttered in-game console. Ammo depletion is now signaled via a red "OUT OF AMMO" popup directly over the player.
-* **Animated Death Screen**: Implemented a smooth fade-in for the death overlay. The game world now desaturates to grayscale upon death while the UI remains vibrant red.
-* **Contextual Taunts**: Added a variety of random death messages, including specific taunts if you are killed by a Boss or "Imagine" taunts for regular enemies. Albert Epstein is cannon in the Tetragon Universe.
-* **Combat Logic Fixes**: 
-    * Fixed a major bug where Explosions/AoE damage would only hit one enemy per frame.
-    * Standardized property setters to prevent permanent upgrades from compounding incorrectly with temporary power-ups (e.g., permanent speed boosts no longer "bake in" the multiplier from Overdrive).
-* **Visual Improvements**: 
-    * Improved "Game Over" pulsing animation for better centering.
-    * Added visual trails and homing logic to Hexagon Minions.
-    * Added a "DEBUG" badge in the HUD to clearly indicate when debug mode is active.
-* **UX**: Inventory and Upgrade lists are now visible by default on non-mobile devices.
-
+# II: Recent Updates (v1.13: Mobile Support Revamped)
+*   **Robust Detection**: Enhanced cross-browser detection (including Firefox and "Desktop mode" tablets) using `matchMedia` and touch-point analysis.
+*   **Manual Toggle**: New "Mobile Controls" setting in the menu to force touch UI on any device (enabled by default).
+*   **Vertical Choice Menus**: Upgrade and Gun selection screens redesigned as vertical lists with sticky headers for better mobile accessibility and easier scrolling.
+*   **Adaptive UI**: Utility buttons (Pause, Debug, Menu Toggle) remain accessible during pause and choice states, while joysticks automatically hide to declutter the screen.
+*   **Custom Mobile Actions**: Dedicated 'Respawn' and 'Main Menu' buttons added to the death screen, ensuring touch players don't need a keyboard to navigate.
+*   **Performance & Feel**: Added visual lerping to joysticks for smooth feedback and a customizable scale slider in settings to fit different screen sizes.
+*   **Visual Polish**: Distinct color-coded buttons and touch-friendly layouts for all mobile-specific controls.
+*   **Bug Fixes**: Resolved auto-fire conflicts with the aim joystick and Z-index layering issues that caused controls to vanish on mobile browsers.
 ---
 
 # III: Technical Overview
@@ -115,7 +110,6 @@ The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTM
 
 # VI: Planned Updates
 
-- **Mobile Support**: I am planning to add support for mobile devices by July 31st.
 - **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I might reädd them in the future. It's not guaranteed, nor likely, that they return.
 
 <!-- Maintenance Note: 

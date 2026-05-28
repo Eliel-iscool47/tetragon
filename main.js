@@ -23,77 +23,6 @@ main.style.top = '0'
 main.style.left = '0'
 main.style.zIndex = '-1'
 
-const style = document.createElement('style')
-style.innerHTML = `
-	.gun-button, .upgrade-button, .reroll-button, .cancel-button {
-		background: rgba(0, 0, 0, 0.05);
-		border: 1px solid rgba(0, 0, 0, 0.15);
-		color: black;
-		border-radius: 8px;
-		cursor: pointer;
-		font-family: 'DM Sans', sans-serif;
-		transition: background 0.2s;
-		padding: 10px;
-	}
-	.reroll-button, .cancel-button { position: absolute; }
-	.gun-button, .upgrade-button { position: relative; width: 80%; margin: 10px auto; display: block; }
-	.gun-button:hover, .upgrade-button:hover { background: rgba(0, 0, 0, 0.1); }
-	@media (max-width: 768px) {
-		#HUD { font-size: 12px; }
-		#inventory, #upgrade-list { width: 140px !important; font-size: 14px !important; }
-		#level-counter { width: 140px !important; left: 50% !important; transform: translateX(-50%) !important; }
-	}
-	#mobile-controls {
-		z-index: 1000;
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100vw;
-		height: 100vh;
-		pointer-events: none;
-	}
-	#move-base, #aim-base {
-		transition: transform 0.1s;
-	}
-	#move-base {
-		transform-origin: bottom left;
-	}
-	#aim-base {
-		transform-origin: bottom right;
-	}
-	::-webkit-scrollbar {
-		width: 8px;
-	}
-	::-webkit-scrollbar-track {
-		background: rgba(0, 0, 0, 0.05);
-	}
-	::-webkit-scrollbar-thumb {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-	}
-	::-webkit-scrollbar-thumb:hover {
-		background: rgba(0, 0, 0, 0.3);
-	}
-	#settings-menu {
-		display: none;
-		position: fixed;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background: rgba(245, 245, 245, 0.98);
-		padding: 30px;
-		border-radius: 15px;
-		border: 1px solid rgba(0,0,0,0.1);
-		color: black;
-		min-width: 320px;
-		box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-		z-index: 2000;
-		max-height: 80vh;
-		overflow-y: auto;
-	}
-`
-document.head.appendChild(style)
-
 const font = document.createElement('link')
 font.href = "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
 font.rel = "stylesheet"
@@ -143,76 +72,91 @@ let remappingAction = null
 
 //mobile controls
 
-var mobileControls = null
+window.mobileControls = null
 function updateMobileFireVisibility() {
-	if (document.getElementById('mobile-fire')) {
-		document.getElementById('mobile-fire').style.display = state.input.isAutoFire ? 'none' : 'block'
+	const fireBtn = document.getElementById('mobile-fire')
+	if (fireBtn) {
+		fireBtn.style.display = (simulation.isMobile || state.input.showMobileControls) && !state.input.isAutoFire ? 'block' : 'none'
 	}
 }
 function updateJoystickScale() {
-	const scale = state.input.joystickSize
-	if (document.getElementById('move-base')) document.getElementById('move-base').style.transform = `scale(${scale})`
-	if (document.getElementById('aim-base')) document.getElementById('aim-base').style.transform = `scale(${scale})`
+	const scale = state.input.joystickSize;
+	const moveBase = document.getElementById('move-base');
+	const aimBase = document.getElementById('aim-base');
+	if (moveBase) moveBase.style.transform = `scale(${scale})`;
+	if (aimBase) aimBase.style.transform = `scale(${scale})`;
 }
 
 //
 
 window.addEventListener('load', () => {
 	title = document.getElementById('title')
+
+	// Initialize mobile controls regardless of device detection
+	let mDiv = document.getElementById('mobile-controls') 
+	if (!mDiv) {
+		mDiv = document.createElement('div')
+		mDiv.id = 'mobile-controls'
+	}
 	
-	// Ensure the mobile controls container exists
-	mobileControls = document.getElementById('mobile-controls') 
-	if (!mobileControls) {
-		mobileControls = document.createElement('div')
-		mobileControls.id = 'mobile-controls'
-		document.body.appendChild(mobileControls)
+	// Always ensure it is a direct child of the body so it isn't hidden by #container
+	if (mDiv.parentElement !== document.body) {
+		document.body.appendChild(mDiv)
 	}
 
-	if (simulation.isMobile) {
-		mobileControls.style.pointerEvents = 'none'
-		mobileControls.innerHTML = `
-			<div id="move-base" style="position: absolute; bottom: 8vh; left: 8vh; width: 18vh; height: 18vh; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); touch-action: none; pointer-events: auto;">
-				<div id="move-thumb" style="position: absolute; top: 6.5vh; left: 6.5vh; width: 5vh; height: 5vh; background: white; border-radius: 50%; opacity: 0.5; pointer-events: none;"></div>
+	window.mobileControls = mDiv
+
+	window.mobileControls.innerHTML = `
+			<div id="move-base" class="joystick-base">
+				<div id="move-thumb" class="joystick-thumb"></div>
 			</div>
-			<div id="aim-base" style="position: absolute; bottom: 8vh; right: 8vh; width: 18vh; height: 18vh; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); touch-action: none; pointer-events: auto;">
-				<div id="aim-thumb" style="position: absolute; top: 6.5vh; left: 6.5vh; width: 5vh; height: 5vh; background: #ff4444; border-radius: 50%; opacity: 0.5; pointer-events: none;"></div>
+			<div id="aim-base" class="joystick-base">
+				<div id="aim-thumb" class="joystick-thumb"></div>
 			</div>
-			<button id="mobile-fire" style="position: absolute; bottom: 8vh; right: 28vh; width: 12vh; height: 12vh; background: rgba(255,68,68,0.15); color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; font-family: 'DM Sans'; font-size: 18px; font-weight: bold; z-index: 1000; touch-action: none; pointer-events: auto;">FIRE</button>
-			<button id="mobile-pause" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Pause</button>
-			<button id="mobile-debug" style="position: absolute; top: 80px; left: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Debug</button>
-			<button id="mobile-menu-toggle" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Toggle Menus</button>
-			<button id="mobile-gun-cycle" style="position: absolute; top: 80px; right: 20px; padding: 10px 20px; background: rgba(0,0,0,0.2); color: white; border: 1px solid white; border-radius: 8px; font-family: 'DM Sans'; font-size: 16px; z-index: 1000; touch-action: none; pointer-events: auto;">Cycle Guns</button>
+			<button id="mobile-fire" class="mobile-btn">FIRE</button>
+			<button id="mobile-pause" class="mobile-btn">Pause</button>
+			<button id="mobile-debug" class="mobile-btn">Debug</button>
+			<button id="mobile-menu-toggle" class="mobile-btn">Toggle Menus</button>
+			<button id="mobile-gun-cycle" class="mobile-btn">Cycle Guns</button>
+			<button id="mobile-respawn" class="mobile-btn">RESPAWN</button>
+			<button id="mobile-quit" class="mobile-btn">MAIN MENU</button>
 		`
-		const fireBtn = document.getElementById('mobile-fire')
-		if (fireBtn) {
-			const startFire = (e) => { e.preventDefault(); if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire') }
-			const stopFire = (e) => { e.preventDefault(); input.pressedKeys = input.pressedKeys.filter(k => k !== 'MobileFire') }
-			fireBtn.addEventListener('touchstart', startFire)
-			fireBtn.addEventListener('touchend', stopFire)
-			fireBtn.addEventListener('touchcancel', stopFire)
-		}
-
-		document.getElementById('mobile-menu-toggle').onclick = (e) => {
-			e.preventDefault()
-			hud.showMobileMenu = !hud.showMobileMenu
-		}
-		document.getElementById('mobile-gun-cycle').onclick = (e) => {
-			e.preventDefault()
-			input.gunRight()
-		}
-		document.getElementById('mobile-pause').onclick = (e) => {
-			e.preventDefault()
-			input.pause()
-		}
-		document.getElementById('mobile-debug').onclick = (e) => {
-			e.preventDefault()
-				input.toggleDebug()
-		}
-		updateJoystickScale()
-		updateMobileFireVisibility()
-		// Small timeout ensures DOM elements are ready for event listeners
-		setTimeout(() => input.initJoystick(), 100) // Increased timeout for robustness
+	const fireBtn = document.getElementById('mobile-fire')
+	if (fireBtn) {
+		const startFire = (e) => { e.preventDefault(); if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire') }
+		const stopFire = (e) => { e.preventDefault(); input.pressedKeys = input.pressedKeys.filter(k => k !== 'MobileFire') }
+		fireBtn.addEventListener('touchstart', startFire)
+		fireBtn.addEventListener('touchend', stopFire)
+		fireBtn.addEventListener('touchcancel', stopFire)
 	}
+
+	document.getElementById('mobile-menu-toggle').onclick = (e) => {
+		e.preventDefault()
+		hud.showMobileMenu = !hud.showMobileMenu
+	}
+	document.getElementById('mobile-gun-cycle').onclick = (e) => {
+		e.preventDefault()
+		input.gunRight()
+	}
+	document.getElementById('mobile-pause').onclick = (e) => {
+		e.preventDefault()
+		input.pause()
+	}
+	document.getElementById('mobile-debug').onclick = (e) => {
+		e.preventDefault()
+		input.toggleDebug()
+	}
+	document.getElementById('mobile-respawn').onclick = (e) => {
+		e.preventDefault()
+		input.respawn()
+	}
+	document.getElementById('mobile-quit').onclick = (e) => {
+		e.preventDefault()
+		input.mainMenu()
+	}
+	updateJoystickScale()
+	updateMobileFireVisibility()
+	setTimeout(() => input.initJoystick(), 100)
 
 	// Initialize elements inside the load listener to ensure they aren't null
 	start = document.getElementById('start')
@@ -364,7 +308,7 @@ window.addEventListener('load', () => {
 		}
 
 		// Joystick Size Slider (Mobile Only)
-		if (simulation.isMobile) {
+		if (simulation.isMobile || state.input.showMobileControls) {
 			const joyContainer = document.createElement('div')
 			joyContainer.style.marginBottom = '20px'
 			joyContainer.style.borderBottom = '1px solid #333'
@@ -393,8 +337,33 @@ window.addEventListener('load', () => {
 			settingsMenu.appendChild(joyContainer)
 		}
 
-		// Auto-fire Toggle (Mobile Only)
-		if (simulation.isMobile) {
+		// Mobile Controls Toggle
+		const mobileControlsContainer = document.createElement('div')
+		mobileControlsContainer.style.marginBottom = '20px'
+		mobileControlsContainer.style.display = 'flex'
+		mobileControlsContainer.style.justifyContent = 'space-between'
+		mobileControlsContainer.style.alignItems = 'center'
+
+		const mobileControlsLabel = document.createElement('span')
+		mobileControlsLabel.innerText = 'Mobile Controls:'
+
+		const mobileControlsBtn = document.createElement('button')
+		mobileControlsBtn.innerText = state.input.showMobileControls ? 'ON' : 'OFF'
+		mobileControlsBtn.style.padding = '5px 15px'
+		mobileControlsBtn.onclick = () => {
+			state.input.showMobileControls = !state.input.showMobileControls
+			localStorage.setItem('tetragon-show-mobile-controls', state.input.showMobileControls)
+			renderSettings()
+			updateMobileFireVisibility()
+			updateJoystickScale()
+		}
+
+		mobileControlsContainer.appendChild(mobileControlsLabel)
+		mobileControlsContainer.appendChild(mobileControlsBtn)
+		settingsMenu.appendChild(mobileControlsContainer)
+
+		// Auto-fire Toggle
+		if (simulation.isMobile || state.input.showMobileControls) {
 			const autoFireContainer = document.createElement('div')
 			autoFireContainer.style.marginBottom = '20px'
 			autoFireContainer.style.display = 'flex'
@@ -517,6 +486,9 @@ window.addEventListener('load', () => {
 	if (title) title.style.display = 'block'
 	document.getElementById('name-modal').style.display = 'none'
 	main.style.display = 'block'
+	
+	// Ensure the main menu container is visible on load
+	if (dc) dc.style.display = 'flex'
 
 	renderSettings() // Initial render
 

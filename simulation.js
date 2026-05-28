@@ -92,8 +92,19 @@ var simulation = {
 	get isDebug() { return this._isDebug },
 	set isDebug(val) { this._isDebug = val },
 
-	_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0),
-	get isMobile() { return this._isMobile },
+	_isMobile: (function() { return (
+		/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+		(navigator.maxTouchPoints > 0) || ('ontouchstart' in window) || 
+		(window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(any-pointer: coarse)").matches)) ||
+		(navigator.userAgentData && navigator.userAgentData.mobile) ||
+		// Fallback for Firefox touch detection
+		(window.matchMedia && window.matchMedia("(any-hover: none)").matches)
+	)})(),
+	get isMobile() {
+		// Safe check for the manual setting
+		const setting = (window.input && input.showMobileControls) || (window.state && state.input && state.input.showMobileControls);
+		return this._isMobile || setting;
+	},
 
 	_world: { width: 1500, height: 800 },
 	get world() { return this._world },
@@ -118,7 +129,7 @@ var simulation = {
 			Particles: [],
 			menuParticles: [],
 			fps: 60,
-			_isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0),
+			_isMobile: this._isMobile,
 		}
 	},
 
@@ -240,8 +251,45 @@ var simulation = {
 		const scaleY = main.height / this.world.height
 
 		input.keyLogic()
+		// Always update joysticks if the container exists to ensure smooth visuals
+		if (document.getElementById('mobile-controls')) input.updateJoysticks()
+
 		nameModal.style.display = this.isPaused ? 'block' : 'none'
-		mobileControls.style.display = this.isMobile && !this.isPaused && !this.isChoosing && !this.isMainMenu && !this.isDead ? 'block' : 'none'
+
+		const mCtrls = window.mobileControls || document.getElementById('mobile-controls')
+		if (mCtrls && window.input) {
+			// Show container if setting is enabled
+			mCtrls.style.display = input.showMobileControls ? 'block' : 'none';
+			
+			const isGameplay = !this.isPaused && !this.isDead && !this.isChoosing && !this.isMainMenu;
+			const isDead = this.isDead && !this.isMainMenu;
+			const moveBase = document.getElementById('move-base');
+			const aimBase = document.getElementById('aim-base');
+			const fireBtn = document.getElementById('mobile-fire');
+			const respawnBtn = document.getElementById('mobile-respawn');
+			const quitBtn = document.getElementById('mobile-quit');
+			const pauseBtn = document.getElementById('mobile-pause');
+			const toggleBtn = document.getElementById('mobile-menu-toggle');
+			const debugBtn = document.getElementById('mobile-debug');
+			const cycleBtn = document.getElementById('mobile-gun-cycle');
+
+			// Controls only appear during active gameplay to avoid blocking the Main Menu
+			if (moveBase) moveBase.style.display = isGameplay ? 'block' : 'none';
+			if (aimBase) aimBase.style.display = isGameplay ? 'block' : 'none';
+			if (fireBtn) fireBtn.style.display = isGameplay && !input.isAutoFire ? 'block' : 'none';
+			
+			// UI buttons hide on the main menu to prevent clutter
+			const hideUI = isDead || this.isMainMenu;
+			if (pauseBtn) pauseBtn.style.display = hideUI ? 'none' : 'block';
+			if (toggleBtn) toggleBtn.style.display = hideUI ? 'none' : 'block';
+			if (debugBtn) debugBtn.style.display = hideUI ? 'none' : 'block';
+			if (cycleBtn) cycleBtn.style.display = hideUI ? 'none' : 'block';
+
+			// Death buttons only appear when dead
+			if (respawnBtn) respawnBtn.style.display = isDead ? 'block' : 'none';
+			if (quitBtn) quitBtn.style.display = isDead ? 'block' : 'none';
+		}
+
 		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
 
 		draw.save()
