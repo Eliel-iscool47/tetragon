@@ -66,6 +66,10 @@ class Entity {
 	}
 
 	checkCollision(other) {
-		return distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) <= (this.size + other.size) * 0.5
+		const dx = this.pos.x - other.pos.x;
+		const dy = this.pos.y - other.pos.y;
+		const distSq = dx * dx + dy * dy;
+		const radiusSum = (this.size + other.size) * 0.5;
+		return distSq <= radiusSum * radiusSum;
 	}
 }

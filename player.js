@@ -62,6 +62,26 @@ class Player extends Entity {
 		this.lastDamageTime = this.state.simulation.time
 		if (source) this._killer = source
 		this.state.upgrades.lastHealthRegen = this.state.simulation.time
+
+		// Trigger a short window of i-frames after taking damage to prevent "shotgunning" from multiple enemies.
+		// This duration is scaled by the Iron Will upgrade.
+		this.setInvulnerable(0.08 * this.state.upgrades.invulnerabilityDuration)
+
+		// Knock back nearby enemies when taking damage to provide breathing room
+		const knockbackRadius = this.size * 2.5
+		const knockbackForce = 45
+		this.state.collisions.grid.query(this.pos.x, this.pos.y, (mob) => {
+			if (mob.isMob && mob.class !== 'projectile') {
+				const dx = mob.pos.x - this.pos.x
+				const dy = mob.pos.y - this.pos.y
+				const distSq = dx * dx + dy * dy
+				if (distSq < knockbackRadius * knockbackRadius && distSq > 0) {
+					const dist = Math.sqrt(distSq)
+					mob.pos.x += (dx / dist) * knockbackForce
+					mob.pos.y += (dy / dist) * knockbackForce
+				}
+			}
+		})
 	}
 
 	get health() { return this._health }
@@ -128,7 +148,8 @@ class Player extends Entity {
 
 	deathScreen() {
 		const pulse = 1 + Math.sin(this.state.simulation.time * 5) * 0.1
-		this._deathAlpha = Math.min(1, this._deathAlpha + 0.015)
+		const ts = this.state.simulation.timeScale
+		this._deathAlpha = Math.min(1, this._deathAlpha + 0.015 * ts)
 		draw.save()
 		draw.globalAlpha = this._deathAlpha
 		draw.fillStyle = 'hsl(0, 100%, 40%)'
@@ -154,7 +175,7 @@ class Player extends Entity {
 		draw.textAlign = 'center'
 		draw.fillStyle = 'rgb(55, 215, 255)'
 		draw.font = `28px \'DM Sans\'`
-		draw.fillText(this.state.simulation.scoreStatus, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
+		draw.fillText(this.state.simulation.scoreStatus, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 190)
 		
 		if (!this.state.simulation.isMobile) {
 			draw.fillStyle = 'hsl(0, 0%, 100%)'
@@ -163,7 +184,7 @@ class Player extends Entity {
 			draw.font = `25px 'DM Sans'`
 			draw.fillText(`or ${this.state.input.keybinds.mainMenu.replace('Key', '').replace('Digit', '')} for Main Menu`, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 130)
 		}
-		document.title = `Tetragon: Score: ${Math.round(this.state.level.current)}`
+		document.title = `Tetragon: Score: ${Math.round(this.state.level.current * this.state.simulation.scoreMultiplier)}`
 		draw.restore()
 	}
 
@@ -215,14 +236,16 @@ class Player extends Entity {
 
 		this.state.simulation.deathMessage = message
 
-		const score = Math.round(this.state.level.current)
+		const score = Math.round(this.state.level.current * this.state.simulation.scoreMultiplier)
 		const highScore = Number(localStorage.getItem('tetragon-high-score') || 0)
+		const multiplierText = this.state.simulation.scoreMultiplier > 1 ? ` (${this.state.simulation.scoreMultiplier}x Bonus)` : ""
+
 		if (score > highScore) {
-			this.state.simulation.scoreStatus = "New High Score!"
+			this.state.simulation.scoreStatus = "New High Score!" + multiplierText
 			localStorage.setItem('tetragon-high-score', score)
 			if (window.submitHighScore) window.submitHighScore(score)
 		} else {
-			this.state.simulation.scoreStatus = ""
+			this.state.simulation.scoreStatus = multiplierText ? "Hardcore Bonus Applied" : ""
 		}
 
 		this.state.simulation.isDead = true
@@ -274,6 +297,12 @@ class Player extends Entity {
 		const d = this.defaults
 		Object.assign(this, d)
 		this.pos = { ...d.pos }
+		
+		// Apply Gamemode Overrides
+		if (this.state.simulation.gamemode === 'hardcore') {
+			this.maxHealth = 30
+			this.health = 30
+		}
 	}
 }
 

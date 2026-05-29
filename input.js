@@ -112,6 +112,10 @@ var input = {
 	pause() {
 		simulation.isPaused = !simulation.isPaused
 	},
+	toggleGamemode() {
+		if (!simulation.isMainMenu && !simulation.isPaused) return
+		simulation.gamemode = simulation.gamemode === 'standard' ? 'hardcore' : 'standard'
+	},
 	mainMenu() {
 		simulation.isMainMenu = true
 		simulation.mainMenu()
@@ -159,7 +163,7 @@ var input = {
 		}
 	},
 	lilKeyLogic() {
-		this.pressedKeys.forEach(function (k) {
+		this.pressedKeys.forEach((k) => {
 			switch (k) {
 				case this.keybinds.gunLeft:
 					this.gunLeft()
@@ -173,6 +177,9 @@ var input = {
 				case this.keybinds.pause:
 					this.pause()
 					break
+				case 'KeyH':
+					this.toggleGamemode()
+					break
 				case 'Escape':
 					this.pause()
 					break
@@ -183,7 +190,7 @@ var input = {
 					this.reload()
 					break
 			}
-		}.bind(this))
+		})
 	},
 	gamepadLogic() {
 		const gamepad = navigator.getGamepads()[0]
@@ -225,8 +232,9 @@ var input = {
 				// Use magnitude to prevent faster diagonal movement and allow for analog stick sensitivity
 				const normalizedX = moveX / magnitude
 				const normalizedY = moveY / magnitude
-				state.player.pos.x += normalizedX * state.player.velocity * Math.min(1, magnitude)
-				state.player.pos.y += normalizedY * state.player.velocity * Math.min(1, magnitude)
+				const ts = simulation.timeScale
+				state.player.pos.x += normalizedX * state.player.velocity * Math.min(1, magnitude) * ts
+				state.player.pos.y += normalizedY * state.player.velocity * Math.min(1, magnitude) * ts
 			}
 
 			// Aim Joystick (Mobile)
@@ -244,7 +252,7 @@ var input = {
 				if (this.isAutoFire && Math.sqrt(this.aimJoystick.moveX ** 2 + this.aimJoystick.moveY ** 2) > 0.3) this.fire()
 			}
 		}
-		this.pressedKeys.forEach(function (k) {
+		this.pressedKeys.forEach((k) => {
 			switch (k) {
 				case this.keybinds.fire:
 				case 'MobileFire':
@@ -258,7 +266,7 @@ var input = {
 					this.mainMenu()
 					break
 			}
-		}.bind(this))
+		})
 		if (state.player) {
 			this.cursor.angle = angle(
 				this.cursor.x,

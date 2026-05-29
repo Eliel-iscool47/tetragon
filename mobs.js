@@ -25,20 +25,29 @@ var mobs = {
 			this.timeSinceLastAttack = this.state.simulation.time
 			this.lastDamageTime = 0
 			this.maxHealth = config.maxHealth || this.health
+
+			// Apply Hardcore Difficulty Scaling
+			if (this.state.simulation.gamemode === 'hardcore') {
+				this.speed *= 1.35
+				this.damage *= 2
+			}
 		}
 		/**
 		 * Logic executed when this mob collides with the player.
 		 * @returns {boolean} Whether the mob should remain in the game list.
 		 */
 		onCollide() {
+			// Prevent frame-rate dependent damage by checking against attackRate
+			if (this.state.simulation.time - this.timeSinceLastAttack < 1 / this.attackRate) return true
+
 			this.state.player.takeDamage(this.damage, this)
 			this.state.upgrades.lastHealthRegen = this.state.simulation.time
 			this.state.simulation.shake = 5
 			this.timeSinceLastAttack = this.state.simulation.time
-
 			if (this.class != "projectile") {
-				this.pos.x += Math.cos(this.state.input.cursor.angle) * this.speed * this.size
-				this.pos.y += Math.sin(this.state.input.cursor.angle) * this.speed * this.size
+				const angle = input.cursor.angle + rand(-Math.PI / 12, Math.PI / 12)
+				this.pos.x += Math.cos(angle) * this.speed * this.size * 0.5
+				this.pos.y += Math.sin(angle) * this.speed * this.size * 0.5
 				return true
 			}
 			return false
@@ -105,8 +114,9 @@ var mobs = {
 			if (this.class === "boss") simulation.shake = 10
 		}
 
-		update() {
-			this.moveTowardsPlayer()
+		update(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
+			this.moveTowardsPlayer(ts)
 		}
 		draw() {}
 		/**
@@ -134,23 +144,22 @@ var mobs = {
 			let forceY = 0
 			let count = 0
 			const desiredSeparation = this.size * 1.2
+			const desiredSepSq = desiredSeparation * desiredSeparation
 
-			for (const other of this.state.mobs.list) {
-				if (other === this || other.class === "projectile") continue
-
-				const d = distance(
-					this.pos.x,
-					this.pos.y,
-					other.pos.x,
-					other.pos.y
-				)
-				if (d > 0 && d < desiredSeparation) {
-					// Calculate vector pointing away from neighbor, weighted by distance
-					forceX += (this.pos.x - other.pos.x) / d
-					forceY += (this.pos.y - other.pos.y) / d
+			// Optimization: Use the grid to find neighbors instead of checking every mob in the game
+			this.state.collisions.grid.query(this.pos.x, this.pos.y, (other) => {
+				if (!other.isMob || other === this || other.class === "projectile") return
+				const dx = this.pos.x - other.pos.x
+				const dy = this.pos.y - other.pos.y
+				const dSq = dx * dx + dy * dy
+				
+				if (dSq > 0 && dSq < desiredSepSq) {
+					const d = Math.sqrt(dSq)
+					forceX += dx / d
+					forceY += dy / d
 					count++
 				}
-			}
+			})
 
 			if (count > 0) {
 				forceX /= count
@@ -159,7 +168,8 @@ var mobs = {
 			return { x: forceX, y: forceY }
 		}
 
-		moveTowardsPlayer() {
+		moveTowardsPlayer(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
 			this.angle = angle(
 				this.pos.x,
 				this.pos.y,
@@ -178,13 +188,15 @@ var mobs = {
 
 			const mag = Math.sqrt(vx * vx + vy * vy)
 			if (mag > 0) {
-				this.pos.x += (vx / mag) * this.speed
-				this.pos.y += (vy / mag) * this.speed
+				this.pos.x += (vx / mag) * this.speed * ts
+				this.pos.y += (vy / mag) * this.speed * ts
 			}
 		}
-		moveInAngle() {
-			this.pos.x -= Math.cos(this.angle) * this.speed
-			this.pos.y -= Math.sin(this.angle) * this.speed
+
+		moveInAngle(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
+			this.pos.x -= Math.cos(this.angle) * this.speed * ts
+			this.pos.y -= Math.sin(this.angle) * this.speed * ts
 		}
 	},
 	list: [],
@@ -199,14 +211,10 @@ var mobs = {
 	reset() {
 		Object.assign(this, this.defaults)
 	},
-	drawMobs: function () {
-		this.list.forEach(
-			function (mob) {
-				return mob.draw()
-			}.bind(this)
-		)
+	drawMobs() {
+		this.list.forEach((mob) => mob.draw())
 	},
-	kill: function () {
+	kill() {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
 
 		// Filter out dead mobs and trigger their death logic
@@ -219,10 +227,9 @@ var mobs = {
 			return true
 		})
 	},
-	healthBars: function () {
+	healthBars() {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach(
-			function (mob) {
+		this.list.forEach((mob) => {
 				draw.save()
 				if (mob.class != "projectile") {
 					draw.globalAlpha = clamp(
@@ -260,16 +267,13 @@ var mobs = {
 						)
 				}
 				draw.restore()
-			}.bind(this)
-		)
+			})
 	},
-	loop: function () {
+	loop(timeScale = 1) {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach(
-			function (mob) {
+		this.list.forEach((mob) => {
 				if (mob.health > mob.maxHealth) mob.health = mob.maxHealth
-				mob.update()
-			}.bind(this)
-		)
+				mob.update(timeScale)
+			})
 	}
 }

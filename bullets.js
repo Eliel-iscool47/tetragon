@@ -16,9 +16,10 @@ var bullets = {
 				...config
 			})
 		}
-		update() {
-			this.pos.x += Math.cos(this.angle) * this.speed
-			this.pos.y += Math.sin(this.angle) * this.speed
+		update(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
+			this.pos.x += Math.cos(this.angle) * this.speed * ts
+			this.pos.y += Math.sin(this.angle) * this.speed * ts
 		}
 		takeDamage(amount) {
 			this.piercing--
@@ -234,8 +235,9 @@ var bullets = {
 			onCollision: function () {
 				bullets.explosion(this.pos.x, this.pos.y, 2)
 			},
-			update: function () {
+			update: function (timeScale = 1) {
 				if (!this.state.simulation) return undefined
+				const ts = timeScale ?? this.state.simulation.timeScale
 				let nearest = null
 				let minDist = 1000 // High search radius for missiles
 				this.state.mobs.list.forEach(m => {
@@ -254,16 +256,17 @@ var bullets = {
 				let diff = targetAngle - this.angle
 				while (diff < -Math.PI) diff += Math.PI * 2
 				while (diff > Math.PI) diff -= Math.PI * 2
-				this.angle += diff * this.steerStrength // Steer strength for missiles
+				this.angle += diff * this.steerStrength * ts // Steer strength for missiles
 
 
-				this.pos.x += Math.cos(this.angle) * this.speed
-				this.pos.y += Math.sin(this.angle) * this.speed
-				this.speed = Math.min(30, this.speed + 0.15)
-				this.steerStrength = Math.min(1, this.steerStrength + 0.0006)
+				this.pos.x += Math.cos(this.angle) * this.speed * ts
+				this.pos.y += Math.sin(this.angle) * this.speed * ts
+				this.speed = Math.min(30, this.speed + 0.15 * ts)
+				this.steerStrength = Math.min(1, this.steerStrength + 0.0006 * ts)
 
 				// Spawn smoke particle for trail effect
-				if (this.state.simulation.time % 0.05 < 1 / this.state.simulation.fps) {
+				const dt = ts / 60
+				if (this.state.simulation.time % 0.05 < dt) {
 					this.state.particles.spawn(this.pos.x, this.pos.y, {
 						...this.state.particles.missileSmoke,
 						angle: this.angle + Math.PI + rand(-0.5, 0.5), // Opposite direction with spread
@@ -282,30 +285,33 @@ var bullets = {
 			damage: state.guns.bouncyBalls.damage,
 			size: 5,
 			piercing: guns.bouncyBalls.piercing,
-			update: function () {
+			update(timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				const radius = this.size / 2
 				if (this.pos.x < radius || this.pos.x > state.simulation.world.width - radius) {
 					this.angle = Math.PI - this.angle + rand(-0.05, 0.05)
 					this.pos.x = clamp(this.pos.x, radius, state.simulation.world.width - radius)
-					this.speed = Math.min(30, this.speed + 0.8)
+					this.speed = Math.min(30, this.speed + 0.8 * ts)
 				}
 				if (this.pos.y < radius || this.pos.y > state.simulation.world.height - radius) {
 					this.angle = -this.angle + rand(-0.05, 0.05)
 					this.pos.y = clamp(this.pos.y, radius, state.simulation.world.height - radius)
-					this.speed = Math.min(30, this.speed + 0.8)
+					this.speed = Math.min(30, this.speed + 0.8 * ts)
 				}
 
 				// Homing logic: If upgrade is active, steer toward the nearest mob
 				if (upgrades.isBouncyBallHoming) {
 					let nearest = null
-					let minDist = 500 // Search radius
-					this.state.mobs.list.forEach(m => {
-						if (m.class !== 'projectile' && !m.isInvulnerable) {
-							const d = distance(this.pos.x, this.pos.y, m.pos.x, m.pos.y)
-							if (d < minDist) {
-								minDist = d
-								nearest = m
-							}
+					let minDistSq = 250000 // 500^2
+					
+					this.state.collisions.grid.query(this.pos.x, this.pos.y, (m) => {
+						if (!m.isMob || m.class === 'projectile' || m.isInvulnerable) return
+						const dx = m.pos.x - this.pos.x
+						const dy = m.pos.y - this.pos.y
+						const dSq = dx * dx + dy * dy
+						if (dSq < minDistSq) {
+							minDistSq = dSq
+							nearest = m
 						}
 					})
 					if (nearest) {
@@ -313,21 +319,22 @@ var bullets = {
 						let diff = targetAngle - this.angle
 						while (diff < -Math.PI) diff += Math.PI * 2
 						while (diff > Math.PI) diff -= Math.PI * 2
-						this.angle += diff * 0.08 // Steer strength
+						this.angle += diff * 0.08 * ts // Steer strength
 					}
 				}
 
-				this.pos.x += Math.cos(this.angle) * this.speed
-				this.pos.y += Math.sin(this.angle) * this.speed
+				this.pos.x += Math.cos(this.angle) * this.speed * ts
+				this.pos.y += Math.sin(this.angle) * this.speed * ts
 
 				// Spawn trail particle every ~30ms
-				if (this.state.simulation.time % 0.03 < 1 / this.state.simulation.fps) {
+				const dt = ts / 60
+				if (this.state.simulation.time % 0.03 < dt) {
 					this.state.particles.spawn(this.pos.x, this.pos.y, {
 						...this.state.particles.bouncyBallTrail
 					})
 				}
 			},
-			draw: function () {
+			draw() {
 				this.drawSelf(function () {
 					if (upgrades.isBouncyBallHoming) {
 						// Add a pulsing golden glow when homing is active
@@ -340,7 +347,7 @@ var bullets = {
 					draw.fill()
 					draw.strokeStyle = 'black'
 					draw.stroke()
-				}.bind(this))
+				})
 			}
 		}))
 	},
@@ -520,9 +527,9 @@ var bullets = {
 		)
 		draw.fill()
 	},
-	move() {
+	move(timeScale = 1) {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
-		this.list.forEach(function (b) { return b.update() }.bind(this))
+		this.list.forEach(function (b) { return b.update(timeScale) }.bind(this))
 	},
 	draw() {
 		this.list.forEach(function (b) { return b.draw() }.bind(this))

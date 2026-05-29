@@ -78,15 +78,8 @@ var powerUps = {
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing || state.player.health >= state.player.maxHealth) return undefined
 			state.player.heal(upgrades.healEffect * 8)
-			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
+			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
 	},
 	ammo: {
 		name: 'ammo',
@@ -94,7 +87,7 @@ var powerUps = {
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
-			guns.inventory.forEach(function (g) {
+			guns.inventory.forEach((g) => {
 				switch (g) {
 					case guns.missiles:
 						if (percentChance(upgrades.ammoYield - Math.floor(upgrades.ammoYield))) g.magazines += Math.ceil(upgrades.ammoYield) * 3
@@ -105,16 +98,9 @@ var powerUps = {
 						else g.magazines += Math.floor(upgrades.ammoYield)
 						break
 				}
-			}.bind(this))
-			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
+			})
+			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
 	},
 	upgrade: {
 		name: 'upgrade',
@@ -126,15 +112,8 @@ var powerUps = {
 				simulation.isChoosing
 			) return undefined
 			upgrades.choose()
-			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
+			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
 	},
 	reroll: {
 		name: 'reroll',
@@ -143,15 +122,8 @@ var powerUps = {
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
 			upgrades.rerolls++
-			powerUps.list = powerUps.list.filter(function (p) { return p != this }.bind(this))
+			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
 	},
 	invincibility: {
 		name: 'invincibility',
@@ -173,18 +145,19 @@ var powerUps = {
 			powerUps.list = powerUps.list.filter(p => p != this)
 		}
 	},
-	draw: function () {
-		this.list.forEach(function (p) { return p.draw() }.bind(this))
+	draw() {
+		this.list.forEach((p) => p.draw())
 	},
-	logic: function () {
-		powerUps.list.forEach(function (p) {
+	logic(timeScale = 1) {
+		const ts = timeScale ?? simulation.timeScale
+		powerUps.list.forEach((p) => {
 			if (p.checkCollision(state.player)) p.effect()
 			const dist = distance(p.pos.x, p.pos.y, state.player.pos.x, state.player.pos.y)
 			if (dist < upgrades.magnetRange && !simulation.isChoosing && !simulation.isPaused) { // Range where the magnet starts pulling
 				const dir = angle(p.pos.x, p.pos.y, state.player.pos.x, state.player.pos.y)
 				const magnetSpeed = distance(p.pos.x, p.pos.y, state.player.pos.x, state.player.pos.y) / 20 // Speed at which the magnet pulls
-				p.pos.x -= Math.cos(dir) * magnetSpeed * upgrades.magnetStrength
-				p.pos.y -= Math.sin(dir) * magnetSpeed * upgrades.magnetStrength
+				p.pos.x -= Math.cos(dir) * magnetSpeed * upgrades.magnetStrength * ts
+				p.pos.y -= Math.sin(dir) * magnetSpeed * upgrades.magnetStrength * ts
 
 				// Draw a tapering visual trail effect
 				for (let i = 0; i < 3; i++) {
@@ -196,6 +169,6 @@ var powerUps = {
 					draw.stroke()
 				}
 			}
-		}.bind(this))
+		})
 	}
 }

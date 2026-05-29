@@ -70,15 +70,16 @@ var collisions = {
 			}
 		}
 	},
-	loop() {
+	loop(timeScale = 1) {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
+		const ts = timeScale ?? simulation.timeScale
 		state.player.pos.x = clamp(state.player.pos.x, collisions.border.left, collisions.border.right)
 		state.player.pos.y = clamp(state.player.pos.y, collisions.border.top, collisions.border.bottom)
 
 		this.grid.clear()
-		bullets.list.forEach(function (b) {
-			this.grid.add(b)
-		}.bind(this))
+		bullets.list.forEach((b) => this.grid.add(b))
+		// Add mobs to the grid for separation force and proximity checks
+		mobs.list.forEach((m) => { m.isMob = true; this.grid.add(m); })
 
 		const explosionsToUpdate = new Set();
 
@@ -86,8 +87,14 @@ var collisions = {
 			bullets.explosionList[i].isExplosion = true
 			this.grid.add(bullets.explosionList[i])
 		}
+		
+		const fireList = state.bullets.firePoolList ?? []
+		fireList.forEach((f) => {
+			f.isFirePool = true
+			this.grid.add(f)
+		})
 
-		mobs.list = mobs.list.filter(function (mob) {
+		mobs.list = mobs.list.filter((mob) => {
 			const world = state.simulation.world || { width: 1500, height: 800 }
 			// Check for death or out-of-bounds projectiles
 			const isOutOfBounds = mob.pos.x < -200 || mob.pos.x > world.width + 200 || mob.pos.y < -200 || mob.pos.y > world.height + 200
@@ -115,7 +122,16 @@ var collisions = {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						explosionsToUpdate.add(e)
 					}
-				} else {
+				} else if (e.isFirePool) {
+					const dx = mob.pos.x - e.pos.x;
+					const dy = mob.pos.y - e.pos.y;
+					const distSq = dx * dx + dy * dy;
+					const range = e.size + mob.size / 2;
+					if (distSq <= range * range) {
+						// Scale damage by delta time so DoT is frame-independent
+						mob.takeDamage(e.damage * state.player.damageDone * ts)
+					}
+				} else { // Bullet
 					if (e.piercing > 0 && mob.checkCollision(e)) {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						if (e.type == 'bouncyBalls') {
@@ -137,26 +153,19 @@ var collisions = {
 					}
 				}
 			})
-			const fireList = state.bullets.firePoolList ?? []
-			fireList.forEach(function (f) {
-				if (mob.class === 'projectile') return // Fire pools shouldn't destroy boss bullets
-				if (distance(mob.pos.x, mob.pos.y, f.pos.x, f.pos.y) <= f.size + mob.size / 2) {
-					mob.takeDamage(f.damage * state.player.damageDone)
-				}
-			})
 			return true
-		}.bind(this))
+		})
 
 		// Update explosion timers only after all mobs have been checked for this frame
 		// This ensures all mobs in the radius take damage before the cooldown starts
 		explosionsToUpdate.forEach(e => e.timeSinceLastAttack = simulation.time)
 
-		bullets.explosionList.forEach(function (xp) {
+		bullets.explosionList.forEach((xp) => {
 			if (distance(state.player.pos.x, state.player.pos.y, xp.pos.x, xp.pos.y) <= xp.size / 2 + state.player.size / 2 && xp.timeSinceLastAttack < simulation.time - 0.05) {
-				state.player.takeDamage(xp.damage, xp)
+				state.player.takeDamage(xp.damage * ts, xp)
 				xp.timeSinceLastAttack = simulation.time
 				upgrades.lastHealthRegen = simulation.time
 			}
-		}.bind(this))
+		})
 	},
 }

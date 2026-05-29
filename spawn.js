@@ -47,7 +47,10 @@ const default_mobSpawn = {
 			dropChance: 0,
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			color: 'hsl(0, 100%, 65%)',
-			update: function () { this.moveInAngle() },
+			update: function (timeScale = 1) { 
+				const ts = timeScale ?? this.state.simulation.timeScale
+				this.moveInAngle(ts) 
+			},
 			draw: function () {
 				this.drawSelf(function () {
 					// Apply glow effect
@@ -105,14 +108,15 @@ const default_mobSpawn = {
 			attackRate: 1.5,
 			attackType: 'ranged',
 			color: 'hsl(300, 100%, 50%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.arrow(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
 				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 15) {
-					this.moveTowardsPlayer()
+					this.moveTowardsPlayer(ts)
 				}
 			},
 			draw: function () {
@@ -137,7 +141,10 @@ const default_mobSpawn = {
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 0%, 0%)',
-			update: function () { this.moveInAngle() },
+			update: function (timeScale = 1) { 
+				const ts = timeScale ?? this.state.simulation.timeScale
+				this.moveInAngle(ts) 
+			},
 			draw: function () {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -3, this.size * -0.35, this.size * 6, this.size * 0.7)
@@ -158,8 +165,9 @@ const default_mobSpawn = {
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			duration: 1.5,
 			color: 'hsl(90, 100%, 30%)',
-			update: function () {
-				this.moveInAngle()
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
+				this.moveInAngle(ts)
 				if (this.state.simulation.time - this.timeSpawned > this.duration) {
 					this.health = 0
 					bullets.explosion(this.pos.x, this.pos.y, 2.5, this.damage, true)
@@ -194,14 +202,15 @@ const default_mobSpawn = {
 			attackRate: 0.6,
 			attackType: 'ranged',
 			color: 'hsl(90, 100%, 50%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.grenade(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
 				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 10) {
-					this.moveTowardsPlayer()
+					this.moveTowardsPlayer(ts)
 				}
 			},
 			draw: function () {
@@ -227,14 +236,15 @@ const default_mobSpawn = {
 			attackRate: 0.5,
 			attackType: 'summon',
 			color: 'hsl(0, 0%, 35%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.default(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
 				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 8) {
-					this.moveTowardsPlayer()
+					this.moveTowardsPlayer(ts)
 				}
 			},
 			draw: function () {
@@ -261,14 +271,15 @@ const default_mobSpawn = {
 			attackRate: 0.4,
 			telegraphDuration: 0.8,
 			color: 'hsl(170, 100%, 70%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				// Spin the boss over time
-				this.angle += 0.02
+				this.angle += 0.02 * ts
 
 				// Move towards the player
 				const moveDir = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
-				this.pos.x -= Math.cos(moveDir) * this.speed
-				this.pos.y -= Math.sin(moveDir) * this.speed
+				this.pos.x -= Math.cos(moveDir) * this.speed * ts
+				this.pos.y -= Math.sin(moveDir) * this.speed * ts
 
 				// Fire lasers from each of the 5 corners occasionally
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
@@ -331,7 +342,8 @@ const default_mobSpawn = {
 			duration: 0.5,
 			color: 'hsl(180, 100%, 50%)',
 			parent: parent,
-			update: function () {
+			update: function (timeScale = 1) {
+				// timeScale not strictly needed here for coordinates as it follows parent, but kept for consistency
 				if (this.state.simulation.time - this.timeSpawned > this.duration) {
 					this.health = 0
 					return
@@ -349,7 +361,7 @@ const default_mobSpawn = {
 				// Continuous damage check: check collision every frame, but apply damage on a cooldown
 				if (lineCircleCollision(this.pos.x, this.pos.y, endX, endY, this.state.player.pos.x, this.state.player.pos.y, this.state.player.size / 2)) {
 					if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
-						player.takeDamage(this.damage)
+						this.state.player.takeDamage(this.damage)
 						this.state.upgrades.lastHealthRegen = this.state.simulation.time
 						this.timeSinceLastAttack = this.state.simulation.time
 					}
@@ -390,7 +402,8 @@ const default_mobSpawn = {
 			attackRate: 2,
 			attackType: 'summon',
 			color: 'hsl(25, 100%, 45%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let i = 0; i < 3; i++) {
@@ -399,7 +412,7 @@ const default_mobSpawn = {
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
-				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 4) this.moveTowardsPlayer()
+				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 4) this.moveTowardsPlayer(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -423,7 +436,8 @@ const default_mobSpawn = {
 			dropChance: 0.3,
 			angle: spawnAngle ?? angle(x, y, state.player.pos.x, state.player.pos.y),
 			color: 'hsl(30, 100%, 50%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				// Homing logic: steer toward player
 				const targetAngle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				let diff = targetAngle - this.angle
@@ -431,8 +445,8 @@ const default_mobSpawn = {
 				while (diff > Math.PI) diff -= Math.PI * 2
 
 				// Apply a slight steering force to make them "swervy" but avoidable
-				this.angle += diff * 0.04
-				this.moveInAngle()
+				this.angle += diff * 0.04 * ts
+				this.moveInAngle(ts)
 
 				// Spawn trail particle
 				if (this.state.simulation.time - this.timeSpawned > 0.05 && this.state.simulation.time % 0.05 < 1 / this.state.simulation.fps) {
@@ -464,7 +478,8 @@ const default_mobSpawn = {
 			attackRate: 0.8,
 			attackType: 'ranged',
 			color: 'hsl(150, 100%, 45%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let index = 0; index < 8; index++) {
@@ -472,7 +487,7 @@ const default_mobSpawn = {
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
-				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 4) this.moveTowardsPlayer()
+				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 4) this.moveTowardsPlayer(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -496,7 +511,10 @@ const default_mobSpawn = {
 			dropChance: 0.3,
 			angle: angle,
 			color: 'hsl(30, 100%, 50%)',
-			update: function () { this.moveInAngle() },
+			update: function (timeScale = 1) { 
+				const ts = timeScale ?? this.state.simulation.timeScale
+				this.moveInAngle(ts) 
+			},
 			draw: function () {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
@@ -516,10 +534,11 @@ const default_mobSpawn = {
 			speed: 8,
 			attackRate: 5,
 			color: 'hsl(0, 100%, 35%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
-				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
-				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed
+				this.pos.x -= Math.cos(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed * ts
+				this.pos.y -= Math.sin(this.angle + randInt(Math.PI * -0.1, Math.PI * 0.1)) * this.speed * ts
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -541,13 +560,14 @@ const default_mobSpawn = {
 			speed: 0.9,
 			attackRate: 0.5,
 			color: 'hsl(0, 0%, 10%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) <= this.size * 5) {
-					this.state.player.pos.x += Math.cos(this.angle + 0.4) * 1.5
-					this.state.player.pos.y += Math.sin(this.angle + 0.4) * 1.5
+					this.state.player.pos.x += Math.cos(this.angle + 0.4) * 1.5 * ts
+					this.state.player.pos.y += Math.sin(this.angle + 0.4) * 1.5 * ts
 				}
-				this.moveTowardsPlayer()
+				this.moveTowardsPlayer(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -574,13 +594,14 @@ const default_mobSpawn = {
 			attackRate: 0.5,
 			attackType: 'ranged',
 			color: 'hsl(260, 100%, 30%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.sniperBullet(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
-				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 10) this.moveTowardsPlayer()
+				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size * 10) this.moveTowardsPlayer(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -604,7 +625,10 @@ const default_mobSpawn = {
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 100%, 15%)',
-			update: function () { this.moveInAngle() },
+			update: function (timeScale = 1) { 
+				const ts = timeScale ?? this.state.simulation.timeScale
+				this.moveInAngle(ts) 
+			},
 			draw: function () {
 				this.drawSelf(function () {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
@@ -623,12 +647,13 @@ const default_mobSpawn = {
 			speed: 4,
 			attackRate: 0.8,
 			color: 'hsl(205, 100%, 35%)',
-			update: function () {
-				this.moveTowardsPlayer()
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
+				this.moveTowardsPlayer(ts)
 				mobs.list.forEach(function (other) {
 					if (other == this || other.type != "twin boss") return undefined
 					if (distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) < 300) {
-						this.heal(0.05)
+						this.heal(0.05 * ts)
 						draw.beginPath()
 						draw.strokeStyle = 'hsl(115, 100%, 50%)'
 						draw.lineWidth = 5
@@ -658,13 +683,14 @@ const default_mobSpawn = {
 			speed: 3,
 			attackRate: 0.5,
 			color: 'hsl(0, 42%, 36%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					spawn.mine(this.pos.x - Math.cos(this.angle) * this.size, this.pos.y - Math.sin(this.angle) * this.size)
 					this.timeSinceLastAttack = this.state.simulation.time
 				}
-				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size) this.moveTowardsPlayer()
+				if (distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y) >= this.size) this.moveTowardsPlayer(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -710,7 +736,8 @@ const default_mobSpawn = {
 			target: { x, y },
 			range: 300,
 			chaseUntil: 0,
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				const time = this.state.simulation.time
 				const isChasing = time < this.chaseUntil
 
@@ -720,7 +747,8 @@ const default_mobSpawn = {
 					this.target.y = this.state.player.pos.y
 
 					// Leave a menacing trail while chasing
-					if (time % 0.05 < 1 / this.state.simulation.fps) {
+					const dt = this.state.simulation.timeScale / 60
+					if (time % 0.05 < dt) {
 						this.state.particles.spawn(this.pos.x, this.pos.y, {
 							...this.state.particles.bouncyBallTrail,
 							color: 'hsl(0, 100%, 50%)',
@@ -736,12 +764,12 @@ const default_mobSpawn = {
 						this.target.y = clamp(this.anchor.y + Math.sin(moveAngle) * dist, 50, state.simulation.world.height - 50)
 					}
 					// 0.5% chance per frame (~once every 3 seconds) to start a 3-second chase
-					if (percentChance(0.005)) this.chaseUntil = time + 3
+					if (percentChance(0.005 * ts)) this.chaseUntil = time + 3
 				}
 
 				this.angle = angle(this.pos.x, this.pos.y, this.target.x, this.target.y)
-				this.pos.x -= Math.cos(this.angle) * this.speed
-				this.pos.y -= Math.sin(this.angle) * this.speed
+				this.pos.x -= Math.cos(this.angle) * this.speed * ts
+				this.pos.y -= Math.sin(this.angle) * this.speed * ts
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -771,12 +799,13 @@ const default_mobSpawn = {
 			size: 45,
 			speed: 2.2,
 			color: 'hsla(0, 0%, 100%, 0.6)',
-			update: function () {
+			update: function (timeScale = 1) {
+				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				// Periodic invulnerability (phasing)
 				const phase = Math.sin(this.state.simulation.time * 2.5)
 				this.isInvulnerable = phase > 0.1
-				this.moveTowardsPlayer()
+				this.moveTowardsPlayer(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -802,7 +831,8 @@ const default_mobSpawn = {
 			attackRate: 3,
 			attackType: 'ranged',
 			color: 'hsl(230, 100%, 30%)',
-			update: function () {
+			update: function (timeScale = 1) {
+				// timeScale not strictly needed for position (speed=0) but logic follows
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				const dist = distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 

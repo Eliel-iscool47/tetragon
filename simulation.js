@@ -12,6 +12,10 @@ var simulation = {
 	get deathMessage() { return this._deathMessage },
 	set deathMessage(val) { this._deathMessage = val },
 
+	_gamemode: 'standard',
+	get gamemode() { return this._gamemode },
+	set gamemode(val) { this._gamemode = val },
+
 	_isChoosing: false,
 	get isChoosing() { return this._isChoosing },
 	set isChoosing(val) { this._isChoosing = val },
@@ -74,7 +78,9 @@ var simulation = {
 
 				<div style="flex: 1; border-left: 2px solid rgba(0, 0, 0, 0.1); padding-left: 30px; text-align: left;">
 					<h2 style="font-size: 28px; color: #aaa; margin-bottom: 20px;">Statistics</h2>
+					<button onclick="simulation.showUpdates()" style="width: 100%; padding: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; font-family: 'DM Sans';">Show Recent Updates</button>
 					<div style="font-size: 20px; line-height: 2; color: #fff;">
+						<div style="margin-bottom: 10px; color: ${this.gamemode === 'hardcore' ? '#ff4444' : '#44ff44'}">Mode: <span style="float: right;">${this.gamemode.toUpperCase()}</span></div>
 						<div style="margin-bottom: 10px;">${text('health', 'Health')}: <span style="float: right;">${Math.round(state.player.health)} / ${Math.round(state.player.maxHealth)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage', 'Global Damage')}: <span style="float: right;">x${state.player.damageDone.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage-taken', 'Damage Taken')}: <span style="float: right;">x${state.player.damageTaken.toFixed(2)}</span></div>
@@ -113,6 +119,23 @@ var simulation = {
 	get time() { return this._time },
 	set time(val) { this._time = val },
 
+	_timeScale: 1,
+	get timeScale() { return this._timeScale },
+
+	get scoreMultiplier() {
+		return this.gamemode === 'hardcore' ? 3 : 1
+	},
+
+	shake: 0,
+
+	showUpdates() {
+		alert("v1.14: Delta-Time & Survival Update\n\n" +
+			"• Frame-Independent Logic: Game speed remains consistent across refresh rates.\n" +
+			"• Survival Mechanics: Added I-Frames and Defensive Knockback.\n" +
+			"• Hardcore Mode: Features a 30 HP Challenge and a 3x Score Multiplier.\n" +
+			"• Collision Engine 2.0: Optimized squared distance checks.");
+	},
+
 	get defaults() {
 		return {
 			collisions,
@@ -120,6 +143,7 @@ var simulation = {
 			isDead: false,
 			isPaused: false,
 			isDebug: false,
+			gamemode: this.gamemode || 'standard',
 			time: 0,
 			isMainMenu: true,
 			_world: { width: 1500, height: 800 },
@@ -130,19 +154,25 @@ var simulation = {
 			menuParticles: [],
 			fps: 60,
 			_isMobile: this._isMobile,
+			_timeScale: 1,
+			shake: 0,
 		}
 	},
 
 	set defaults(val) { throw new Error('simulation.defaults is read-only') },
 
 	reset() {
+		this._lastFrameTime = performance.now()
 		Object.assign(this, this.defaults)
 	},
 
 	isMainMenu: true,
 	fps: 60,
 	interval: undefined,
+	_isLooping: false,
+	_mobileUiCache: null,
 	crosshairColor: 'black',
+	_lastFrameTime: 0,
 	Particles: [],
 	menuParticles: [],
 	log(msg) {
@@ -241,10 +271,14 @@ var simulation = {
 	/**
 	 * This function is responsible for the game's loop. If it breaks, the whole canvas stops.
 	 */
-	gameLoop() {
-		if (document.hidden) return undefined
-		main.style.top = '0px'
-		main.style.left = '0px'
+	gameLoop(now = performance.now()) {
+		if (document.hidden || !this._isLooping) return undefined
+		requestAnimationFrame((t) => this.gameLoop(t))
+
+		const dt = Math.min(0.1, (now - this._lastFrameTime) / 1000)
+		this._lastFrameTime = now
+		this._timeScale = dt * 60 // Normalized to target 60fps
+
 		draw.clearRect(0, 0, main.width, main.height)
 
 		const scaleX = main.width / this.world.width
@@ -252,42 +286,49 @@ var simulation = {
 
 		input.keyLogic()
 		// Always update joysticks if the container exists to ensure smooth visuals
-		if (document.getElementById('mobile-controls')) input.updateJoysticks()
+		if (window.mobileControls) input.updateJoysticks()
 
 		nameModal.style.display = this.isPaused ? 'block' : 'none'
 
-		const mCtrls = window.mobileControls || document.getElementById('mobile-controls')
+		const mCtrls = window.mobileControls
 		if (mCtrls && window.input) {
 			// Show container if setting is enabled
 			mCtrls.style.display = input.showMobileControls ? 'block' : 'none';
 			
 			const isGameplay = !this.isPaused && !this.isDead && !this.isChoosing && !this.isMainMenu;
 			const isDead = this.isDead && !this.isMainMenu;
-			const moveBase = document.getElementById('move-base');
-			const aimBase = document.getElementById('aim-base');
-			const fireBtn = document.getElementById('mobile-fire');
-			const respawnBtn = document.getElementById('mobile-respawn');
-			const quitBtn = document.getElementById('mobile-quit');
-			const pauseBtn = document.getElementById('mobile-pause');
-			const toggleBtn = document.getElementById('mobile-menu-toggle');
-			const debugBtn = document.getElementById('mobile-debug');
-			const cycleBtn = document.getElementById('mobile-gun-cycle');
+
+			// Cache DOM lookups for performance
+			if (!this._mobileUiCache) {
+				this._mobileUiCache = {
+					move: document.getElementById('move-base'),
+					aim: document.getElementById('aim-base'),
+					fire: document.getElementById('mobile-fire'),
+					respawn: document.getElementById('mobile-respawn'),
+					quit: document.getElementById('mobile-quit'),
+					pause: document.getElementById('mobile-pause'),
+					toggle: document.getElementById('mobile-menu-toggle'),
+					debug: document.getElementById('mobile-debug'),
+					cycle: document.getElementById('mobile-gun-cycle')
+				}
+			}
+			const ui = this._mobileUiCache;
 
 			// Controls only appear during active gameplay to avoid blocking the Main Menu
-			if (moveBase) moveBase.style.display = isGameplay ? 'block' : 'none';
-			if (aimBase) aimBase.style.display = isGameplay ? 'block' : 'none';
-			if (fireBtn) fireBtn.style.display = isGameplay && !input.isAutoFire ? 'block' : 'none';
+			if (ui.move) ui.move.style.display = isGameplay ? 'block' : 'none';
+			if (ui.aim) ui.aim.style.display = isGameplay ? 'block' : 'none';
+			if (ui.fire) ui.fire.style.display = isGameplay && !input.isAutoFire ? 'block' : 'none';
 			
 			// UI buttons hide on the main menu to prevent clutter
 			const hideUI = isDead || this.isMainMenu;
-			if (pauseBtn) pauseBtn.style.display = hideUI ? 'none' : 'block';
-			if (toggleBtn) toggleBtn.style.display = hideUI ? 'none' : 'block';
-			if (debugBtn) debugBtn.style.display = hideUI ? 'none' : 'block';
-			if (cycleBtn) cycleBtn.style.display = hideUI ? 'none' : 'block';
+			if (ui.pause) ui.pause.style.display = hideUI ? 'none' : 'block';
+			if (ui.toggle) ui.toggle.style.display = hideUI ? 'none' : 'block';
+			if (ui.debug) ui.debug.style.display = hideUI ? 'none' : 'block';
+			if (ui.cycle) ui.cycle.style.display = hideUI ? 'none' : 'block';
 
 			// Death buttons only appear when dead
-			if (respawnBtn) respawnBtn.style.display = isDead ? 'block' : 'none';
-			if (quitBtn) quitBtn.style.display = isDead ? 'block' : 'none';
+			if (ui.respawn) ui.respawn.style.display = isDead ? 'block' : 'none';
+			if (ui.quit) ui.quit.style.display = isDead ? 'block' : 'none';
 		}
 
 		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
@@ -295,9 +336,8 @@ var simulation = {
 		draw.save()
 		draw.scale(scaleX, scaleY)
 
-		const saturation = this.isDead ? 0 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)
-		draw.filter = `saturate(${saturation}%)`
 		this.background()
+		this.applySaturationEffect()
 
 		if (this.isMainMenu) {
 			this.drawMenuBackground()
@@ -306,15 +346,12 @@ var simulation = {
 			return undefined
 		}
 		main.style.cursor = !this.isMainMenu && !this.isPaused && !this.isChoosing && !this.isDead ? "none" : "default"
-		if (
-			this.time - state.player.lastDamageTime < 0.1 &&
-			!this.isDead &&
-			!this.isPaused &&
-			!this.isChoosing &&
-			!this.isMainMenu
-		) {
-			main.style.top = `${rand(-10, 10)}px`
-			main.style.left = `${rand(-10, 10)}px`
+		
+		if (this.shake > 0 && !this.isPaused && !this.isChoosing) {
+			main.style.top = `${rand(-this.shake, this.shake)}px`
+			main.style.left = `${rand(-this.shake, this.shake)}px`
+			this.shake *= Math.pow(0.9, this.timeScale)
+			if (this.shake < 0.1) this.shake = 0
 		} else {
 			main.style.top = '0px'
 			main.style.left = '0px'
@@ -326,7 +363,7 @@ var simulation = {
 		if (!this.isPaused && !this.isChoosing) guns.logic()
 		pauseScreen.style.display = this.isPaused ? 'flex' : 'none'
 		chooseScreen.style.display = this.isChoosing ? 'block' : 'none'
-		if (!this.isPaused && !this.isChoosing) this.time += 1 / this.fps
+		if (!this.isPaused && !this.isChoosing) this.time += dt
 
 		state.player.draw()
 		guns.equippedGun?.drawReload()
@@ -337,9 +374,9 @@ var simulation = {
 		mobs.drawMobs()
 		mobs.healthBars()
 		particles.draw()
-		particles.update()
+		particles.update(this.timeScale)
 		powerUps.draw()
-		powerUps.logic()
+		powerUps.logic(this.timeScale)
 
 		// LEVEL LOGIC
 
@@ -420,32 +457,35 @@ var simulation = {
 		}
 		else this.crosshairColor = 'black'
 		hud.make()
-		collisions.loop()
-		bullets.move()
-		mobs.loop()
+		collisions.loop(this.timeScale)
+		bullets.move(this.timeScale)
+		mobs.loop(this.timeScale)
+	},
+	applySaturationEffect() {
+		const saturation = this.isDead ? 0 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)
+		if (saturation < 100) {
+			draw.save()
+			draw.globalCompositeOperation = 'color'
+			draw.globalAlpha = 1 - (saturation / 100)
+			draw.fillStyle = 'gray'
+			draw.fillRect(0, 0, this.world.width, this.world.height)
+			draw.restore()
+		}
 	},
 	init() {
-		if (this.interval) clearInterval(this.interval)
-		this.interval = undefined
+		this._isLooping = false
+		this._mobileUiCache = null
 		
 		this.wipe()
 
-		main.style.display = 'block'
-		main.width = window.innerWidth
-		main.height = window.innerHeight
 		this.isMainMenu = false
 		this.isPaused = false
 		this.isDead = false
-		this.isDebug = false
-		this.time = 0
-		dc.style.display = 'none'
-		main.style.cursor = 'default'
-		pauseScreen.style.display = 'none'
-		document.getElementById('name-modal').style.display = 'none'
-		hud.Obj.style.display = 'block'
 		this.collisions.grid.init()
 		level.init() // Call level init here
-		this.interval = setInterval(this.gameLoop.bind(this), 1000 / this.fps)
+		this._lastFrameTime = performance.now()
+		this._isLooping = true
+		this.gameLoop()
 	},
 	spawnVampireParticle(x, y) {
 

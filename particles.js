@@ -29,9 +29,10 @@ var particles = {
 			draw.fill()
 		}
 
-		update() {
-			this.pos.x += Math.cos(this.angle) * this.speed
-			this.pos.y += Math.sin(this.angle) * this.speed
+		update(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
+			this.pos.x += Math.cos(this.angle) * this.speed * ts
+			this.pos.y += Math.sin(this.angle) * this.speed * ts
 		}
 	},
 	list: [],
@@ -58,11 +59,11 @@ var particles = {
 	draw() {
 		this.list.forEach(function (p) { return p.draw() }.bind(this))
 	},
-	update() {
+	update(timeScale = 1) {
 		if (simulation.isPaused || simulation.isChoosing) return undefined
 		for (let i = this.list.length - 1; i >= 0; i--) {
 			const p = this.list[i]
-			p.update()
+			p.update(timeScale)
 			
 			if (!p.active) {
 				this.pool.push(p)
@@ -77,11 +78,12 @@ var particles = {
 		duration: 1.5,
 		healAmount: 0, // Default heal amount
 		angle: 0,
-		update() {
+		update(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
 			this.angle = angle(this.state.player.pos.x, this.state.player.pos.y, this.pos.x, this.pos.y)
-			this.speed = Math.min(25, this.speed + 0.3) // Accelerate towards the player
-			this.pos.x += Math.cos(this.angle) * this.speed
-			this.pos.y += Math.sin(this.angle) * this.speed
+			this.speed = Math.min(25, this.speed + 0.3 * ts) // Accelerate towards the player
+			this.pos.x += Math.cos(this.angle) * this.speed * ts
+			this.pos.y += Math.sin(this.angle) * this.speed * ts
 
 			const dist = distance(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 			if (dist < this.state.player.size / 2) {
@@ -109,9 +111,10 @@ var particles = {
 			draw.fill();
 			draw.restore();
 		},
-		update() {
-			this.pos.x += Math.cos(this.angle) * this.speed;
-			this.pos.y += Math.sin(this.angle) * this.speed;
+		update(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
+			this.pos.x += Math.cos(this.angle) * this.speed * ts;
+			this.pos.y += Math.sin(this.angle) * this.speed * ts;
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
 				this.active = false
 			}
@@ -124,10 +127,11 @@ var particles = {
 		vx: 0,
 		vy: 0,
 		gravity: 0.2,
-		update() {
-			this.vy += this.gravity;
-			this.pos.x += this.vx;
-			this.pos.y += this.vy;
+		update(timeScale = 1) {
+			const ts = timeScale ?? this.state.simulation.timeScale
+			this.vy += this.gravity * ts;
+			this.pos.x += this.vx * ts;
+			this.pos.y += this.vy * ts;
 
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
 				this.active = false

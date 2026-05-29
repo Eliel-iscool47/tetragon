@@ -657,30 +657,34 @@ br {
 }
 
 #mobile-pause { 
-	top: 70px; 
+	bottom: 30px; 
+	top: auto;
 	left: 50%;
-	margin-left: -220px;
+	margin-left: -240px;
 	background: rgba(33, 150, 243, 0.4); 
 	border-color: rgba(33, 150, 243, 0.6);
 }
 #mobile-debug { 
-	top: 70px; 
+	bottom: 30px; 
+	top: auto;
 	left: 50%;
-	margin-left: -130px;
+	margin-left: -135px;
 	background: rgba(96, 125, 139, 0.4);
 	border-color: rgba(96, 125, 139, 0.6);
 }
 #mobile-menu-toggle { 
-	top: 70px; 
+	bottom: 30px; 
+	top: auto;
 	left: 50%;
-	margin-left: -40px;
+	margin-left: -15px;
 	background: rgba(156, 39, 176, 0.4);
 	border-color: rgba(156, 39, 176, 0.6);
 }
 #mobile-gun-cycle { 
-	top: 70px; 
+	bottom: 30px; 
+	top: auto;
 	left: 50%;
-	margin-left: 110px;
+	margin-left: 125px;
 	background: rgba(255, 193, 7, 0.4);
 	border-color: rgba(255, 193, 7, 0.6);
 }

@@ -178,12 +178,12 @@ window.addEventListener('load', () => {
 
 	if (controlDoc) controlDoc.style.display = 'none'
 
-	start.onclick = function () {
+	start.onclick = () => {
 		if (simulation.interval) clearInterval(simulation.interval)
 		simulation.init()
-	}.bind(this)
+	}
 
-	controls.onclick = function () {
+	controls.onclick = () => {
 		if (controlDoc) {
 			const isVisible = controlDoc.style.display === 'block'
 			controlDoc.style.display = isVisible ? 'none' : 'block'
@@ -223,7 +223,7 @@ window.addEventListener('load', () => {
 	}
 	updateControls()
 
-	leaderboardButton.onclick = async function () {
+	leaderboardButton.onclick = async () => {
 		leaderboardModal.style.display = 'flex'
 		leaderboardList.innerHTML = 'Loading...'
 
@@ -253,21 +253,21 @@ window.addEventListener('load', () => {
 		} catch (e) {
 			leaderboardList.innerHTML = 'Error loading scores.'
 		}
-	}.bind(this)
+	}
 
-	document.getElementById('close-leaderboard').onclick = function () {
+	document.getElementById('close-leaderboard').onclick = () => {
 		leaderboardModal.style.display = 'none'
 	}
 
-	feedbackButton.onclick = function () {
+	feedbackButton.onclick = () => {
 		window.open("https://forms.gle/QinmVfLSQpMya29R9")
 	}
 
-	settings.onclick = function () {
+	settings.onclick = () => {
 		const isVisible = settingsMenu.style.display === 'block'
 		settingsMenu.style.display = isVisible ? 'none' : 'block'
 		if (!isVisible) renderSettings()
-	}.bind(this)
+	}
 
 	function renderSettings() {
 		settingsMenu.innerHTML = '<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Settings</h2>'
@@ -463,7 +463,7 @@ window.addEventListener('load', () => {
 		}
 	}
 
-	document.addEventListener('keydown', function (e) {
+	document.addEventListener('keydown', (e) => {
 		if (remappingAction && settingsMenu.style.display === 'block') {
 			e.preventDefault()
 			if (e.code !== 'Escape') {
@@ -474,7 +474,7 @@ window.addEventListener('load', () => {
 			remappingAction = null
 			renderSettings()
 		}
-	}.bind(this))
+	})
 
 	// Initial UI State
 	start.style.display = 'block'
@@ -493,8 +493,9 @@ window.addEventListener('load', () => {
 	renderSettings() // Initial render
 
 	// Start the background animation loop for the main menu
-	if (!simulation.interval) {
-		simulation.interval = setInterval(simulation.gameLoop.bind(simulation), 1000 / simulation.fps)
+	if (!simulation._isLooping) {
+		simulation._isLooping = true
+		simulation.gameLoop()
 	}
 
 	window.submitHighScore = async function (score) {

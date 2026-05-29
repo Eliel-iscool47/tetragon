@@ -58,8 +58,7 @@ var guns = {
 		}
 
 		drop() {
-			const index = guns.inventory.indexOf(this)
-			guns.inventory = guns.inventory.filter(function (g) { return g != this && g }.bind(this))
+			guns.inventory = guns.inventory.filter((g) => g !== this && g)
 			if (guns.equippedGun == this) guns.equippedGun = guns.inventory.at(-1) ?? guns.inventory.at(-1) ?? guns.inventory.at(0)
 			simulation.log(`guns.drop(${this.id})`)
 		}
@@ -164,7 +163,7 @@ var guns = {
 		this[g]?.equip()
 	},
 	logic() {
-		this.inventory.forEach(function (g) {
+		this.inventory.forEach((g) => {
 			if (g.isReloading && simulation.time - g.reloadStartTime >= (g.reloadTime / upgrades.reloadSpeed)) {
 				g.isReloading = false
 				if (g.magSize == Infinity) {
@@ -181,13 +180,13 @@ var guns = {
 	randomizeOptions() {
 		guns.options = []
 		let tempPool = [...this.pool]
-		repeat(function () {
+		repeat(() => {
 			if (tempPool.length <= 0) return undefined
 			const r = randInt(0, tempPool.length - 1)
 			const key = tempPool.at(r)
 			this.options.push(key)
 			tempPool = tempPool.filter((_, i) => i !== r)
-		}.bind(this), upgrades.optionsPerPowerUp)
+		}, upgrades.optionsPerPowerUp)
 	},
 	choose() {
 		if (!this.pool || this.pool.length <= 0) return undefined

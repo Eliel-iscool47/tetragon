@@ -13,18 +13,21 @@ The game's controls are the following:
 * **Cycle Guns**: `Q` and `E`
 * **Reload**: `V` (or empty magazine)
 * **Pause**: `P` or `Escape` (while playing)
+* **Toggle Gamemode**: `H` *(while paused or in main menu)*
 * **Restart**: `R` *(while paused/choosing/dead)*
 * **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.13: Mobile Support Revamped)
-*   **Robust Detection**: Enhanced cross-browser detection (including Firefox and "Desktop mode" tablets) using `matchMedia` and touch-point analysis.
-*   **Manual Toggle**: New "Mobile Controls" setting in the menu to force touch UI on any device (enabled by default).
-*   **Vertical Choice Menus**: Upgrade and Gun selection screens redesigned as vertical lists with sticky headers for better mobile accessibility and easier scrolling.
-*   **Adaptive UI**: Utility buttons (Pause, Debug, Menu Toggle) remain accessible during pause and choice states, while joysticks automatically hide to declutter the screen.
-*   **Custom Mobile Actions**: Dedicated 'Respawn' and 'Main Menu' buttons added to the death screen, ensuring touch players don't need a keyboard to navigate.
-*   **Performance & Feel**: Added visual lerping to joysticks for smooth feedback and a customizable scale slider in settings to fit different screen sizes.
-*   **Visual Polish**: Distinct color-coded buttons and touch-friendly layouts for all mobile-specific controls.
-*   **Bug Fixes**: Resolved auto-fire conflicts with the aim joystick and Z-index layering issues that caused controls to vanish on mobile browsers.
+# II: Recent Updates (v1.14: Delta-Time & Survival Update)
+*   **Frame-Independent Logic**: Integrated a global `timeScale` (Delta Time) system. Game speed, movement, and animations now remain consistent across all monitor refresh rates (60Hz, 144Hz, 240Hz+).
+*   **Survival Mechanics**:
+    *   **Invincibility Frames (I-Frames)**: Taking damage now triggers a brief window of invulnerability, preventing "shotgunning" (dying instantly to multiple overlapping hitboxes).
+    *   **Defensive Knockback**: Taking damage generates a localized shockwave that pushes nearby enemies away, providing critical breathing room in tight situations.
+*   **Hardcore Mode**: A new gamemode with reduced player HP and more aggressive enemies. Rewards players with a **2x Score Multiplier**.
+*   **Collision Engine 2.0**: 
+    *   **Fire Pool Integration**: lingering AOE fire pools are now processed through the spatial grid, drastically reducing the performance hit during late-game chaos.
+    *   **Squared Distance Calculations**: Replaced expensive square root operations with squared distance checks for all proximity and collision logic, resulting in a significant CPU performance boost.
+*   **Combat Synchronization**: Refined the game clock and attack timers to ensure enemy aggression and weapon fire rates are perfectly telegraphed and consistent regardless of frame rate fluctuations.
+*   **Mobile Polish**: Retained all v1.13 features (Robust detection, vertical choice menus, and adaptive UI) with improved joystick lerping and bug fixes for auto-fire behavior.
 ---
 
 # III: Technical Overview
@@ -36,19 +39,22 @@ The project utilizes a centralized `state` object (defined in `main.js`) to mana
 - **Standardized Resets**: Every game module ( `player`, `guns`, `mobs`, etc.) implements a `defaults` getter and a `reset()` method. Calling `state.resetAll()` performs an `Object.assign` to restore the game to its pristine initial state.
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
-### b: Global Leaderboard & Persistence
+### b: Delta-Time Implementation
+The simulation now calculates `dt` using high-resolution timestamps from `requestAnimationFrame`. This `dt` is normalized into a `timeScale` factor (target 1.0 @ 60fps) that is passed to every `update()` call in the game. This ensures that a projectile moving at speed `X` covers the same physical distance per second, whether the game is rendering 30 or 300 frames per second.
+
+### c: Global Leaderboard & Persistence
 - **Supabase Integration**: The game communicates with a Supabase backend to store and retrieve high scores.
 - **Persistent Profile**: Usernames are stored in `localStorage`, allowing for automatic identification without interruptive popups.
 - **Async Feedback**: The death screen utilizes a reactive status message system to inform players of the leaderboard submission progress.
 - **Property Protection**: Implemented defensive setters for `velocity`, `damageDone`, and `fireRate`. These setters automatically "un-multiply" temporary buffs before applying permanent upgrades, preventing exponential stat leakage.
 
-### b: Rendering System
+### d: Rendering System
 - **Context Filtering**: Utilizes `draw.filter` to apply real-time desaturation to the game world based on player health or death state without affecting the UI layer.
 
-### c: Data-Driven Leveling
+### e: Data-Driven Leveling
 - **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
 
-### d: Level System
+### f: Level System
 - **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
 - **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
 
@@ -85,6 +91,7 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 ## 5: Technical Implementation Details
 
 - **Collision Grid**: A spatial partitioning grid (100px cells) optimizes collision checks. Includes defensive boundary checks to prevent `TypeError` during coordinate queries.
+- **Performance Optimization**: Beyond the grid, the engine utilizes **Squared Distance** checks (`dx*dx + dy*dy <= r*r`) for most proximity logic, avoiding the computational cost of `Math.sqrt()` millions of times per minute.
 - **Visual Polish**:
   - **Geometric Background**: A low-opacity grid rendered in the simulation background to provide a frame of reference for player movement.
   - **Muzzle Flashes**: Triggered on weapon fire.

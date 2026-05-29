@@ -185,14 +185,14 @@ var upgrades = {
 		let tempPool = [...this.pool]
 		const amount = Math.min(this.optionsPerPowerUp, tempPool.length)
 
-		repeat(function () {
+		repeat(() => {
 			if (tempPool.length <= 0) return undefined
 			const r = randInt(0, tempPool.length - 1)
 			const key = tempPool.at(r)
 			const upg = this[key]
 			if (upg) this.options.push(upg)
 			tempPool = tempPool.filter((_, j) => j !== r)
-		}.bind(this), amount)
+		}, amount)
 	},
 	/**
 	 * This method shows the choice menu to choose an upgrade.
@@ -236,9 +236,9 @@ var upgrades = {
 	check() {
 		this.unlocked = [...new Set(this.unlocked)]
 		const counts = {}
-		this.collected.forEach(function (upg) {
+		this.collected.forEach((upg) => {
 			counts[upg.id] = (counts[upg.id] || 0) + 1
-		}.bind(this))
+		})
 
 		// Filter out upgrades that have reached their stack limit from the pool
 		this.pool = this.pool.filter(id => (counts[id] || 0) < (this[id]?.stackSize ?? Infinity))
@@ -367,11 +367,11 @@ upgrades.reactiveArmor = new upgrades.Upgrade({
 upgrades.liquidCooling = new upgrades.Upgrade({
 	id: 'liquidCooling',
 	name: 'Liquid Cooling',
-	description: `1.1x ${text('movement-speed', 'movement speed')}, 2.5x ${text('fire-rate', 'fire rate')}, and 1.8x ${text('magnet-range', 'magnet range')}`,
+	description: `1.5x ${text('movement-speed', 'movement speed')}, 2x ${text('fire-rate', 'fire rate')}, and 1.3x ${text('magnet-range', 'magnet range')}`,
 	effect() {
-		state.player.velocity *= 1.1
-		upgrades.fireRate *= 2.5
-		upgrades.magnetRange *= 1.8
+		state.player.velocity *= 1.5
+		upgrades.fireRate *= 2
+		upgrades.magnetRange *= 1.3
 	}
 })
 
@@ -379,8 +379,8 @@ upgrades.strengthenedAlloys = new upgrades.Upgrade({
 	id: 'strengthenedAlloys',
 	name: 'Strengthened Alloys',
 	stackSize: 3,
-	description: `1.2x ${text('health', 'max health')}`,
-	effect() { state.player.maxHealth *= 1.2 }
+	description: `+20 ${text('health', 'max health')}`,
+	effect() { state.player.maxHealth += 20 }
 })
 
 upgrades.maintenance = new upgrades.Upgrade({
@@ -432,18 +432,18 @@ upgrades.logistics = new upgrades.Upgrade({
 	id: 'logistics',
 	name: 'Logistics',
 	stackSize: 2,
-	description: `3x ${text('ammo', 'ammo yield')}`,
-	effect() { upgrades.ammoYield *= 3 }
+	description: `2.5x ${text('ammo', 'ammo yield')}`,
+	effect() { upgrades.ammoYield *= 2.5 }
 })
 
 upgrades.pyrotechnics = new upgrades.Upgrade({
 	id: 'pyrotechnics',
 	name: 'Pyrotechnics',
-	description: `1.2x ${text('explosion', 'explosion damage')} and ${text('explosion', 'explosion size')} <br> ${text('explosion', 'explosions')} are colorful.`,
+	description: `1.3x ${text('explosion', 'explosion damage')} and ${text('explosion', 'explosion size')} <br> ${text('explosion', 'explosions')} are colorful.`,
 	requirements() { return upgrades.unlocked.includes('explosions') }, // Requires 'explosions' to be unlocked
 	effect() { // Effect is applied when chosen
-		bullets.explosions.damageDone *= 1.2
-		bullets.explosions.size *= 1.2
+		bullets.explosions.damageDone *= 1.3
+		bullets.explosions.size *= 1.3
 		upgrades.isExplosionColorful = true
 	}
 })
@@ -451,12 +451,12 @@ upgrades.pyrotechnics = new upgrades.Upgrade({
 upgrades.incendiaryMunitions = new upgrades.Upgrade({
 	id: 'incendiaryMunitions',
 	name: 'Incendiary Munitions',
-	description: `${text('bullets', 'Bullets')} from ${text('gun', 'Shotgun')}, ${text('gun', 'Bouncy Balls')}, ${text('gun', 'SMG')}, and ${text('gun', 'Rifle')} ${text('explosion', 'explode')} upon contact.<br>0.5x ${text('gun', 'Shotgun')} ${text('bullets', 'pellets')} per shot`, // Description for when it's available
+	description: `${text('bullets', 'Bullets')} from ${text('gun', 'Shotgun')}, ${text('gun', 'Bouncy Balls')}, ${text('gun', 'SMG')}, and ${text('gun', 'Rifle')} ${text('explosion', 'explode')} upon contact.`, 
 	requirements() { return upgrades.unlocked.some(id => ['shotgun', 'rifle', 'smg', 'bouncy balls'].includes(id)) }, // Requires one of these gun types to be unlocked
 	effect() {
 		upgrades.isBulletExplode = true
 		upgrades.unlocked.push('explosions')
-		upgrades.shotgunPellets *= 0.5
+		upgrades.shotgunPellets *= 0.4
 	}
 })
 

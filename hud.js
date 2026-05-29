@@ -50,8 +50,10 @@ var hud = {
 		}
 	},
 	healthBar() {
-		this.displayHealth = lerp(this.displayHealth, state.player.health, 0.1)
-		this.displayMaxHealth = lerp(this.displayMaxHealth, state.player.maxHealth, 0.1)
+		const ts = simulation.timeScale
+		// Correct frame-independent lerp formula
+		this.displayHealth = lerp(this.displayHealth, state.player.health, 1 - Math.pow(1 - 0.1, ts))
+		this.displayMaxHealth = lerp(this.displayMaxHealth, state.player.maxHealth, 1 - Math.pow(1 - 0.1, ts))
 		this.health.style.width = `${this.displayHealth * 2}px`
 		this.health.style.backgroundColor = `hsl(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%)`
 		// this.maxHealth.style.backgroundColor = `hsla(${(this.displayHealth / this.displayMaxHealth) * 115}, 100%, 50%, 0.3)`
@@ -95,9 +97,7 @@ var hud = {
 		this.inv.style.textAlign = 'left'
 		this.inv.innerHTML = `
 		Inventory: <br>
-		${guns.inventory.map(function (g) {
-			return g.HUDEntry
-		}.bind(this)
+		${guns.inventory.map((g) => g.HUDEntry
 		).join('').replaceAll('Infinity', '∞')}
 		`
 	},
@@ -174,15 +174,15 @@ hud.debugBadge.innerText = 'DEBUG'
 hud.debugBadge.style.pointerEvents = 'none'
 hud.Obj.appendChild(hud.debugBadge)
 
-hud.health.addEventListener('mousemove', function (m) {
+hud.health.addEventListener('mousemove', (m) => {
 	input.cursor.update(m.offsetX + hud.health.offsetLeft, m.offsetY + hud.health.offsetTop)
-}.bind(this))
-hud.inv.addEventListener('mousemove', function (m) {
+})
+hud.inv.addEventListener('mousemove', (m) => {
 	input.cursor.update(m.offsetX + hud.inv.offsetLeft, m.offsetY + hud.inv.offsetTop)
-}.bind(this))
-hud.levels.addEventListener('mousemove', function (m) {
+})
+hud.levels.addEventListener('mousemove', (m) => {
 	input.cursor.update(m.offsetX + hud.levels.offsetLeft, m.offsetY + hud.levels.offsetTop)
-}.bind(this))
-hud.upgrades.addEventListener('mousemove', function (m) {
+})
+hud.upgrades.addEventListener('mousemove', (m) => {
 	input.cursor.update(m.offsetX + hud.upgrades.offsetLeft, m.offsetY + hud.upgrades.offsetTop)
-}.bind(this))
+})
