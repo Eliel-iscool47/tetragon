@@ -87,18 +87,7 @@ var powerUps = {
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
-			guns.inventory.forEach((g) => {
-				switch (g) {
-					case guns.missiles:
-						if (percentChance(upgrades.ammoYield - Math.floor(upgrades.ammoYield))) g.magazines += Math.ceil(upgrades.ammoYield) * 3
-						else g.magazines += Math.floor(upgrades.ammoYield) * 3
-						break
-					default:
-						if (percentChance(upgrades.ammoYield - Math.floor(upgrades.ammoYield))) g.magazines += Math.ceil(upgrades.ammoYield)
-						else g.magazines += Math.floor(upgrades.ammoYield)
-						break
-				}
-			})
+			guns.inventory.forEach((g) => { g.ammo++ })
 			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
 	},
