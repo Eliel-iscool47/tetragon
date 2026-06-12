@@ -17,17 +17,9 @@ The game's controls are the following:
 * **Restart**: `R` *(while paused/choosing/dead)*
 * **Main Menu**: `M` *(while paused/choosing/dead)*
 
-# II: Recent Updates (v1.14: Delta-Time & Survival Update)
-*   **Frame-Independent Logic**: Integrated a global `timeScale` (Delta Time) system. Game speed, movement, and animations now remain consistent across all monitor refresh rates (60Hz, 144Hz, 240Hz+).
-*   **Survival Mechanics**:
-    *   **Invincibility Frames (I-Frames)**: Taking damage now triggers a brief window of invulnerability, preventing "shotgunning" (dying instantly to multiple overlapping hitboxes).
-    *   **Defensive Knockback**: Taking damage generates a localized shockwave that pushes nearby enemies away, providing critical breathing room in tight situations.
-*   **Hardcore Mode**: A new gamemode with reduced player HP and more aggressive enemies. Rewards players with a **2x Score Multiplier**.
-*   **Collision Engine 2.0**: 
-    *   **Fire Pool Integration**: lingering AOE fire pools are now processed through the spatial grid, drastically reducing the performance hit during late-game chaos.
-    *   **Squared Distance Calculations**: Replaced expensive square root operations with squared distance checks for all proximity and collision logic, resulting in a significant CPU performance boost.
-*   **Combat Synchronization**: Refined the game clock and attack timers to ensure enemy aggression and weapon fire rates are perfectly telegraphed and consistent regardless of frame rate fluctuations.
-*   **Mobile Polish**: Retained all v1.13 features (Robust detection, vertical choice menus, and adaptive UI) with improved joystick lerping and bug fixes for auto-fire behavior.
+# II: Recent Updates (v1.15: Freedom of Color)
+*   **Character customization**: The player can now choose its color.
+*   **Bug Fixes**: I fixed the bug where ammo power-ups only gave 1 ammo.
 ---
 
 # III: Technical Overview

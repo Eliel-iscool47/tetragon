@@ -5,12 +5,12 @@ var upgrades = {
 
 	_fireRate: 1,
 	_fireRateBoostUntil: 0,
-	get fireRate() { 
-		return simulation.time < this._fireRateBoostUntil ? this._fireRate * 1.5 : this._fireRate 
+	get fireRate() {
+		return simulation.time < this._fireRateBoostUntil ? this._fireRate * 1.5 : this._fireRate
 	},
-	set fireRate(val) { 
+	set fireRate(val) {
 		const multiplier = simulation.time < this._fireRateBoostUntil ? 1.5 : 1
-		this._fireRate = val / multiplier 
+		this._fireRate = val / multiplier
 	},
 
 	_rerolls: 0,
@@ -129,7 +129,7 @@ var upgrades = {
 	get isBouncyBallHoming() { return this._isBouncyBallHoming },
 	set isBouncyBallHoming(val) { this._isBouncyBallHoming = !!val },
 
-	
+
 
 	clusterBombTypes: [
 		'missiles',
@@ -451,8 +451,14 @@ upgrades.pyrotechnics = new upgrades.Upgrade({
 upgrades.incendiaryMunitions = new upgrades.Upgrade({
 	id: 'incendiaryMunitions',
 	name: 'Incendiary Munitions',
-	description: `${text('bullets', 'Bullets')} from ${text('gun', 'Shotgun')}, ${text('gun', 'Bouncy Balls')}, ${text('gun', 'SMG')}, and ${text('gun', 'Rifle')} ${text('explosion', 'explode')} upon contact.`, 
-	requirements() { return upgrades.unlocked.some(id => ['shotgun', 'rifle', 'smg', 'bouncy balls'].includes(id)) }, // Requires one of these gun types to be unlocked
+	description: `${text('bullets', 'Bullets')} from ${text('gun', 'Shotgun')}, ${text('gun', 'Bouncy Balls')}, ${text('gun', 'SMG')}, and ${text('gun', 'Rifle')} ${text('explosion', 'explode')} upon contact.`,
+	requirements() {
+		return upgrades.unlocked.some(id => [
+			'shotgun', 
+			'rifle', 
+			'smg', 
+			'bouncy balls'
+		].includes(id)) && !upgrades.collected.includes(upgrades.smartBounces) }, // Requires one of these gun types to be unlocked
 	effect() {
 		upgrades.isBulletExplode = true
 		upgrades.unlocked.push('explosions')
@@ -626,7 +632,7 @@ upgrades.superball = new upgrades.Upgrade({
 	id: 'superball',
 	name: 'Superball',
 	stackSize: 5, // Description for when it's available
-	description: `+3 ${text('gun', 'bouncy ball')} ${text('bounces', 'bounces')}`,
+	description: `+3 ${text('bullets', 'bouncy ball')} ${text('bounces', 'bounces')}`,
 	requirements() { return upgrades.unlocked.includes('bouncy balls') },
 	effect() { guns.bouncyBalls.piercing += 3 }
 })
@@ -643,8 +649,8 @@ upgrades.refractiveLens = new upgrades.Upgrade({
 upgrades.smartBounces = new upgrades.Upgrade({
 	id: 'smartBounces',
 	name: 'Smart Bounces',
-	description: `${text('gun', 'Bouncy balls')} gain a ${text('homing', 'homing')} effect towards nearby enemies.`,
-	requirements() { return upgrades.unlocked.includes('bouncy balls') },
+	description: `${text('bullets', 'Bouncy balls')} gain a ${text('homing', 'homing')} effect towards nearby enemies.`,
+	requirements() { return upgrades.unlocked.includes('bouncy balls') && !upgrades.collected.includes(upgrades.incendiaryMunitions)},
 	effect() { upgrades.isBouncyBallHoming = true }
 })
 

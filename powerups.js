@@ -87,7 +87,7 @@ var powerUps = {
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined
-			guns.inventory.forEach((g) => { g.ammo++ })
+			guns.inventory.forEach((g) => { g.magazines += upgrades.ammoYield })
 			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
 	},

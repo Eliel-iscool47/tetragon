@@ -92,7 +92,8 @@ function updateJoystickScale() {
 window.addEventListener('load', () => {
 	title = document.getElementById('title')
 
-	// Initialize mobile controls regardless of device detection
+		// Initialize mobile controls regardless of device detection
+
 	let mDiv = document.getElementById('mobile-controls') 
 	if (!mDiv) {
 		mDiv = document.createElement('div')
@@ -160,8 +161,11 @@ window.addEventListener('load', () => {
 
 	// Initialize elements inside the load listener to ensure they aren't null
 	start = document.getElementById('start')
-	controls = document.getElementById('controls')
-	controlDoc = document.getElementById('control-doc')
+	controlDoc = document.getElementById('control-doc') ?? {
+		style: {},
+		innerHTML: '',
+	}
+
 	settings = document.getElementById('settings')
 	leaderboardButton = document.getElementById('leaderboard-button')
 	leaderboardModal = document.getElementById('leaderboard-modal')
@@ -183,22 +187,14 @@ window.addEventListener('load', () => {
 		simulation.init()
 	}
 
-	controls.onclick = () => {
-		if (controlDoc) {
-			const isVisible = controlDoc.style.display === 'block'
-			controlDoc.style.display = isVisible ? 'none' : 'block'
-		}
-	}
 
-	// Ensure controls are styled and populated
-	controlDoc.style.position = 'fixed'
-	controlDoc.style.top = '50%'
-	controlDoc.style.left = '50%'
-	controlDoc.style.transform = 'translate(-50%, -50%)'
-	controlDoc.style.zIndex = '1000'
+
+
 
 	const updateControls = () => {
+		// (removed Controls modal)
 		controlDoc.innerHTML = `
+
 			<div style="background: rgba(245, 245, 245, 0.98); padding: 30px; border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); color: black; min-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: 'DM Sans', sans-serif;">
 				<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Controls</h2>
 				<div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
@@ -221,9 +217,17 @@ window.addEventListener('load', () => {
 			</div>
 		`
 	}
-	updateControls()
+		updateControls()
 
-	leaderboardButton.onclick = async () => {
+		const githubRepoBtn = document.getElementById('github-repo')
+		if (githubRepoBtn) {
+			githubRepoBtn.onclick = () => {
+				window.open('https://github.com/Eliel-iscool47/tetragon', '_blank', 'noopener')
+			}
+		}
+
+		leaderboardButton.onclick = async () => {
+
 		leaderboardModal.style.display = 'flex'
 		leaderboardList.innerHTML = 'Loading...'
 
@@ -272,7 +276,70 @@ window.addEventListener('load', () => {
 	function renderSettings() {
 		settingsMenu.innerHTML = '<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Settings</h2>'
 
+		// Customization (Main Menu only)
+		if (simulation.isMainMenu) {
+			const customizationHeader = document.createElement('h3')
+			customizationHeader.innerText = 'Customization'
+			customizationHeader.style.margin = '20px 0 10px'
+			customizationHeader.style.borderBottom = '1px solid rgba(0,0,0,0.2)'
+			customizationHeader.style.paddingBottom = '8px'
+			settingsMenu.appendChild(customizationHeader)
+
+			// Player color picker
+			const playerColorContainer = document.createElement('div')
+			playerColorContainer.style.marginBottom = '20px'
+			playerColorContainer.style.borderBottom = '1px solid #333'
+			playerColorContainer.style.paddingBottom = '10px'
+
+			const playerColorLabel = document.createElement('div')
+			playerColorLabel.innerText = 'Player Color:'
+			playerColorLabel.style.marginBottom = '8px'
+
+			const playerColorInput = document.createElement('input')
+			playerColorInput.type = 'color'
+			playerColorInput.value = localStorage.getItem('tetragon-player-color') || '#2b86ff'
+			playerColorInput.style.width = '100%'
+			playerColorInput.style.height = '40px'
+			playerColorInput.style.border = 'none'
+			playerColorInput.style.background = 'transparent'
+			playerColorInput.oninput = () => {
+				localStorage.setItem('tetragon-player-color', playerColorInput.value)
+				if (state.player) state.player.color = playerColorInput.value
+			}
+
+			playerColorContainer.appendChild(playerColorLabel)
+			playerColorContainer.appendChild(playerColorInput)
+			settingsMenu.appendChild(playerColorContainer)
+
+			const DEFAULT_PLAYER_COLOR = 'hsl(215, 100%, 45%)'
+
+			// Reset button (keeps player color changer only)
+			const resetAestheticsBtn = document.createElement('button')
+			resetAestheticsBtn.innerText = 'Reset Player Color'
+			resetAestheticsBtn.style.width = '100%'
+			resetAestheticsBtn.style.padding = '10px'
+			resetAestheticsBtn.style.marginBottom = '20px'
+			resetAestheticsBtn.style.backgroundColor = 'hsl(0, 0%, 20%)'
+			resetAestheticsBtn.style.color = 'white'
+			resetAestheticsBtn.style.border = 'none'
+			resetAestheticsBtn.style.borderRadius = '5px'
+			resetAestheticsBtn.style.cursor = 'pointer'
+			resetAestheticsBtn.onclick = () => {
+				localStorage.setItem('tetragon-player-color', DEFAULT_PLAYER_COLOR)
+				playerColorInput.value = DEFAULT_PLAYER_COLOR
+				if (state.player) state.player.color = DEFAULT_PLAYER_COLOR
+
+				// If other systems read these, clear them so defaults apply
+				localStorage.removeItem('tetragon-hud-tint')
+				localStorage.removeItem('tetragon-particle-intensity')
+			}
+
+			settingsMenu.appendChild(resetAestheticsBtn)
+		}
+
+
 		// Restart Button (only visible during gameplay)
+
 		if (!simulation.isMainMenu) {
 			const restartBtn = document.createElement('button')
 			restartBtn.innerText = 'Restart'
@@ -478,7 +545,7 @@ window.addEventListener('load', () => {
 
 	// Initial UI State
 	start.style.display = 'block'
-	controls.style.display = 'block'
+	// controls.style.display = 'block'
 	settings.style.display = 'block'
 	leaderboardButton.style.display = 'block'
 	feedbackButton.style.display = 'block'

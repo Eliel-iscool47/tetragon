@@ -132,7 +132,7 @@ br {
 	font: 60px "DM Sans"
 }
 
-#controls {
+#github-repo {
 	font-style: normal;
 	font-weight: 400;
 	position: absolute;
@@ -152,6 +152,7 @@ br {
 	z-index: 5;
 	font: 36px "DM Sans"
 }
+
 
 #HUD {
 	display: none;
@@ -263,9 +264,10 @@ br {
 
 #start:hover,
 #settings:hover,
-#controls:hover,
+#github-repo:hover,
 #leaderboard-button:hover,
 #feedback-button:hover {
+
 	background-color: hsl(215, 100%, 50%); /* A consistent hover color */
 	color: hsl(0, 0%, 100%);
 	border-color: hsl(215, 100%, 65%); /* A consistent border color */
@@ -278,10 +280,11 @@ br {
 	border-color: hsl(0, 0%, 75%);
 }
 
-#controls:hover {
-	background-color: hsl(0, 100%, 45%); /* Slightly different for controls */
+#github-repo:hover {
+	background-color: hsl(0, 100%, 45%); /* Slightly different for github repo */
 	border-color: hsl(0, 100%, 60%);
 }
+
 
 #control-doc {
 	font-style: normal;

@@ -18,7 +18,7 @@ class Player extends Entity {
 			_killer: null,
 			_velocity: 5,
 			_deathAlpha: 0,
-			color: 'hsl(215, 100%, 45%)',
+			color: localStorage.getItem('tetragon-player-color') || 'hsl(215, 100%, 45%)',
 		})
 	}
 
@@ -38,8 +38,8 @@ class Player extends Entity {
 			_deathAlpha: 0,
 			_killer: null,
 			_velocity: 5,
-			color: 'hsl(215, 100%, 45%)',
-			pos: { x: main.width / 2, y: main.height / 2 }
+			color: localStorage.getItem('tetragon-player-color') || 'hsl(215, 100%, 45%)',
+			pos: { x: main.width / 2, y: main.height / 2 },
 		}
 	}
 
@@ -93,23 +93,23 @@ class Player extends Entity {
 		this.health = Math.min(this.health, val)
 	}
 
-	get damageDone() { 
-		return this.state.simulation.time < this._damageBoostUntil ? this._damageDone * 2.0 : this._damageDone 
+	get damageDone() {
+		return this.state.simulation.time < this._damageBoostUntil ? this._damageDone * 2.0 : this._damageDone
 	}
-	set damageDone(val) { 
+	set damageDone(val) {
 		const multiplier = this.state.simulation.time < this._damageBoostUntil ? 2.0 : 1
-		this._damageDone = Math.abs(val / multiplier) 
+		this._damageDone = Math.abs(val / multiplier)
 	}
 
 	get lastDamageTime() { return this._lastDamageTime }
 	set lastDamageTime(val) { this._lastDamageTime = val }
 
-	get damageTaken() { 
-		return this.state.simulation.time < this._defenseBoostUntil ? this._damageTaken * 0.5 : this._damageTaken 
+	get damageTaken() {
+		return this.state.simulation.time < this._defenseBoostUntil ? this._damageTaken * 0.5 : this._damageTaken
 	}
-	set damageTaken(val) { 
+	set damageTaken(val) {
 		const multiplier = this.state.simulation.time < this._defenseBoostUntil ? 0.5 : 1
-		this._damageTaken = val / multiplier 
+		this._damageTaken = val / multiplier
 	}
 
 	get isInvulnerable() { return this._isInvulnerable || this.state.simulation.time < this._invulnerableUntil }
@@ -120,8 +120,8 @@ class Player extends Entity {
 		this._size = val
 	}
 
-	get velocity() { 
-		return this.state.simulation.time < this._speedBoostUntil ? this._velocity * 1.6 : this._velocity 
+	get velocity() {
+		return this.state.simulation.time < this._speedBoostUntil ? this._velocity * 1.6 : this._velocity
 	}
 	set velocity(val) {
 		// If the player is currently boosted, we need to divide the incoming value by the multiplier
@@ -170,13 +170,13 @@ class Player extends Entity {
 		draw.fillStyle = 'rgba(255, 255, 255, 0.8)'
 		draw.font = `italic 30px 'DM Sans'`
 		draw.fillText(this.state.simulation.deathMessage, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 55)
-		
+
 		// Draw the leaderboard submission status
 		draw.textAlign = 'center'
 		draw.fillStyle = 'rgb(55, 215, 255)'
 		draw.font = `28px \'DM Sans\'`
 		draw.fillText(this.state.simulation.scoreStatus, this.state.simulation.world.width / 2, this.state.simulation.world.height / 2 + 190)
-		
+
 		if (!this.state.simulation.isMobile) {
 			draw.fillStyle = 'hsl(0, 0%, 100%)'
 			draw.font = `50px 'DM Sans'`
@@ -216,7 +216,7 @@ class Player extends Entity {
 				"Square up next time.",
 				"Albert Epstein better than bro",
 			]
-			
+
 			if (killer && Math.random() < 0.4) {
 				const imagineMessages = [
 					`Imagine dying to a ${killer.type}, what a tragic tale!`,
@@ -297,7 +297,7 @@ class Player extends Entity {
 		const d = this.defaults
 		Object.assign(this, d)
 		this.pos = { ...d.pos }
-		
+
 		// Apply Gamemode Overrides
 		if (this.state.simulation.gamemode === 'hardcore') {
 			this.maxHealth = 30
@@ -307,3 +307,4 @@ class Player extends Entity {
 }
 
 var player = new Player(state, main.width / 2, main.height / 2)
+

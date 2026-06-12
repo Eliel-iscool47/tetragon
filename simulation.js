@@ -123,7 +123,7 @@ var simulation = {
 	get timeScale() { return this._timeScale },
 
 	get scoreMultiplier() {
-		return this.gamemode === 'hardcore' ? 3 : 1
+		return this.gamemode == 'hardcore' ? 3 : 1
 	},
 
 	shake: 0,
@@ -188,47 +188,66 @@ var simulation = {
 		this.isPaused = false
 	},
 	drawMenuBackground() {
-		if (this.menuParticles.length < 15) {
-			this.menuParticles.push({
-				x: rand(0, this.world.width),
-				y: rand(0, this.world.height),
-				size: rand(50, 200),
-				angle: rand(0, Math.PI * 2),
-				rot: rand(-0.005, 0.005),
-				speed: rand(0.1, 0.4),
-				points: randInt(3, 6),
-				color: `hsla(${rand(180, 260)}, 60%, 50%, 0.06)` // Faded blue/purple geometric shapes
-			})
+		const targetCount = 50
+		const minAlpha = 0.02
+
+		// Spawn + keep menu particles alive indefinitely (no fade-out despawn).
+		if (this.menuParticles.length < targetCount) {
+			const missing = targetCount - this.menuParticles.length
+			for (let k = 0; k < missing; k++) {
+				this.menuParticles.push({
+					x: rand(0, this.world.width),
+					y: rand(0, this.world.height),
+					size: rand(20, 200),
+					angle: rand(-Math.PI, Math.PI),
+					rot: rand(-0.015, 0.015),
+					speed: rand(0.1, 0.4),
+					points: randInt(3, 8),
+					alpha: rand(0.3, 0.8),
+					hue: rand(160, 230),
+				})
+			}
 		}
 
 		this.menuParticles.forEach(p => {
+			// Movement
 			p.angle += p.rot
 			p.x += Math.cos(p.angle) * p.speed
 			p.y += Math.sin(p.angle) * p.speed
 
-			if (p.x < -200) p.x = this.world.width + 200
-			if (p.x > this.world.width + 200) p.x = -200
-			if (p.y < -200) p.y = this.world.height + 200
-			if (p.y > this.world.height + 200) p.y = -200
+			// Wrap around when they go offscreen.
+			// (Keep a small buffer so they re-enter smoothly.)
+			const buf = 10
+			if (p.x < -buf) p.x = this.world.width + buf
+			if (p.x > this.world.width + buf) p.x = -buf
+			if (p.y < -buf) p.y = this.world.height + buf
+			if (p.y > this.world.height + buf) p.y = -buf
+
+			// Drawing
+			const alphaRange = 0.05
+			p.alpha = clamp(p.alpha + rand(-alphaRange / 2, alphaRange / 2), 0.3, 0.85)
+			const hueRange = 10
+			p.hue = clamp(p.hue + rand(-hueRange / 2, hueRange / 2), 170, 230)
+			p.color = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`
 
 			draw.save()
 			draw.translate(p.x, p.y)
 			draw.rotate(p.angle)
+			draw.globalAlpha = p.alpha
 			draw.fillStyle = p.color
-			draw.strokeStyle = 'rgba(255, 255, 255, 0.03)'
-			draw.lineWidth = 1
+
 			draw.beginPath()
 			polygon(0, 0, p.size, p.points)
 			draw.fill()
-			draw.stroke()
 			draw.restore()
 		})
 	},
+
 	mainMenu() {
 		pauseScreen.style.display = 'none'
 		nameModal.style.display = 'none'
 		start.style.display = 'block'
-		controls.style.display = 'block'
+		// controls.style.display = 'block'
 		settings.style.display = 'block'
 		leaderboardButton.style.display = 'block'
 		feedbackButton.style.display = 'block'
@@ -245,11 +264,11 @@ var simulation = {
 	background() {
 		const step = 100
 		draw.save()
-		draw.fillStyle = 'hsl(0, 0%, 80%)'
+		draw.fillStyle = 'hsl(0, 0%, 95%)'
 		draw.fillRect(0, 0, this.world.width, this.world.height)
 		
-		draw.strokeStyle = 'hsla(0, 0%, 30%, 0.20)'
-		draw.lineWidth = 3
+		draw.strokeStyle = 'hsla(0, 0%, 20%, 0.2)'
+		draw.lineWidth = 4
 
 		// Vertical lines
 		for (let x = 0; x <= this.world.width; x += step) {
