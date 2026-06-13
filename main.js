@@ -198,12 +198,13 @@ window.addEventListener('load', () => {
 			<div style="background: rgba(245, 245, 245, 0.98); padding: 30px; border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); color: black; min-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: 'DM Sans', sans-serif;">
 				<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Controls</h2>
 				<div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
-					${Object.entries(state.input.keybinds).map(([action, key]) => `
+					${Object.entries(state.input.keybinds).map(([action, key]) => {
+						if (action != "testing") return `
 						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.1em;">
 							<span style="color: #555; margin-right: 20px;">${action.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</span>
 							<kbd style="background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; font-family: monospace; box-shadow: 0 2px 0 #bbb; color: #333;">${key.replace('Key', '').replace('Digit', '')}</kbd>
 						</div>
-					`).join('')}
+					`}).join('')}
 					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.1em; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 12px;">
 						<span style="color: #555;">Fire (Alt):</span>
 						<kbd style="background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; font-family: monospace; box-shadow: 0 2px 0 #bbb; color: #333;">Left Click</kbd>

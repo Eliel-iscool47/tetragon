@@ -22,6 +22,7 @@ var input = {
 		respawn: "KeyR",
 		mainMenu: "KeyM",
 		reload: "KeyV",
+		switchGamemode: "KeyH",
 		...JSON.parse(localStorage.getItem('tetragon-keybinds') || "{}"),
 	},
 	joystick: {
@@ -146,8 +147,10 @@ var input = {
 	},
 
 	respawn() {
-		simulation.init()
+		// Fast respawn: don’t re-run simulation.init() (which re-attaches/initializes more things).
+		return simulation.respawn()
 	},
+
 	clickLogic(click) {
 		this.cursor.update(click.offsetX, click.offsetY)
 		switch (click.button) {
@@ -177,7 +180,7 @@ var input = {
 				case this.keybinds.pause:
 					this.pause()
 					break
-				case 'KeyH':
+				case this.keybinds.switchGamemode:
 					this.toggleGamemode()
 					break
 				case 'Escape':
@@ -258,10 +261,12 @@ var input = {
 				case 'MobileFire':
 					this.fire()
 					break
-				case this.keybinds.respawn:
-					this.respawn()
-					break
+			case this.keybinds.respawn:
+				this.respawn()
+				break
+
 				case this.keybinds.mainMenu:
+					simulation.menuParticles = []
 					simulation.isMainMenu = true
 					this.mainMenu()
 					break

@@ -1,16 +1,16 @@
 const default_mobSpawn = {
 	bosses: {
-		voidBoss: 12,
-		summonerBoss: 12,
-		triangleBoss: 10,
-		stalkerBoss: 12,
-		pentagonBoss: 10,
-		hexagonBoss: 5, // Hexagons are rare/annoying
-		twinBoss: 5, // Twins are rare/difficult
-		octagonBoss: 9,
-		sniperBoss: 8,
-		minefieldBoss: 10,
-		ghostBoss: 10
+		voidBoss: 1,
+		summonerBoss: 1,
+		triangleBoss: 1,
+		stalkerBoss: 1,
+		pentagonBoss: 1,
+		hexagonBoss: 1,
+		twinBoss: 1,
+		octagonBoss: 1,
+		sniperBoss: 1,
+		minefieldBoss: 1,
+		ghostBoss: 1
 	},
 	randomBoss(x, y) {
 		const choice = weightedRand(this.bosses)
@@ -47,9 +47,9 @@ const default_mobSpawn = {
 			dropChance: 0,
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			color: 'hsl(0, 100%, 65%)',
-			update: function (timeScale = 1) { 
+			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
-				this.moveInAngle(ts) 
+				this.moveInAngle(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -141,9 +141,9 @@ const default_mobSpawn = {
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 0%, 0%)',
-			update: function (timeScale = 1) { 
+			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
-				this.moveInAngle(ts) 
+				this.moveInAngle(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -511,9 +511,9 @@ const default_mobSpawn = {
 			dropChance: 0.3,
 			angle: angle,
 			color: 'hsl(30, 100%, 50%)',
-			update: function (timeScale = 1) { 
+			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
-				this.moveInAngle(ts) 
+				this.moveInAngle(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -625,9 +625,9 @@ const default_mobSpawn = {
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			attackRate: 5,
 			color: 'hsl(0, 100%, 15%)',
-			update: function (timeScale = 1) { 
+			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
-				this.moveInAngle(ts) 
+				this.moveInAngle(ts)
 			},
 			draw: function () {
 				this.drawSelf(function () {
@@ -647,32 +647,47 @@ const default_mobSpawn = {
 			speed: 4,
 			attackRate: 0.8,
 			color: 'hsl(205, 100%, 35%)',
-			update: function (timeScale = 1) {
+			update(timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
 				this.moveTowardsPlayer(ts)
-				mobs.list.forEach(function (other) {
-					if (other == this || other.type != "twin boss") return undefined
+
+				// Heal the paired twin when they are close enough.
+				for (const other of mobs.list) {
+					if (other === this || other.type !== "twin boss") continue
 					if (distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) < 300) {
 						this.heal(0.05 * ts)
+						break
+					}
+				}
+			},
+			draw() {
+				// Draw the boss itself (uses Entity.drawSelf for local transforms)
+				this.drawSelf(() => {
+					draw.beginPath()
+					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
+					draw.fill()
+					draw.stroke()
+				})
+
+				// Draw the green connecting segment only while healing is active (within range).
+				// IMPORTANT: draw this in WORLD coordinates so the segment always connects
+				// the two actual mob positions (no interference with local rotation).
+				for (const other of mobs.list) {
+					if (other === this || other.type !== "twin boss") continue
+					if (distance(this.pos.x, this.pos.y, other.pos.x, other.pos.y) < 300) {
 						draw.beginPath()
 						draw.strokeStyle = 'hsl(115, 100%, 50%)'
 						draw.lineWidth = 5
 						draw.moveTo(this.pos.x, this.pos.y)
 						draw.lineTo(other.pos.x, other.pos.y)
 						draw.stroke()
+						break
 					}
-				}.bind(this))
+				}
 			},
-			draw: function () {
-				this.drawSelf(function () {
-					draw.beginPath()
-					draw.arc(0, 0, this.size / 2, 0, Math.PI * 2)
-					draw.fill()
-					draw.stroke()
-				}.bind(this))
-			}
 		}))
 	},
+
 	minefieldBoss(x, y) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'minefield boss',

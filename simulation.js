@@ -161,9 +161,15 @@ var simulation = {
 
 	set defaults(val) { throw new Error('simulation.defaults is read-only') },
 
-	reset() {
+reset() {
 		this._lastFrameTime = performance.now()
+		this._timeScale = 1
 		Object.assign(this, this.defaults)
+
+		// Ensure menu particles don't inherit any prior angular state when re-entering.
+		// (They are animated via p.rot in drawMenuBackground.)
+		this.menuParticles = []
+		this._menuParticlesInitialized = false
 	},
 
 	isMainMenu: true,
@@ -188,8 +194,9 @@ var simulation = {
 		this.isPaused = false
 	},
 	drawMenuBackground() {
-		const targetCount = 50
-		const minAlpha = 0.02
+		if (!this.isMainMenu) return undefined
+		const targetCount = 15
+		const minAlpha = 0.2
 
 		// Spawn + keep menu particles alive indefinitely (no fade-out despawn).
 		if (this.menuParticles.length < targetCount) {
@@ -210,10 +217,12 @@ var simulation = {
 		}
 
 		this.menuParticles.forEach(p => {
-			// Movement
-			p.angle += p.rot
-			p.x += Math.cos(p.angle) * p.speed
-			p.y += Math.sin(p.angle) * p.speed
+			// Movement (frame-rate independent)
+			const ts = this.timeScale ?? 1
+			p.angle += p.rot * ts
+			p.x += Math.cos(p.angle) * p.speed * ts
+			p.y += Math.sin(p.angle) * p.speed * ts
+
 
 			// Wrap around when they go offscreen.
 			// (Keep a small buffer so they re-enter smoothly.)
@@ -224,10 +233,10 @@ var simulation = {
 			if (p.y > this.world.height + buf) p.y = -buf
 
 			// Drawing
-			const alphaRange = 0.05
-			p.alpha = clamp(p.alpha + rand(-alphaRange / 2, alphaRange / 2), 0.3, 0.85)
-			const hueRange = 10
-			p.hue = clamp(p.hue + rand(-hueRange / 2, hueRange / 2), 170, 230)
+			// const alphaRange = 0.05
+			// p.alpha = clamp(p.alpha + rand(-alphaRange / 2, alphaRange / 2), 0.3, 0.85)
+			// const hueRange = 10
+			// p.hue = clamp(p.hue + rand(-hueRange / 2, hueRange / 2), 170, 230)
 			p.color = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`
 
 			draw.save()
@@ -491,20 +500,60 @@ var simulation = {
 			draw.restore()
 		}
 	},
-	init() {
-		this._isLooping = false
-		this._mobileUiCache = null
-		
+	respawn() {
+		// Full restart (like fresh from main menu) but keeping the same page load.
+		// This resets BOTH runtime state and run progression state.
 		this.wipe()
 
+		// Ensure we return to the “playing” state (not the main menu UI).
+		this.isMainMenu = false
+		this.isPaused = false
+		this.isDead = false
+		this.isChoosing = false
+
+		this.time = 0
+		this._timeScale = 1
+		this._lastFrameTime = performance.now()
+
+		// Reset runtime lists to prevent “accumulation” across respawns.
+		mobs.list = []
+		bullets.list = []
+		bullets.explosionList = []
+		bullets.slashList = []
+		bullets.firePoolList = []
+
+		powerUps.list = []
+		particles.list = []
+		particles.pool = []
+
+		// Reset grids / level state.
+		this.collisions.grid.init()
+		level.init() // reload level config (async but safe)
+
+		// Ensure run-scoped HUD/status values start fresh.
+		this.shake = 0
+		this.scoreStatus = ''
+		this.deathMessage = ''
+	},
+
+
+	init() {
+		// Reset the entire game state and ensure only ONE RAF loop is active.
+		this._mobileUiCache = null
+		this.wipe()
 		this.isMainMenu = false
 		this.isPaused = false
 		this.isDead = false
 		this.collisions.grid.init()
 		level.init() // Call level init here
 		this._lastFrameTime = performance.now()
+
+		// Prevent duplicate RAF chains if init() is triggered more than once.
 		this._isLooping = true
-		this.gameLoop()
+		if (!this._rafStarted) {
+			this._rafStarted = true
+			this.gameLoop()
+		}
 	},
 	spawnVampireParticle(x, y) {
 

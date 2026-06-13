@@ -1,13 +1,6 @@
-# Tetragon - Implementation TODO
+# TODO (Main menu particles)
 
-## Customization section in main menu
-- [x] Update `player.js` to read player color from `localStorage` (`tetragon-player-color`) and apply it on reset.
-- [x] Update `main.js` settings modal to add a **Customization** section visible in main menu.
-
-- [ ] Add UI controls in `main.js`:
-  - [ ] Player color picker persisted to `localStorage`.
-  - [ ] HUD tint control (CSS variable) persisted to `localStorage`.
-  - [ ] Aesthetic/particle intensity slider persisted to `localStorage` (wired for future + UI state).
-- [ ] Update `styles.css` to introduce and use CSS variables for HUD tint.
-- [ ] Verify that changes apply immediately on selection and persist across refresh.
+- [ ] Modify `simulation.drawMenuBackground()` so menu particles only initialize when entering main menu (lazy init / one-time spawn).
+- [ ] Ensure `menuParticles` are reset when leaving/entering main menu to prevent allocation during gameplay.
+- [ ] Sanity-check there are no other calls that mutate/initialize `menuParticles` outside main menu.
 
