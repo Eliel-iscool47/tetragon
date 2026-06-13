@@ -306,5 +306,5 @@ class Player extends Entity {
 	}
 }
 
-var player = new Player(state, main.width / 2, main.height / 2)
+var player = new Player(state, simulation.world.width / 2, simulation.world.height / 2)
 
