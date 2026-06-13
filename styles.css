@@ -220,8 +220,33 @@ br {
 	height: 40px;
 }
 
+
+
+#whats-new-modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: rgba(0, 0, 0, 0.95);
+	padding: 30px;
+	border: 5px solid black;
+	border-radius: 10px;
+	z-index: 1000;
+	display: none;
+	flex-direction: column;
+	width: 600px;
+	max-width: 90vw;
+	text-align: center;
+	color: white;
+}
+
+#whats-new-content {
+	color: white;
+}
+
 #feedback-button {
 	font-style: normal;
+
 	font-weight: 400;
 	font-size: 24px;
 	position: absolute;
@@ -267,6 +292,7 @@ br {
 #github-repo:hover,
 #leaderboard-button:hover,
 #feedback-button:hover {
+
 
 	background-color: hsl(215, 100%, 50%); /* A consistent hover color */
 	color: hsl(0, 0%, 100%);

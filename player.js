@@ -39,7 +39,7 @@ class Player extends Entity {
 			_killer: null,
 			_velocity: 5,
 			color: localStorage.getItem('tetragon-player-color') || 'hsl(215, 100%, 45%)',
-			pos: { x: main.width / 2, y: main.height / 2 },
+			pos: { x: simulation.world?.width / 2, y: simulation.world.height / 2 },
 		}
 	}
 

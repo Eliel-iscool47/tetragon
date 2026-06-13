@@ -27,7 +27,17 @@
 			<button id="leaderboard-button">Leaderboard</button>
 
 			<button id="feedback-button">Feedback</button>
+
+			<!-- removed “What’s new” button from main menu; modal kept in case it’s reused elsewhere -->
+			<div id="whats-new-modal">
+				<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+					<h3 style="margin:0;">What's new</h3>
+					<button id="close-whats-new" style="padding:10px 16px;cursor:pointer;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:white;">Close</button>
+				</div>
+				<div id="whats-new-content" style="margin-top:15px;max-height:55vh;overflow:auto;white-space:pre-wrap;text-align:left;font-family:monospace;" aria-live="polite">Loading...</div>
+			</div>
 			<div id="feedback-modal">
+
 				<h3>Send Feedback</h3>
 				<textarea
 					id="feedback-text"

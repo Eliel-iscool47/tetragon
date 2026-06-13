@@ -174,6 +174,7 @@ window.addEventListener('load', () => {
 	pauseScreen = document.getElementById('pause-screen')
 	chooseScreen = document.getElementById('choice-screen')
 
+
 	if (!document.getElementById('settings-menu')) {
 		settingsMenu = document.createElement('div')
 		settingsMenu.id = 'settings-menu'
@@ -267,6 +268,31 @@ window.addEventListener('load', () => {
 	feedbackButton.onclick = () => {
 		window.open("https://forms.gle/QinmVfLSQpMya29R9")
 	}
+
+if (false && whatsNewButton && whatsNewModal) {
+		whatsNewModal.style.display = 'none'
+		whatsNewButton.onclick = async () => {
+			whatsNewModal.style.display = 'flex'
+			whatsNewContent.textContent = 'Loading...'
+
+			try {
+				const res = await fetch('./README.md', { cache: 'no-store' })
+				if (!res.ok) throw new Error(`Failed to load README.md (${res.status})`)
+				const text = await res.text()
+				whatsNewContent.textContent = text
+			} catch (e) {
+				whatsNewContent.textContent = `Error loading README.md:\n${e?.message || e}`
+			}
+		}
+
+		const closeWhatsNewBtn = document.getElementById('close-whats-new')
+		if (closeWhatsNewBtn) {
+			closeWhatsNewBtn.onclick = () => {
+				whatsNewModal.style.display = 'none'
+			}
+		}
+	}
+
 
 	settings.onclick = () => {
 		const isVisible = settingsMenu.style.display === 'block'
