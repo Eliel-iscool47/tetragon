@@ -386,6 +386,12 @@ reset() {
 		}
 		dc.style.display = 'none'
 		main.style.filter = 'none'
+		// During early boot / race conditions the player may not exist yet.
+		if (!state.player) {
+			// Minimal HUD update to avoid crashing; will resume normal logic once player is created.
+			draw.restore()
+			return undefined
+		}
 		state.player.health = Math.min(state.player.health, state.player.maxHealth)
 		upgrades.applyRegen()
 		if (!this.isPaused && !this.isChoosing) guns.logic()
@@ -489,9 +495,12 @@ reset() {
 		bullets.move(this.timeScale)
 		mobs.loop(this.timeScale)
 	},
-	applySaturationEffect() {
+applySaturationEffect() {
+		// Can be called during init / main menu before player exists.
+		if (!state.player || !Number.isFinite(state.player.maxHealth) || state.player.maxHealth <= 0) return undefined
 		const saturation = this.isDead ? 0 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)
 		if (saturation < 100) {
+
 			draw.save()
 			draw.globalCompositeOperation = 'color'
 			draw.globalAlpha = 1 - (saturation / 100)
@@ -604,6 +613,7 @@ reset() {
 				draw.stroke()
 				break
 			default:
+
 				draw.moveTo(0, s * - 0.5)
 				draw.lineTo(0, s * 0.5)
 				draw.moveTo(s * - 0.5, 0)
