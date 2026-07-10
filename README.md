@@ -10,7 +10,7 @@ The game's controls are the following:
 ---
 * **Move**: `W`, `A`, `S`, `D` or arrow keys
 * **Fire**: `Left Click` or `F`
-* **Cycle Guns**: `Q` and `E`
+* **Cycle Equipped gun**: `Q (Previous)`, `E (Next)`
 * **Reload**: `V` (or empty magazine)
 * **Pause**: `P` or `Escape` (while playing)
 * **Toggle Gamemode**: `H` *(while paused or in main menu)*
