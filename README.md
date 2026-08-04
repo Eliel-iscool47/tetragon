@@ -3,60 +3,64 @@
 
 A fast-paced geometric survival shooter built with a modular, data-driven architecture.
 
-# I: Controls
+# Controls
 
 The game's controls are the following:
 
 ---
-* **Move**: `W`, `A`, `S`, `D` or arrow keys
+* **Move**: `W` (up), `A` (left), `S` (down), `D` (right) or arrow keys
 * **Fire**: `Left Click` or `F`
-* **Cycle Equipped gun**: `Q (Previous)`, `E (Next)`
+* **Switch Equipped Gun**: `Q`for previous gun and `E` for next gun
 * **Reload**: `V` (or empty magazine)
 * **Pause**: `P` or `Escape` (while playing)
 * **Toggle Gamemode**: `H` *(while paused or in main menu)*
-* **Restart**: `R` *(while paused/choosing/dead)*
-* **Main Menu**: `M` *(while paused/choosing/dead)*
+* **Restart**: `R` 
+* **Main Menu**: `M` 
 
-# II: Recent Updates (v1.15: Freedom of Color)
-*   **Character customization**: The player can now choose its color.
-*   **Bug Fixes**: I fixed the bug where ammo power-ups only gave 1 ammo.
+# Recent Updates (v1.15: Fixing the Broken)
+## 1: Bug Fixes
+* Laser beam ends could be seen if shot from a corner
+* Couldn't switch equipped gun on mobile
+* Ammo power-ups only gave 1 ammo
+## 2: Additions
+* **Custom Player Color**: The player can now choose his color 
 ---
 
-# III: Technical Overview
+# Technical Overview
 
 ## 1: Core Architecture
 
-### a: Centralized State Management
+### 𐑐 (p): Centralized State Management
 The project utilizes a centralized `state` object (defined in `main.js`) to manage all core modules. This reduces reliance on the global scope and ensures a clean data flow.
 - **Standardized Resets**: Every game module ( `player`, `guns`, `mobs`, etc.) implements a `defaults` getter and a `reset()` method. Calling `state.resetAll()` performs an `Object.assign` to restore the game to its pristine initial state.
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
-### b: Delta-Time Implementation
+### 𐑚 (b): Delta-Time Implementation
 The simulation now calculates `dt` using high-resolution timestamps from `requestAnimationFrame`. This `dt` is normalized into a `timeScale` factor (target 1.0 @ 60fps) that is passed to every `update()` call in the game. This ensures that a projectile moving at speed `X` covers the same physical distance per second, whether the game is rendering 30 or 300 frames per second.
 
-### c: Global Leaderboard & Persistence
+### 𐑑 (t): Global Leaderboard & Persistence
 - **Supabase Integration**: The game communicates with a Supabase backend to store and retrieve high scores.
-- **Persistent Profile**: Usernames are stored in `localStorage`, allowing for automatic identification without interruptive popups.
+- **Persistent Profile**: Usernames are stored in `localStorage`.
 - **Async Feedback**: The death screen utilizes a reactive status message system to inform players of the leaderboard submission progress.
 - **Property Protection**: Implemented defensive setters for `velocity`, `damageDone`, and `fireRate`. These setters automatically "un-multiply" temporary buffs before applying permanent upgrades, preventing exponential stat leakage.
 
-### d: Rendering System
+### 𐑛 (d): Rendering System
 - **Context Filtering**: Utilizes `draw.filter` to apply real-time desaturation to the game world based on player health or death state without affecting the UI layer.
 
-### e: Data-Driven Leveling
+### 𐑒 (k): Data-Driven Leveling
 - **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
 
-### f: Level System
+### 𐑜 (g): Level System
 - **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
 - **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
 
 ## 2: Combat & Mechanics
 
-### a: Difficulty Scaling
+### 𐑐 (p): Difficulty Scaling
 The game features a difficulty slider in the Settings menu ranging from **0.2x to 5.0x**.
 - **Probabilistic Spawning**: To handle fractional multipliers (e.g., spawning 0.3 mobs), the engine uses a weighted random roll. This ensures that statistically, the average number of spawns matches the selected difficulty over time.
 
-### b: The Arsenal
+### 𐑚 (b): The Arsenal
 - **Melee (Knife)**: A high-damage sweeping attack with a visual fade-out slash.
 - **Ballistics**: A wide variety of weapons including Rifles, Snipers, Shotguns, and Miniguns.
 - **Specialty**: Homing Missiles that accelerate towards their target, Balls 😋, Flamethrowers, and instant-hit Lasers.
@@ -79,6 +83,7 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 - **Archer/Grenadier**: Ranged units that use predictive aiming.
 - **Bosses**: Unique entities like the **Pentagon Boss** (laser telegraphs) and **Void Boss** (gravitational pull).
 - **Ghost Boss**: A spectral entity that phases between states, becoming invulnerable to damage.
+- **And more!**
 
 ## 5: Technical Implementation Details
 
@@ -93,23 +98,19 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 
 ---
 
-# IV: Credits and Links
+# Credits and Links
 
-
+## 1: Credits
 
 - **Eliel-isCool47**: Art, Code, Game Design.
 
-## Links
+## 2: Links
 
 - **Project URL**: [github.com/Eliel-isCool47/Tetragon](https://github.com/Eliel-isCool47/Tetragon)
 - **Feedback Link**: [https://forms.gle/xokJpH3U76hHibot7](https://forms.gle/xokJpH3U76hHibot7)
 
-# V: Development
+# Development
 The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.
-
-# VI: Planned Updates
-
-- **Gun Sprites**: The gun sprites haven't been in the game since February 15th, so I might reädd them in the future. It's not guaranteed, nor likely, that they return.
 
 <!-- Maintenance Note: 
 When adding new modules, register them in the state object in main.js 

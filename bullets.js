@@ -302,7 +302,7 @@ var bullets = {
 				// Homing logic: If upgrade is active, steer toward the nearest mob
 				if (upgrades.isBouncyBallHoming) {
 					let nearest = null
-					let minDistSq = 250000 // 500^2
+					let minDistSq = 500**2 // 500^2
 					
 					this.state.collisions.grid.query(this.pos.x, this.pos.y, (m) => {
 						if (!m.isMob || m.class === 'projectile' || m.isInvulnerable) return
@@ -380,7 +380,7 @@ var bullets = {
 					draw.lineWidth = bullets.laserWidth
 					draw.strokeStyle = bullets.laserColor
 					draw.moveTo(0, 0)
-					draw.lineTo(Math.max(main.width, main.height) * Math.sqrt(1.5), 0)
+					draw.lineTo(Math.max(main.width, main.height) * Math.sqrt(2), 0)
 					draw.stroke()
 				}.bind(this))
 			}
