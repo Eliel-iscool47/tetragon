@@ -400,7 +400,7 @@ guns.laser = new guns.Gun({
 	defaultAmmo: Infinity,
 	magSize: Infinity,
 	magazines: Infinity,
-	damage: 1,
+	damage: 0.2,
 	fireRate: Infinity,
 	bulletDuration: 0.05,
 	isMuzzleFlash: false,

@@ -17,50 +17,47 @@ The game's controls are the following:
 * **Restart**: `R` 
 * **Main Menu**: `M` 
 
-# Recent Updates (v1.15: Fixing the Broken)
+# Recent Updates (v1.16: How to play!)
 ## 1: Bug Fixes
-* Laser beam ends could be seen if shot from a corner
-* Couldn't switch equipped gun on mobile
-* Ammo power-ups only gave 1 ammo
 ## 2: Additions
-* **Custom Player Color**: The player can now choose his color 
+* **Tutorial**: Players can now get a basic grasp on the gameplay before playing
 ---
 
 # Technical Overview
 
 ## 1: Core Architecture
 
-### 𐑐 (p): Centralized State Management
+### a: Centralized State Management
 The project utilizes a centralized `state` object (defined in `main.js`) to manage all core modules. This reduces reliance on the global scope and ensures a clean data flow.
 - **Standardized Resets**: Every game module ( `player`, `guns`, `mobs`, etc.) implements a `defaults` getter and a `reset()` method. Calling `state.resetAll()` performs an `Object.assign` to restore the game to its pristine initial state.
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
-### 𐑚 (b): Delta-Time Implementation
+### b: Delta-Time Implementation
 The simulation now calculates `dt` using high-resolution timestamps from `requestAnimationFrame`. This `dt` is normalized into a `timeScale` factor (target 1.0 @ 60fps) that is passed to every `update()` call in the game. This ensures that a projectile moving at speed `X` covers the same physical distance per second, whether the game is rendering 30 or 300 frames per second.
 
-### 𐑑 (t): Global Leaderboard & Persistence
+### c: Global Leaderboard & Persistence
 - **Supabase Integration**: The game communicates with a Supabase backend to store and retrieve high scores.
 - **Persistent Profile**: Usernames are stored in `localStorage`.
 - **Async Feedback**: The death screen utilizes a reactive status message system to inform players of the leaderboard submission progress.
 - **Property Protection**: Implemented defensive setters for `velocity`, `damageDone`, and `fireRate`. These setters automatically "un-multiply" temporary buffs before applying permanent upgrades, preventing exponential stat leakage.
 
-### 𐑛 (d): Rendering System
+### d: Rendering System
 - **Context Filtering**: Utilizes `draw.filter` to apply real-time desaturation to the game world based on player health or death state without affecting the UI layer.
 
-### 𐑒 (k): Data-Driven Leveling
+### e Data-Driven Leveling
 - **Timed Buff Management**: Power-up durations (like Invulnerability) are calculated against `simulation.time` rather than real-world time. This ensures that durations are preserved when the game is paused or when the player is in a choice menu.
 
-### 𐑜 (g): Level System
+### f Level System
 - **Threshold System**: Difficulty tiers are triggered based on the `current` level number.
 - **Dynamic Formulas**: Spawn counts support both static integers and string-based formulas (e.g., `"c - 10"`) which are interpreted at runtime.
 
 ## 2: Combat & Mechanics
 
-### 𐑐 (p): Difficulty Scaling
+### a: Difficulty Scaling
 The game features a difficulty slider in the Settings menu ranging from **0.2x to 5.0x**.
 - **Probabilistic Spawning**: To handle fractional multipliers (e.g., spawning 0.3 mobs), the engine uses a weighted random roll. This ensures that statistically, the average number of spawns matches the selected difficulty over time.
 
-### 𐑚 (b): The Arsenal
+### b: The Arsenal
 - **Melee (Knife)**: A high-damage sweeping attack with a visual fade-out slash.
 - **Ballistics**: A wide variety of weapons including Rifles, Snipers, Shotguns, and Miniguns.
 - **Specialty**: Homing Missiles that accelerate towards their target, Balls 😋, Flamethrowers, and instant-hit Lasers.
@@ -81,7 +78,7 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 - **Sentry**: Stationary turrets that fire glowing red projectiles with trail effects.
 - **Tank**: High health, high damage, but slow movement.
 - **Archer/Grenadier**: Ranged units that use predictive aiming.
-- **Bosses**: Unique entities like the **Pentagon Boss** (laser telegraphs) and **Void Boss** (gravitational pull).
+- **Bosses**: Unique entities like the **Pentagon Boss** (laser telegraphs) and **Void Boss** (gravitational pull), or just another "Big Scary guy shoots little things".
 - **Ghost Boss**: A spectral entity that phases between states, becoming invulnerable to damage.
 - **And more!**
 
@@ -110,7 +107,7 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 - **Feedback Link**: [https://forms.gle/xokJpH3U76hHibot7](https://forms.gle/xokJpH3U76hHibot7)
 
 # Development
-The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context. To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.
+The game loop runs at a fixed 60 FPS. All rendering is performed on a single HTML5 Canvas context (except the UI. It's made with OTHER html elements). To modify levels or balancing, edit `levels.json` or the `defaults` getters within individual JS files.
 
 <!-- Maintenance Note: 
 When adding new modules, register them in the state object in main.js 

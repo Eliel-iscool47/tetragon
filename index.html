@@ -25,36 +25,18 @@
 			<button id="settings">Settings</button>
 			<button id="github-repo">GitHub repo</button>
 			<button id="leaderboard-button">Leaderboard</button>
-
+			<div 	id="gamemode-modal">
+				<button class="gamemode-button" id="tutorial" onclick="simulation.gamemode = 'tutorial';simulation.init()">
+					<h1>Tutorial</h1>
+				</button>
+				<button class="gamemode-button" id="standard" onclick="simulation.gamemode = 'standard';simulation.init();level.current = 0;level.make()">
+					<h1>Standard</h1>
+				</button>
+				<button class="gamemode-button" id="hardcore" onclick="simulation.gamemode = 'hardcore';simulation.init();level.current = 0;level.make()">
+					<h1>Hardcore</h1>
+				</button>
+			</div>
 			<button id="feedback-button">Feedback</button>
-
-			<!-- removed “What’s new” button from main menu; modal kept in case it’s reused elsewhere -->
-			<div id="whats-new-modal">
-				<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-					<h3 style="margin:0;">What's new</h3>
-					<button id="close-whats-new" style="padding:10px 16px;cursor:pointer;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:white;">Close</button>
-				</div>
-				<div id="whats-new-content" style="margin-top:15px;max-height:55vh;overflow:auto;white-space:pre-wrap;text-align:left;font-family:monospace;" aria-live="polite">Loading...</div>
-			</div>
-			<div id="feedback-modal">
-
-				<h3>Send Feedback</h3>
-				<textarea
-					id="feedback-text"
-					placeholder="Found a bug? Have a suggestion? Let us know!"
-				></textarea>
-				<div
-					style="
-						display: flex;
-						gap: 10px;
-						justify-content: center;
-						margin-top: 10px;
-					"
-				>
-					<button id="submit-feedback">Send</button>
-					<button id="close-feedback">Close</button>
-				</div>
-			</div>
 			<div id="leaderboard-modal">
 				<h3>Global Leaderboard</h3>
 				<div id="leaderboard-list">Loading...</div>

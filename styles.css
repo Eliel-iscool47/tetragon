@@ -45,30 +45,48 @@ br {
 			-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
 			0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
 	}
+
 	14% {
 		text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
 			-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
 			0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
 	}
+
 	15% {
 		text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
 			0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
 			-0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
 		transform: translateX(-5px) skewX(5deg);
 	}
+
 	16% {
 		text-shadow: 0.05em 0.025em 0 rgba(255, 0, 0, 0.75),
 			-0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
 			0.05em 0.05em 0 rgba(0, 0, 255, 0.75);
 		transform: translateX(5px) skewX(-5deg);
 	}
+
 	17% {
 		text-shadow: none;
 		transform: none;
 	}
-	30% { transform: none; }
-	31% { transform: scale(1.05) rotate(-1deg); filter: blur(1px); opacity: 0.8; }
-	32% { transform: none; filter: none; opacity: 1; }
+
+	30% {
+		transform: none;
+	}
+
+	31% {
+		transform: scale(1.05) rotate(-1deg);
+		filter: blur(1px);
+		opacity: 0.8;
+	}
+
+	32% {
+		transform: none;
+		filter: none;
+		opacity: 1;
+	}
+
 	100% {
 		text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
 			-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
@@ -87,7 +105,6 @@ br {
 }
 
 #start {
-	/* font-style: normal; */
 	font-weight: 400;
 	font-size: 24px;
 	position: absolute;
@@ -100,7 +117,7 @@ br {
 	border-radius: 5px;
 	border-width: 5px;
 	border-style: solid;
-	border-color: black;
+	border-color: hsl(210, 100%, 25%);
 	cursor: pointer;
 	overflow: hidden;
 	margin: 0;
@@ -108,6 +125,53 @@ br {
 	padding: 0;
 	z-index: 5;
 	font: 48px "DM Sans"
+}
+
+#gamemode-modal {
+	background-color: hsl(210, 100%, 40%);
+	color: #ffffff;
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: hsl(210, 100%, 25%);
+	display: none;
+	position: absolute;
+	top: 55vh;
+	left: 50vw;
+	width: 30vw;
+	height: 20vh;
+	font: 48px "DM Sans";
+	z-index: 6;
+	transform: translate(-50%, -50%);
+	gap: 15px;
+	justify-content: center;
+	font: 48px "DM Sans"
+}
+
+.gamemode-button {
+	font: 12px "DM Sans";
+	height: 10vh;
+	align-self: center;
+	color: hsl(0, 0%, 100%);
+	border-radius: 5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: hsl(210, 100%, 25%);
+}
+
+#tutorial {
+	background-color: #4CAF50;
+	border-color: #2e7d32;
+}
+
+#standard {
+	background-color: #707070;
+	border-color: #424242;
+}
+
+#hardcore {
+	background-color: #d00808;
+	border-color: #871b1b;
 }
 
 #settings {
@@ -294,20 +358,24 @@ br {
 #feedback-button:hover {
 
 
-	background-color: hsl(215, 100%, 50%); /* A consistent hover color */
+	background-color: hsl(215, 100%, 50%);
+	/* A consistent hover color */
 	color: hsl(0, 0%, 100%);
-	border-color: hsl(215, 100%, 65%); /* A consistent border color */
+	border-color: hsl(215, 100%, 65%);
+	/* A consistent border color */
 	box-shadow: 0 0 20px hsl(215, 100%, 65%);
 	transform: translateY(-3px);
 }
 
 #settings:hover {
-	background-color: hsl(0, 0%, 60%); /* Slightly different for settings */
+	background-color: hsl(0, 0%, 60%);
+	/* Slightly different for settings */
 	border-color: hsl(0, 0%, 75%);
 }
 
 #github-repo:hover {
-	background-color: hsl(0, 100%, 45%); /* Slightly different for github repo */
+	background-color: hsl(0, 100%, 45%);
+	/* Slightly different for github repo */
 	border-color: hsl(0, 100%, 60%);
 }
 
@@ -427,7 +495,8 @@ br {
 	transition: all 0.2s;
 }
 
-#submit-feedback, #close-feedback {
+#submit-feedback,
+#close-feedback {
 	padding: 10px 20px;
 	font-size: 20px;
 	cursor: pointer;
@@ -685,32 +754,35 @@ br {
 	transform: scale(0.92);
 }
 
-#mobile-pause { 
-	bottom: 30px; 
+#mobile-pause {
+	bottom: 30px;
 	top: auto;
 	left: 50%;
 	margin-left: -240px;
-	background: rgba(33, 150, 243, 0.4); 
+	background: rgba(33, 150, 243, 0.4);
 	border-color: rgba(33, 150, 243, 0.6);
 }
-#mobile-debug { 
-	bottom: 30px; 
+
+#mobile-debug {
+	bottom: 30px;
 	top: auto;
 	left: 50%;
 	margin-left: -135px;
 	background: rgba(96, 125, 139, 0.4);
 	border-color: rgba(96, 125, 139, 0.6);
 }
-#mobile-menu-toggle { 
-	bottom: 30px; 
+
+#mobile-menu-toggle {
+	bottom: 30px;
 	top: auto;
 	left: 50%;
 	margin-left: -15px;
 	background: rgba(156, 39, 176, 0.4);
 	border-color: rgba(156, 39, 176, 0.6);
 }
-#mobile-gun-cycle { 
-	bottom: 30px; 
+
+#mobile-gun-cycle {
+	bottom: 30px;
 	top: auto;
 	left: 50%;
 	margin-left: 125px;
@@ -744,8 +816,13 @@ br {
 	backdrop-filter: blur(2px);
 }
 
-#move-base { left: 8vh; }
-#aim-base { right: 8vh; }
+#move-base {
+	left: 8vh;
+}
+
+#aim-base {
+	right: 8vh;
+}
 
 .joystick-thumb {
 	position: absolute;
@@ -757,12 +834,14 @@ br {
 	margin-left: -4vh;
 	border-radius: 50%;
 	background: white;
-	box-shadow: 0 0 15px rgba(0,0,0,0.3);
+	box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 	opacity: 0.8;
 	pointer-events: none;
 }
 
-#aim-thumb { background: #ff4444; }
+#aim-thumb {
+	background: #ff4444;
+}
 
 #mobile-respawn {
 	top: 70%;
@@ -773,8 +852,8 @@ br {
 	color: #ffffff;
 	font-size: 28px;
 	border: 1px solid rgba(255, 255, 255, 0.4);
-	box-shadow: 0 8px 0 #2e7d32, 0 10px 30px rgba(0,0,0,0.5);
-	text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+	box-shadow: 0 8px 0 #2e7d32, 0 10px 30px rgba(0, 0, 0, 0.5);
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 #mobile-quit {
@@ -783,8 +862,9 @@ br {
 	transform: translate(-50%, -50%);
 	background: #424242;
 	border: 1px solid rgba(255, 255, 255, 0.2);
-	box-shadow: 0 6px 0 #212121, 0 10px 30px rgba(0,0,0,0.5);
+	box-shadow: 0 6px 0 #212121, 0 10px 30px rgba(0, 0, 0, 0.5);
 }
+
 /* .styled-text.level {} */
 
 .upgrade-button,

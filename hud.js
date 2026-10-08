@@ -6,12 +6,13 @@ var hud = {
 	inv: document.getElementById('inventory'),
 	levels: document.getElementById('level-counter'),
 	timer: document.getElementById('timer'),
+	criticalOverlay: document.createElement('div'),
+	debugBadge: document.createElement('div'),
+
 	_timeMessage: ``,
 	get timeMessage() { return this._timeMessage },
 	set timeMessage(val) { this._timeMessage = val },
 
-	criticalOverlay: document.createElement('div'),
-	debugBadge: document.createElement('div'),
 	_displayHealth: 100,
 	get displayHealth() { return this._displayHealth },
 	set displayHealth(val) { this._displayHealth = val },

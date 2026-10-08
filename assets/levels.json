@@ -1,15 +1,23 @@
 [
 	{
+		"threshold": 0,
+		"title": "Tutorial",
+		"spawns": [{"type": "tutorial", "count": 1}],
+		"powerUpSpawns": [],
+		"isBoss": false
+	},
+	{
 		"threshold": 1,
 		"title": "Incursion",
 		"spawns": [{ "type": "default", "count": 5 }],
 		"powerUpSpawns": [
-			{ "type": "ammo", "count": 5 },
-			{ "type": "heal", "count": 5 },
-			{ "type": "reroll", "count": 5 },
-			{ "type": "invincibility", "count": 3 },
-			{ "type": "overdrive", "count": 3 }
-		]
+			{ "type": "ammo", "count": 3 },
+			{ "type": "heal", "count": 3 },
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 1 }
+		],
+		"isBoss": true
 	},
 	{
 		"threshold": 6,
@@ -19,12 +27,13 @@
 			{ "type": "sentry", "count": 3 }
 		],
 		"powerUpSpawns": [
-			{ "type": "ammo", "count": 5 },
-			{ "type": "heal", "count": 5 },
-			{ "type": "reroll", "count": 5 },
-			{ "type": "invincibility", "count": 3 },
-			{ "type": "overdrive", "count": 3 }
-		]
+			{ "type": "ammo", "count": 3 },
+			{ "type": "heal", "count": 3 },
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 1 },
+			{ "type": "overdrive", "count": 1 }
+		],
+		"isBoss": true
 	},
 	{
 		"threshold": 11,
@@ -35,12 +44,12 @@
 			{ "type": "grenadier", "count": 3 }
 		],
 		"powerUpSpawns": [
-			{ "type": "ammo", "count": 4 },
-			{ "type": "heal", "count": 3 },
-			{ "type": "reroll", "count": 1 },
-			{ "type": "invincibility", "count": 1 },
-			{ "type": "overdrive", "count": 3 }
-		]
+			{ "type": "ammo", "count": 2 },
+			{ "type": "heal", "count": 2 },
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 1 }
+		],
+		"isBoss": true
 	},
 	{
 		"threshold": 16,
@@ -52,12 +61,12 @@
 			{ "type": "sentry", "count": 8 }
 		],
 		"powerUpSpawns": [
-			{ "type": "ammo", "count": 3 },
+			{ "type": "ammo", "count": 2 },
 			{ "type": "heal", "count": 2 },
-			{ "type": "reroll", "count": 1 },
-			{ "type": "invincibility", "count": 1 },
-			{ "type": "overdrive", "count": 3 }
-		]
+			{ "type": "reroll", "count": 2 },
+			{ "type": "invincibility", "count": 1 }
+		],
+		"isBoss": true
 	},
 	{
 		"threshold": 21,
@@ -73,9 +82,9 @@
 			{ "type": "ammo", "count": 2 },
 			{ "type": "heal", "count": 2 },
 			{ "type": "reroll", "count": 2 },
-			{ "type": "invincibility", "count": 1 },
-			{ "type": "overdrive", "count": 2 }
-		]
+			{ "type": "invincibility", "count": 1 }
+		],
+		"isBoss": true
 	},
 	{
 		"threshold": 31,
@@ -90,10 +99,9 @@
 		"powerUpSpawns": [
 			{ "type": "ammo", "count": 2 },
 			{ "type": "heal", "count": 2 },
-			{ "type": "reroll", "count": 2 },
-			{ "type": "invincibility", "count": 1 },
-			{ "type": "overdrive", "count": 2 }
-		]
+			{ "type": "invincibility", "count": 1 }
+		],
+		"isBoss": true
 	},
 	{
 		"threshold": 41,
@@ -104,6 +112,7 @@
 			{ "type": "heal", "count": 2 },
 			{ "type": "invincibility", "count": 1 },
 			{ "type": "overdrive", "count": 1 }
-		]
+		],
+		"isBoss": true
 	}
 ]

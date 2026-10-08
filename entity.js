@@ -52,10 +52,11 @@ class Entity {
 	/**
 	 * Standard method to handle healing for an entity.
 	 * @param {number} amount The amount of health to restore.
+	 * @param {boolean} isParticle wether or not to draw heal numbers
 	 */
-	heal(amount) {
+	heal(amount, isParticle = false) {
 		this.health += amount
-		if (Math.round(amount) > 0) this.state.particles.spawn(this.pos.x, this.pos.y, {
+		if (Math.round(amount) > 0 && isParticle) this.state.particles.spawn(this.pos.x, this.pos.y, {
 			...this.state.particles.textPopup,
 			text: '+' + Math.round(amount),
 			color: 'hsl(120, 100%, 50%)',
@@ -66,10 +67,10 @@ class Entity {
 	}
 
 	checkCollision(other) {
-		const dx = this.pos.x - other.pos.x;
-		const dy = this.pos.y - other.pos.y;
-		const distSq = dx * dx + dy * dy;
-		const radiusSum = (this.size + other.size) * 0.5;
-		return distSq <= radiusSum * radiusSum;
+		const dx = this.pos.x - other.pos.x
+		const dy = this.pos.y - other.pos.y
+		const distSq = dx * dx + dy * dy
+		const radiusSum = (this.size + other.size)
+		return distSq <= radiusSum * radiusSum
 	}
 }

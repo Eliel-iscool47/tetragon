@@ -415,7 +415,7 @@ upgrades.acceleratedHealing = new upgrades.Upgrade({
 	id: 'acceleratedHealing',
 	name: 'Accelerated Healing',
 	stackSize: Infinity,
-	description: `1.5x ${text('health', 'regeneration speed')}`, // Description for when it's available
+	description: `1.5x ${text('health', 'regeneration speed')}`,
 	requirements() { return upgrades.unlocked.includes('regen') }, // Requires 'regen' to be unlocked
 	effect() { upgrades.regenSpeed *= 1.5 }
 })
@@ -469,7 +469,7 @@ upgrades.incendiaryMunitions = new upgrades.Upgrade({
 upgrades.nitroglycerin = new upgrades.Upgrade({
 	id: 'nitroglycerin',
 	name: 'Nitroglycerin',
-	stackSize: 1, // Description for when it's available
+	stackSize: 1,
 	description: `1.5x ${text('explosion', 'explosion damage')}, but 0.8x ${text('explosion', 'explosion size')}`,
 	requirements() { return upgrades.unlocked.includes('explosions') }, // Requires 'explosions' to be unlocked
 	effect() {
@@ -481,7 +481,7 @@ upgrades.nitroglycerin = new upgrades.Upgrade({
 upgrades.MIRV = new upgrades.Upgrade({
 	id: 'MIRV',
 	name: 'MIRV',
-	stackSize: 10, // Description for when it's available
+	stackSize: Infinity,
 	description: `Shoot an extra ${text('gun', 'missile')} per shot<br>0.9x ${text('gun', 'missile')} ${text('explosion', 'explosion damage')} and ${text('explosion', 'explosion size')}`,
 	requirements() {
 		return upgrades.unlocked.includes('missiles')
@@ -496,7 +496,7 @@ upgrades.MIRV = new upgrades.Upgrade({
 upgrades.heavyCaliber = new upgrades.Upgrade({
 	id: 'heavyCaliber',
 	name: 'Heavy Caliber',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `1.4x ${text('damage', 'damage')}, but 0.8x ${text('fire-rate', 'fire rate')}`,
 	effect() {
 		state.player.damageDone *= 1.4
@@ -507,7 +507,7 @@ upgrades.heavyCaliber = new upgrades.Upgrade({
 upgrades.speedLoader = new upgrades.Upgrade({
 	id: 'speedLoader',
 	name: 'Speed Loader',
-	stackSize: 3, // Description for when it's available
+	stackSize: 3,
 	description: `1.5x ${text('reload', 'reload speed')}`,
 	effect() { upgrades.reloadSpeed *= 1.5 }
 })
@@ -526,7 +526,7 @@ upgrades.deadlyAim = new upgrades.Upgrade({
 upgrades.powerSurge = new upgrades.Upgrade({
 	id: 'powerSurge',
 	name: 'Power Surge',
-	stackSize: 3, // Description for when it's available
+	stackSize: 3,
 	description: `1.2x ${text('fire-rate', 'fire rate')} and ${text('movement-speed', 'movement speed')}`,
 	effect() {
 		upgrades.fireRate *= 1.2
@@ -537,7 +537,7 @@ upgrades.powerSurge = new upgrades.Upgrade({
 upgrades.vampirism = new upgrades.Upgrade({
 	id: 'vampirism',
 	name: 'Vampirism',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `${text('health', 'Heal')} for 10% of ${text('damage', 'damage dealt')} to mobs`,
 	effect() {
 		upgrades.isVampire = true
@@ -548,7 +548,7 @@ upgrades.vampirism = new upgrades.Upgrade({
 upgrades.sharpenedEdge = new upgrades.Upgrade({
 	id: 'sharpenedEdge',
 	name: 'Sharpened Edge',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `1.2x ${text('gun', 'knife')} ${text('range', 'range')} and swing ${text('duration', 'duration')}`,
 	requirements() { return upgrades.unlocked.includes('knife') },
 	effect() {
@@ -559,7 +559,7 @@ upgrades.sharpenedEdge = new upgrades.Upgrade({
 upgrades.clusterBomb = new upgrades.Upgrade({
 	id: 'clusterBomb',
 	name: 'Cluster Bomb',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `${text('gun', 'Missiles')} and ${text('gun', 'Grenades')} ${text('explosion', 'explode')} into smaller ${text('explosion', 'sub-explosions')} upon detonation`,
 	requirements() { return upgrades.unlocked.includes('missiles') || upgrades.unlocked.includes('grenades') },
 	effect() {
@@ -583,7 +583,7 @@ upgrades.napalm = new upgrades.Upgrade({
 upgrades.tacticalEfficiency = new upgrades.Upgrade({
 	id: 'tacticalEfficiency',
 	name: 'Tactical Efficiency',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `2x ${text('gun', 'Sniper')} ${text('reload', 'reload speed')} and 2x ${text('gun', 'Sniper')} ${text('fire-rate', 'fire rate')}`,
 	requirements() { return upgrades.unlocked.includes('sniper') },
 	effect() {
@@ -595,7 +595,7 @@ upgrades.tacticalEfficiency = new upgrades.Upgrade({
 upgrades.leadStorm = new upgrades.Upgrade({
 	id: 'leadStorm',
 	name: 'Lead Storm',
-	stackSize: 3, // Description for when it's available
+	stackSize: 3,
 	description: `Add 5 more ${text('pellets', 'pellets')} to each ${text('gun', 'shotgun')} blast`,
 	requirements() { return upgrades.unlocked.includes('shotgun') },
 	effect() { upgrades.shotgunPellets += 5 }
@@ -604,7 +604,7 @@ upgrades.leadStorm = new upgrades.Upgrade({
 upgrades.deadEye = new upgrades.Upgrade({
 	id: 'deadEye',
 	name: 'Dead Eye',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `1.5x ${text('gun', 'pistol')} ${text('damage', 'damage')}`, // Already uses text.damage
 	requirements() { return upgrades.unlocked.includes('pistol') },
 	effect() { guns.pistol.damage *= 1.5 }
@@ -613,7 +613,7 @@ upgrades.deadEye = new upgrades.Upgrade({
 upgrades.highCapMags = new upgrades.Upgrade({
 	id: 'highCapMags',
 	name: 'High-Capacity Mags',
-	stackSize: 2, // Description for when it's available
+	stackSize: 2,
 	description: `1.5x ${text('gun', 'SMG')} ${text('magazine-size', 'magazine size')}`,
 	requirements() { return upgrades.unlocked.includes('smg') },
 	effect() { guns.smg.magSize = Math.floor(guns.smg.magSize * 1.5) }
@@ -622,7 +622,7 @@ upgrades.highCapMags = new upgrades.Upgrade({
 upgrades.internalCooling = new upgrades.Upgrade({
 	id: 'internalCooling',
 	name: 'Internal Cooling',
-	stackSize: 3, // Description for when it's available
+	stackSize: 3,
 	description: `2x ${text('gun', 'minigun')} ${text('damage', 'damage')}`, // Already uses text.damage
 	requirements() { return upgrades.unlocked.includes('minigun') },
 	effect() { guns.minigun.damage *= 2 }
@@ -631,7 +631,7 @@ upgrades.internalCooling = new upgrades.Upgrade({
 upgrades.superball = new upgrades.Upgrade({
 	id: 'superball',
 	name: 'Superball',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `+3 ${text('bullets', 'bouncy ball')} ${text('bounces', 'bounces')}`,
 	requirements() { return upgrades.unlocked.includes('bouncy balls') },
 	effect() { guns.bouncyBalls.piercing += 3 }
@@ -640,7 +640,7 @@ upgrades.superball = new upgrades.Upgrade({
 upgrades.refractiveLens = new upgrades.Upgrade({
 	id: 'refractiveLens',
 	name: 'Refractive Lens',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `2x ${text('laser', 'laser')} ${text('damage', 'damage')}`, // Already uses text.damage
 	requirements() { return upgrades.unlocked.includes('laser') },
 	effect() { guns.laser.damage *= 2 }
@@ -657,7 +657,7 @@ upgrades.smartBounces = new upgrades.Upgrade({
 upgrades.lightCaliber = new upgrades.Upgrade({
 	id: 'lightCaliber',
 	name: 'Light Caliber',
-	stackSize: 5, // Description for when it's available
+	stackSize: 5,
 	description: `0.8x ${text('damage', 'damage')}, but 1.4x ${text('fire-rate', 'fire rate')}`,
 	effect() {
 		state.player.damageDone *= 0.8

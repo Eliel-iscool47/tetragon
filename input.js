@@ -22,7 +22,6 @@ var input = {
 		respawn: "KeyR",
 		mainMenu: "KeyM",
 		reload: "KeyV",
-		switchGamemode: "KeyH",
 		...JSON.parse(localStorage.getItem('tetragon-keybinds') || "{}"),
 	},
 	joystick: {
@@ -113,10 +112,6 @@ var input = {
 	pause() {
 		simulation.isPaused = !simulation.isPaused
 	},
-	toggleGamemode() {
-		if (!simulation.isMainMenu && !simulation.isPaused) return
-		simulation.gamemode = simulation.gamemode === 'standard' ? 'hardcore' : 'standard'
-	},
 	mainMenu() {
 		simulation.isMainMenu = true
 		simulation.mainMenu()
@@ -147,8 +142,7 @@ var input = {
 	},
 
 	respawn() {
-		// Fast respawn: don’t re-run simulation.init() (which re-attaches/initializes more things).
-		return simulation.respawn()
+		if (simulation.isDead) return simulation.respawn()
 	},
 
 	clickLogic(click) {

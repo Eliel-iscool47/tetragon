@@ -63,7 +63,7 @@ var state = {
 //HTML element objects
 
 var start, controls, controlDoc, settings, leaderboardButton, leaderboardModal, leaderboardList,
-	feedbackButton, pauseScreen, chooseScreen, title
+	feedbackButton, pauseScreen, chooseScreen, title, gamemodeSelector
 
 //styling
 
@@ -80,11 +80,11 @@ function updateMobileFireVisibility() {
 	}
 }
 function updateJoystickScale() {
-	const scale = state.input.joystickSize;
-	const moveBase = document.getElementById('move-base');
-	const aimBase = document.getElementById('aim-base');
-	if (moveBase) moveBase.style.transform = `scale(${scale})`;
-	if (aimBase) aimBase.style.transform = `scale(${scale})`;
+	const scale = state.input.joystickSize
+	const moveBase = document.getElementById('move-base')
+	const aimBase = document.getElementById('aim-base')
+	if (moveBase) moveBase.style.transform = `scale(${scale})`
+	if (aimBase) aimBase.style.transform = `scale(${scale})`
 }
 
 //
@@ -92,14 +92,14 @@ function updateJoystickScale() {
 window.addEventListener('load', () => {
 	title = document.getElementById('title')
 
-		// Initialize mobile controls regardless of device detection
+	// Initialize mobile controls regardless of device detection
 
-	let mDiv = document.getElementById('mobile-controls') 
+	let mDiv = document.getElementById('mobile-controls')
 	if (!mDiv) {
 		mDiv = document.createElement('div')
 		mDiv.id = 'mobile-controls'
 	}
-	
+
 	// Always ensure it is a direct child of the body so it isn't hidden by #container
 	if (mDiv.parentElement !== document.body) {
 		document.body.appendChild(mDiv)
@@ -124,8 +124,14 @@ window.addEventListener('load', () => {
 		`
 	const fireBtn = document.getElementById('mobile-fire')
 	if (fireBtn) {
-		const startFire = (e) => { e.preventDefault(); if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire') }
-		const stopFire = (e) => { e.preventDefault(); input.pressedKeys = input.pressedKeys.filter(k => k !== 'MobileFire') }
+		const startFire = (e) => {
+			e.preventDefault()
+			if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire') 
+			}
+		const stopFire = (e) => {
+			e.preventDefault()
+			input.pressedKeys = input.pressedKeys.filter(k => k !== 'MobileFire')
+		}
 		fireBtn.addEventListener('touchstart', startFire)
 		fireBtn.addEventListener('touchend', stopFire)
 		fireBtn.addEventListener('touchcancel', stopFire)
@@ -161,9 +167,10 @@ window.addEventListener('load', () => {
 
 	// Initialize elements inside the load listener to ensure they aren't null
 	start = document.getElementById('start')
+	gamemodeSelector = document.getElementById('gamemode-modal')
 	controlDoc = document.getElementById('control-doc') ?? {
 		style: {},
-		innerHTML: '',
+		innerHTML: 'It\'s in the settings AND the tutorial. Check there.',
 	}
 
 	settings = document.getElementById('settings')
@@ -185,8 +192,9 @@ window.addEventListener('load', () => {
 
 	start.onclick = () => {
 		if (simulation.interval) clearInterval(simulation.interval)
-		simulation.init()
+		simulation.selectGamemode()
 	}
+	
 
 
 
@@ -200,7 +208,7 @@ window.addEventListener('load', () => {
 				<h2 style="margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; text-align: center;">Controls</h2>
 				<div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
 					${Object.entries(state.input.keybinds).map(([action, key]) => {
-						if (action != "testing") return `
+			if (action != "testing") return `
 						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.1em;">
 							<span style="color: #555; margin-right: 20px;">${action.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</span>
 							<kbd style="background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; font-family: monospace; box-shadow: 0 2px 0 #bbb; color: #333;">${key.replace('Key', '').replace('Digit', '')}</kbd>
@@ -219,16 +227,16 @@ window.addEventListener('load', () => {
 			</div>
 		`
 	}
-		updateControls()
+	updateControls()
 
-		const githubRepoBtn = document.getElementById('github-repo')
-		if (githubRepoBtn) {
-			githubRepoBtn.onclick = () => {
-				window.open('https://github.com/Eliel-iscool47/tetragon', '_blank', 'noopener')
-			}
+	const githubRepoBtn = document.getElementById('github-repo')
+	if (githubRepoBtn) {
+		githubRepoBtn.onclick = () => {
+			window.open('https://github.com/Eliel-iscool47/tetragon', '_blank', 'noopener')
 		}
+	}
 
-		leaderboardButton.onclick = async () => {
+	leaderboardButton.onclick = async () => {
 
 		leaderboardModal.style.display = 'flex'
 		leaderboardList.innerHTML = 'Loading...'
@@ -269,7 +277,7 @@ window.addEventListener('load', () => {
 		window.open("https://forms.gle/QinmVfLSQpMya29R9")
 	}
 
-if (false && whatsNewButton && whatsNewModal) {
+	if (false && whatsNewButton && whatsNewModal) {
 		whatsNewModal.style.display = 'none'
 		whatsNewButton.onclick = async () => {
 			whatsNewModal.style.display = 'flex'
@@ -580,7 +588,7 @@ if (false && whatsNewButton && whatsNewModal) {
 	if (title) title.style.display = 'block'
 	document.getElementById('name-modal').style.display = 'none'
 	main.style.display = 'block'
-	
+
 	// Ensure the main menu container is visible on load
 	if (dc) dc.style.display = 'flex'
 

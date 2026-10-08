@@ -101,20 +101,20 @@ var particles = {
 		speed: 0.5,
 		duration: 0.4, // Short duration
 		draw() {
-			const elapsed = this.state.simulation.time - this.timeSpawned;
-			const alpha = clamp(1 - (elapsed / this.duration), 0, 1); // Fade out
-			draw.save();
-			draw.globalAlpha = alpha;
-			draw.beginPath();
-			draw.fillStyle = this.color;
-			draw.arc(this.pos.x, this.pos.y, this.size, 0, Math.PI * 2);
-			draw.fill();
-			draw.restore();
+			const elapsed = this.state.simulation.time - this.timeSpawned
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1)
+			draw.save()
+			draw.globalAlpha = alpha
+			draw.beginPath()
+			draw.fillStyle = this.color
+			draw.arc(this.pos.x, this.pos.y, this.size, 0, Math.PI * 2)
+			draw.fill()
+			draw.restore()
 		},
 		update(timeScale = 1) {
 			const ts = timeScale ?? this.state.simulation.timeScale
-			this.pos.x += Math.cos(this.angle) * this.speed * ts;
-			this.pos.y += Math.sin(this.angle) * this.speed * ts;
+			this.pos.x += Math.cos(this.angle) * this.speed * ts
+			this.pos.y += Math.sin(this.angle) * this.speed * ts
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
 				this.active = false
 			}
@@ -129,27 +129,27 @@ var particles = {
 		gravity: 0.2,
 		update(timeScale = 1) {
 			const ts = timeScale ?? this.state.simulation.timeScale
-			this.vy += this.gravity * ts;
-			this.pos.x += this.vx * ts;
-			this.pos.y += this.vy * ts;
+			this.vy += this.gravity * ts
+			this.pos.x += this.vx * ts
+			this.pos.y += this.vy * ts
 
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
 				this.active = false
 			}
 		},
 		draw() {
-			const elapsed = this.state.simulation.time - this.timeSpawned;
-			const alpha = clamp(1 - (elapsed / this.duration), 0, 1);
-			draw.save();
-			draw.globalAlpha = alpha;
-			draw.fillStyle = this.color;
-			draw.strokeStyle = 'black';
-			draw.lineWidth = 1;
-			draw.font = `bold ${this.size}px "DM Sans"`;
-			draw.textAlign = 'center';
-			draw.fillText(this.text, this.pos.x, this.pos.y);
-			draw.strokeText(this.text, this.pos.x, this.pos.y);
-			draw.restore();
+			const elapsed = this.state.simulation.time - this.timeSpawned
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1)
+			draw.save()
+			draw.globalAlpha = alpha
+			draw.fillStyle = this.color
+			draw.strokeStyle = 'black'
+			draw.lineWidth = 1
+			draw.font = `bold ${this.size}px "DM Sans"`
+			draw.textAlign = 'center'
+			draw.fillText(this.text, this.pos.x, this.pos.y)
+			draw.strokeText(this.text, this.pos.x, this.pos.y)
+			draw.restore()
 		}
 	},
 	bouncyBallTrail: {
@@ -157,16 +157,16 @@ var particles = {
 		color: 'hsl(35, 100%, 50%)',
 		duration: 0.3,
 		draw() {
-			const elapsed = this.state.simulation.time - this.timeSpawned;
-			const alpha = clamp(1 - (elapsed / this.duration), 0, 1);
-			draw.save();
-			draw.globalAlpha = alpha * 0.5; // Slight transparency
-			draw.beginPath();
-			draw.fillStyle = this.color;
+			const elapsed = this.state.simulation.time - this.timeSpawned
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1)
+			draw.save()
+			draw.globalAlpha = alpha * 0.5
+			draw.beginPath()
+			draw.fillStyle = this.color
 			// Shrink the trail particle over its lifetime
 			draw.arc(this.pos.x, this.pos.y, this.size * alpha, 0, Math.PI * 2);
-			draw.fill();
-			draw.restore();
+			draw.fill()
+			draw.restore()
 		},
 		update() {
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {
@@ -179,15 +179,15 @@ var particles = {
 		color: 'hsl(30, 100%, 50%)',
 		duration: 0.4,
 		draw() {
-			const elapsed = this.state.simulation.time - this.timeSpawned;
-			const alpha = clamp(1 - (elapsed / this.duration), 0, 1);
-			draw.save();
-			draw.globalAlpha = alpha * 0.4;
-			draw.beginPath();
-			polygon(this.pos.x, this.pos.y, this.size * alpha, 6, this.angle);
-			draw.fillStyle = this.color;
-			draw.fill();
-			draw.restore();
+			const elapsed = this.state.simulation.time - this.timeSpawned
+			const alpha = clamp(1 - (elapsed / this.duration), 0, 1)
+			draw.save()
+			draw.globalAlpha = alpha * 0.4
+			draw.beginPath()
+			polygon(this.pos.x, this.pos.y, this.size * alpha, 6, this.angle)
+			draw.fillStyle = this.color
+			draw.fill()
+			draw.restore()
 		},
 		update() {
 			if (this.state.simulation.time - this.timeSpawned > this.duration) {

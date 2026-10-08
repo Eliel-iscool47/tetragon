@@ -1,13 +1,13 @@
 var collisions = {
 	center: {
-		x: 0, // Initialized to 0, will be set correctly in reset()
-		y: 0, // Initialized to 0, will be set correctly in reset()
+		x: 0, 
+		y: 0,
 	},
 	border: {
 		left: 25,
-		right: 0, // Initialized to 0, will be set correctly in reset()
+		right: 0,
 		top: 25,
-		bottom: 0, // Initialized to 0, will be set correctly in reset()
+		bottom: 0,
 	},
 	get defaults() {
 		return {
@@ -60,10 +60,10 @@ var collisions = {
 				for (let j = -1; j <= 1; j++) {
 					const ny = cy + j
 					if (ny < 0 || ny >= this.rows) continue
-					const cell = this.cells[nx + ny * this.cols];
+					const cell = this.cells[nx + ny * this.cols]
 					if (cell) {
 						for (let k = 0, kLen = cell.length; k < kLen; k++) {
-							callback(cell[k]);
+							callback(cell[k])
 						}
 					}
 				}
@@ -81,7 +81,7 @@ var collisions = {
 		// Add mobs to the grid for separation force and proximity checks
 		mobs.list.forEach((m) => { m.isMob = true; this.grid.add(m); })
 
-		const explosionsToUpdate = new Set();
+		const explosionsToUpdate = new Set()
 
 		for (let i = 0; i < bullets.explosionList.length; i++) {
 			bullets.explosionList[i].isExplosion = true
@@ -123,19 +123,15 @@ var collisions = {
 						explosionsToUpdate.add(e)
 					}
 				} else if (e.isFirePool) {
-					const dx = mob.pos.x - e.pos.x;
-					const dy = mob.pos.y - e.pos.y;
-					const distSq = dx * dx + dy * dy;
-					const range = e.size + mob.size / 2;
-					if (distSq <= range * range) {
-						// Scale damage by delta time so DoT is frame-independent
-						mob.takeDamage(e.damage * state.player.damageDone * ts)
-					}
-				} else { // Bullet
+					const dx = mob.pos.x - e.pos.x
+					const dy = mob.pos.y - e.pos.y
+					const distSq = dx * dx + dy * dy
+					const range = e.size + mob.size / 2
+					if (distSq <= range * range) mob.takeDamage(e.damage * state.player.damageDone * ts)
+				} else {
 					if (e.piercing > 0 && mob.checkCollision(e)) {
 						mob.takeDamage(e.damage * state.player.damageDone)
 						if (e.type == 'bouncyBalls') {
-							// Realistic reflection off circle normal
 							const dist = distance(e.pos.x, e.pos.y, mob.pos.x, mob.pos.y)
 							const nx = (e.pos.x - mob.pos.x) / dist
 							const ny = (e.pos.y - mob.pos.y) / dist

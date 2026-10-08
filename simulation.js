@@ -24,6 +24,10 @@ var simulation = {
 	get isDead() { return this._isDead },
 	set isDead(val) { this._isDead = val },
 
+	_isTutorial: false,
+	get isTutorial() { return this._isTutorial },
+	set isTutorial(val) { this._isTutorial = val },
+
 	_isPaused: false,
 	get isPaused() { return this._isPaused },
 	set isPaused(val) {
@@ -78,7 +82,6 @@ var simulation = {
 
 				<div style="flex: 1; border-left: 2px solid rgba(0, 0, 0, 0.1); padding-left: 30px; text-align: left;">
 					<h2 style="font-size: 28px; color: #aaa; margin-bottom: 20px;">Statistics</h2>
-					<button onclick="simulation.showUpdates()" style="width: 100%; padding: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; cursor: pointer; font-family: 'DM Sans';">Show Recent Updates</button>
 					<div style="font-size: 20px; line-height: 2; color: #fff;">
 						<div style="margin-bottom: 10px; color: ${this.gamemode === 'hardcore' ? '#ff4444' : '#44ff44'}">Mode: <span style="float: right;">${this.gamemode.toUpperCase()}</span></div>
 						<div style="margin-bottom: 10px;">${text('health', 'Health')}: <span style="float: right;">${Math.round(state.player.health)} / ${Math.round(state.player.maxHealth)}</span></div>
@@ -98,18 +101,20 @@ var simulation = {
 	get isDebug() { return this._isDebug },
 	set isDebug(val) { this._isDebug = val },
 
-	_isMobile: (function() { return (
-		/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-		(navigator.maxTouchPoints > 0) || ('ontouchstart' in window) || 
-		(window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(any-pointer: coarse)").matches)) ||
-		(navigator.userAgentData && navigator.userAgentData.mobile) ||
-		// Fallback for Firefox touch detection
-		(window.matchMedia && window.matchMedia("(any-hover: none)").matches)
-	)})(),
+	_isMobile: (function () {
+		return (
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+			(navigator.maxTouchPoints > 0) || ('ontouchstart' in window) ||
+			(window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(any-pointer: coarse)").matches)) ||
+			(navigator.userAgentData && navigator.userAgentData.mobile) ||
+			// Fallback for Firefox touch detection
+			(window.matchMedia && window.matchMedia("(any-hover: none)").matches)
+		)
+	})(),
 	get isMobile() {
 		// Safe check for the manual setting
-		const setting = (window.input && input.showMobileControls) || (window.state && state.input && state.input.showMobileControls);
-		return this._isMobile || setting;
+		const setting = (window.input && input.showMobileControls) || (window.state && state.input && state.input.showMobileControls)
+		return this._isMobile || setting
 	},
 
 	_world: { width: 1500, height: 800 },
@@ -128,12 +133,70 @@ var simulation = {
 
 	shake: 0,
 
-	showUpdates() {
-		alert("v1.14: Delta-Time & Survival Update\n\n" +
-			"• Frame-Independent Logic: Game speed remains consistent across refresh rates.\n" +
-			"• Survival Mechanics: Added I-Frames and Defensive Knockback.\n" +
-			"• Hardcore Mode: Features a 30 HP Challenge and a 3x Score Multiplier.\n" +
-			"• Collision Engine 2.0: Optimized squared distance checks.");
+	tutorialActions: [
+		{ message: 'Welcome to the Tetragon Tutorial!' },
+		{
+			message: 'Use WASD or Arrow Keys to move around.',
+			action() {
+				this.startPos = { x: state.player.pos.x, y: state.player.pos.y }
+			},
+			validate() {
+				return distance(state.player.pos.x, state.player.pos.y, this.startPos.x, this.startPos.y) > 50
+			}
+		},
+		{
+			message: 'Good job! Now pick up the gun power-up.',
+			action() {
+				powerUps.spawn(this.pos.x + 150, this.pos.y, powerUps.gun)
+			},
+			validate() {
+				return guns.inventory.length > 0
+			}
+		},
+		{
+			message: `Press Left-Click or ${input.keybinds.fire} to shoot.`,
+			validate() {
+				return bullets.list.length > 0
+			}
+		},
+		{
+			message: 'Defeat the incoming targets!',
+			action() {
+				spawn.default(this.pos.x - 200, this.pos.y - 200)
+				spawn.default(this.pos.x + 200, this.pos.y - 200)
+				spawn.default(this.pos.x, this.pos.y + 200)
+			},
+			validate() {
+				return mobs.list.filter(m => m.class !== 'projectile' && m.type !== 'tutorial').length === 0
+			}
+		},
+		{ message: 'Good luck!' },
+		{
+			action() {
+				simulation.isTutorialComplete = true
+				this.health = 0
+
+				level.next()
+				level.make()
+			}
+		},
+	],
+
+
+	_isTutorialWalk: false,
+	set isTutorialWalk(val) { this._isTutorialWalk = val },
+	get isTutorialWalk() { return this._isTutorialWalk },
+
+	_isTutorialComplete: false,
+	set isTutorialComplete(val) { this._isTutorialComplete = val },
+	get isTutorialComplete() { return this._isTutorialComplete },
+
+	// tutorial() {
+	// 	this.gamemode = 'tutorial'
+	// },
+
+	selectGamemode() {
+		gamemodeSelector.style.display = 'flex'
 	},
 
 	get defaults() {
@@ -161,7 +224,7 @@ var simulation = {
 
 	set defaults(val) { throw new Error('simulation.defaults is read-only') },
 
-reset() {
+	reset() {
 		this._lastFrameTime = performance.now()
 		this._timeScale = 1
 		Object.assign(this, this.defaults)
@@ -182,10 +245,10 @@ reset() {
 	Particles: [],
 	menuParticles: [],
 	log(msg) {
-		console.log(`[Simulation Log]: ${msg}`);
+		console.log(`[Simulation Log]: ${msg}`)
 	},
 	error(msg) {
-		console.error(`[Simulation Error]: ${msg}`);
+		console.error(`[Simulation Error]: ${msg}`)
 	},
 	pause() {
 		this.isPaused = true
@@ -275,7 +338,7 @@ reset() {
 		draw.save()
 		draw.fillStyle = 'hsl(0, 0%, 95%)'
 		draw.fillRect(0, 0, this.world.width, this.world.height)
-		
+
 		draw.strokeStyle = 'hsla(0, 0%, 20%, 0.2)'
 		draw.lineWidth = 4
 
@@ -321,10 +384,10 @@ reset() {
 		const mCtrls = window.mobileControls
 		if (mCtrls && window.input) {
 			// Show container if setting is enabled
-			mCtrls.style.display = input.showMobileControls ? 'block' : 'none';
-			
-			const isGameplay = !this.isPaused && !this.isDead && !this.isChoosing && !this.isMainMenu;
-			const isDead = this.isDead && !this.isMainMenu;
+			mCtrls.style.display = input.showMobileControls ? 'block' : 'none'
+
+			const isGameplay = !this.isPaused && !this.isDead && !this.isChoosing && !this.isMainMenu
+			const isDead = this.isDead && !this.isMainMenu
 
 			// Cache DOM lookups for performance
 			if (!this._mobileUiCache) {
@@ -340,23 +403,23 @@ reset() {
 					cycle: document.getElementById('mobile-gun-cycle')
 				}
 			}
-			const ui = this._mobileUiCache;
+			const ui = this._mobileUiCache
 
 			// Controls only appear during active gameplay to avoid blocking the Main Menu
-			if (ui.move) ui.move.style.display = isGameplay ? 'block' : 'none';
-			if (ui.aim) ui.aim.style.display = isGameplay ? 'block' : 'none';
-			if (ui.fire) ui.fire.style.display = isGameplay && !input.isAutoFire ? 'block' : 'none';
-			
+			if (ui.move) ui.move.style.display = isGameplay ? 'block' : 'none'
+			if (ui.aim) ui.aim.style.display = isGameplay ? 'block' : 'none'
+			if (ui.fire) ui.fire.style.display = isGameplay && !input.isAutoFire ? 'block' : 'none'
+
 			// UI buttons hide on the main menu to prevent clutter
-			const hideUI = isDead || this.isMainMenu;
-			if (ui.pause) ui.pause.style.display = hideUI ? 'none' : 'block';
-			if (ui.toggle) ui.toggle.style.display = hideUI ? 'none' : 'block';
-			if (ui.debug) ui.debug.style.display = hideUI ? 'none' : 'block';
-			if (ui.cycle) ui.cycle.style.display = hideUI ? 'none' : 'block';
+			const hideUI = isDead || this.isMainMenu
+			if (ui.pause) ui.pause.style.display = hideUI ? 'none' : 'block'
+			if (ui.toggle) ui.toggle.style.display = hideUI ? 'none' : 'block'
+			if (ui.debug) ui.debug.style.display = hideUI ? 'none' : 'block'
+			if (ui.cycle) ui.cycle.style.display = hideUI ? 'none' : 'block'
 
 			// Death buttons only appear when dead
-			if (ui.respawn) ui.respawn.style.display = isDead ? 'block' : 'none';
-			if (ui.quit) ui.quit.style.display = isDead ? 'block' : 'none';
+			if (ui.respawn) ui.respawn.style.display = isDead ? 'block' : 'none'
+			if (ui.quit) ui.quit.style.display = isDead ? 'block' : 'none'
 		}
 
 		hud.Obj.style.display = this.isPaused || this.isChoosing || this.isMainMenu || this.isDead ? 'none' : 'block'
@@ -374,7 +437,7 @@ reset() {
 			return undefined
 		}
 		main.style.cursor = !this.isMainMenu && !this.isPaused && !this.isChoosing && !this.isDead ? "none" : "default"
-		
+
 		if (this.shake > 0 && !this.isPaused && !this.isChoosing) {
 			main.style.top = `${rand(-this.shake, this.shake)}px`
 			main.style.left = `${rand(-this.shake, this.shake)}px`
@@ -413,18 +476,24 @@ reset() {
 		powerUps.logic(this.timeScale)
 
 		// LEVEL LOGIC
-
 		if (level.isWon()) {
-			mobs.list = []
-			if (level.current <= 0 || this.time - level.time >= level.intermission) {
-				level.next()
-				level.make()
+			// If we are in standard play, wipe monsters and respect intermission clocks
+			if (this.gamemode !== 'tutorial') {
+				mobs.list = []
+				if (this.time - level.time >= level.intermission) {
+					level.next()
+					level.make()
+					level.time = this.time
+				}
+			} else {
+				// In tutorial mode, progression is managed strictly by tutorialActions, 
+				// so we completely skip automatic engine jumps.
 				level.time = this.time
 			}
 		} else {
-			// Still mobs
 			level.time = this.time
 		}
+
 
 		// Shotgun aim arc
 
@@ -468,7 +537,7 @@ reset() {
 
 		if (this.isDebug) {
 			this.crosshairColor = 'hsl(40,100%,50%)'
-			
+
 			// Debug Text Overlay
 			draw.save()
 			draw.fillStyle = 'rgba(0, 0, 0, 0.6)'
@@ -495,7 +564,7 @@ reset() {
 		bullets.move(this.timeScale)
 		mobs.loop(this.timeScale)
 	},
-applySaturationEffect() {
+	applySaturationEffect() {
 		// Can be called during init / main menu before player exists.
 		if (!state.player || !Number.isFinite(state.player.maxHealth) || state.player.maxHealth <= 0) return undefined
 		const saturation = this.isDead ? 0 : 100 * Math.sqrt(state.player.health / state.player.maxHealth)
@@ -514,7 +583,6 @@ applySaturationEffect() {
 		// This resets BOTH runtime state and run progression state.
 		this.wipe()
 
-		// Ensure we return to the “playing” state (not the main menu UI).
 		this.isMainMenu = false
 		this.isPaused = false
 		this.isDead = false
@@ -524,7 +592,6 @@ applySaturationEffect() {
 		this._timeScale = 1
 		this._lastFrameTime = performance.now()
 
-		// Reset runtime lists to prevent “accumulation” across respawns.
 		mobs.list = []
 		bullets.list = []
 		bullets.explosionList = []
@@ -547,26 +614,36 @@ applySaturationEffect() {
 
 
 	init() {
-		// Reset the entire game state and ensure only ONE RAF loop is active.
 		this._mobileUiCache = null
 		this.wipe()
 		this.isMainMenu = false
 		this.isPaused = false
 		this.isDead = false
 		this.collisions.grid.init()
-		level.init() // Call level init here
-		this._lastFrameTime = performance.now()
+		
+		// Set the correct mode rules
+		if (this.gamemode === 'tutorial') {
+			level.current = 0;
+		} else {
+			level.current = 1;
+		}
 
-		// Prevent duplicate RAF chains if init() is triggered more than once.
+		// Trigger asset load, then manually build the initial map layout
+		level.init().then(() => {
+			level.make();
+		});
+
+		this._lastFrameTime = performance.now()
 		this._isLooping = true
+
 		if (!this._rafStarted) {
 			this._rafStarted = true
 			this.gameLoop()
 		}
 	},
-	spawnVampireParticle(x, y) {
 
-	},
+
+
 	crosshair(s) {
 		draw.strokeStyle = this.crosshairColor
 		draw.lineWidth = 2
