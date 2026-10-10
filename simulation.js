@@ -208,9 +208,7 @@ var simulation = {
 		{
 			message: 'Pick up the one I spawned.',
 			action() {
-				for (let i = 0; i < 5; i++) {
-					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.invincibility)
-				}
+				powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.invincibility)
 			},
 			validate() {
 				return powerUps.list.every(p => { p.name != 'invincibility' })
@@ -220,7 +218,7 @@ var simulation = {
 		{
 			message: 'Pick up the ones I spawned!',
 			action() {
-				for (let i = 0; i < 5; i++) {
+				for (let i = 0; i < 3; i++) {
 					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.overdrive)
 				}
 			},
