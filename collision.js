@@ -110,7 +110,6 @@ var collisions = {
 
 			// Bullet/Explosion collision via grid
 			this.grid.query(mob.pos.x, mob.pos.y, (e) => {
-				// Fix: Projectiles (boss bullets/lasers) should not be destroyed by player fire
 				if (mob.class === 'projectile') return 
 
 				if (e.isExplosion) {

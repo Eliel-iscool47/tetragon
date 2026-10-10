@@ -286,3 +286,7 @@ function weightedRand(spec) {
 		if (r <= cumulative) return i
 	}
 }
+
+function processKeybinds(k) {
+	return k.replace(/Key/ig, '').replace(/Numpad/ig,'NP')
+}

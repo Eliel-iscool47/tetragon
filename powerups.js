@@ -63,13 +63,6 @@ var powerUps = {
 			guns.choose()
 			powerUps.list = powerUps.list.filter(p => p != this)
 		},
-		// draw: function () {
-		// 	this.drawSelf(function () {
-		// 		draw.arc(0, 0, this.size, 0, Math.PI * 2)
-		// 		draw.fill()
-		// 		draw.stroke()
-		// 	}.bind(this))
-		// }
 	},
 	heal: {
 		name: 'heal',
@@ -77,13 +70,13 @@ var powerUps = {
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing || state.player.health >= state.player.maxHealth) return undefined
-			state.player.heal(upgrades.healEffect * 8)
+			state.player.heal(upgrades.healEffect * 0.8 * this.size)
 			powerUps.list = powerUps.list.filter((p) => p !== this)
 		},
 	},
 	ammo: {
 		name: 'ammo',
-		color: 'hsl(235, 50%, 25%)',
+		color: 'hsl(235, 53%, 29%)',
 		size: 10,
 		effect() {
 			if (simulation.isPaused || simulation.isChoosing) return undefined

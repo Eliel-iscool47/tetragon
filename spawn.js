@@ -30,46 +30,36 @@ const default_mobSpawn = {
 			damageTaken: 0,
 			color: 'hsl(0, 0%, 60%)',
 			size: 50,
-			dialogue(message) {
+			dialogue(message, color) {
 				this.state.particles.spawn(this.pos.x, this.pos.y - 80, {
 					...this.state.particles.textPopup,
 					text: message,
 					duration: 0.1,
 					gravity: -0.05,
-					color: "#888"
+					color: color ?? "#636363"
 				})
 			},
 			update() {
-				// FIX: Removed the buggy 'if (simulation.gamemode != "tutorial")' block 
-				// that was forcing standard modes to auto-skip to Level 2.
-
-				// If there are no more actions, do nothing
 				if (simulation.tutorialActions.length === 0) return
 
 				const currentAction = simulation.tutorialActions[0]
-				// ... rest of your tutorial guide step logic remains identical
 
 
-				// If the action has a initialization step, run it once
 				if (currentAction.action && !currentAction.hasRun) {
 					currentAction.action.call(this)
 					currentAction.hasRun = true
 				}
 
-				// Display the dialogue message continuously while active
 				if (currentAction.message) {
 					this.dialogue(currentAction.message)
 				}
 
-				// If there's a validation rule, wait until it returns true. 
-				// Otherwise, progress automatically on text-only prompts after a slight delay.
 				if (currentAction.validate) {
 					if (currentAction.validate.call(this)) {
-						simulation.tutorialActions.shift() // Move to the next task
+						simulation.tutorialActions.shift()
 					}
 				} else {
-					// Fallback for simple message alerts: stay for 3 seconds before advancing
-					if (!currentAction.timer) currentAction.timer = simulation.time + 3
+					if (!currentAction.timer) currentAction.timer = simulation.time + (currentAction.time ?? 3)
 					if (simulation.time >= currentAction.timer) {
 						simulation.tutorialActions.shift()
 					}
@@ -80,6 +70,10 @@ const default_mobSpawn = {
 					draw.fillRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 					draw.strokeRect(this.size * -0.5, this.size * -0.5, this.size, this.size)
 				})
+			},
+			onCollide() {
+				this.dialogue("Ow! That hurt!", '#b40000')
+				return true
 			}
 		}))
 	},

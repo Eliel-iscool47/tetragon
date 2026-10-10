@@ -135,8 +135,9 @@ var simulation = {
 
 	tutorialActions: [
 		{ message: 'Welcome to the Tetragon Tutorial!' },
+		{ message: 'Let\'s start with the movement and pause.' },
 		{
-			message: 'Use WASD or Arrow Keys to move around.',
+			message: `Use ${processKeybinds(input.keybinds.up)}${processKeybinds(input.keybinds.left)}${processKeybinds(input.keybinds.down)}${processKeybinds(input.keybinds.right)} or Arrow Keys to move around.`,
 			action() {
 				this.startPos = { x: state.player.pos.x, y: state.player.pos.y }
 			},
@@ -144,23 +145,101 @@ var simulation = {
 				return distance(state.player.pos.x, state.player.pos.y, this.startPos.x, this.startPos.y) > 50
 			}
 		},
+		{ message: `Good! You can pause the game with ${processKeybinds(input.keybinds.pause)} or Escape.` },
+		{ message: "Now onto power-ups!" },
+		{ message: "Power-ups are collectibles that help you in various ways." },
 		{
-			message: 'Good job! Now pick up the gun power-up.',
+			message: 'Pick up the dark green power-up.',
 			action() {
-				powerUps.spawn(this.pos.x + 150, this.pos.y, powerUps.gun)
+				powerUps.spawn(randInt(0, simulation.world.width), randInt(0, simulation.world.height), powerUps.gun)
 			},
 			validate() {
 				return guns.inventory.length > 0
 			}
 		},
+		{ message: 'It\'s a gun power-up, which gives you a gun.' },
+		{ message: 'There are also light green ones that heal you.' },
 		{
-			message: `Press Left-Click or ${input.keybinds.fire} to shoot.`,
+			message: 'I spawned a few heals. Pick them up!',
+			action() {
+				for (let i = player.health; i < player.maxHealth; i += upgrades.healEffect * 8) {
+					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.heal)
+				}
+			},
+			validate() {
+				return player.health == player.maxHealth
+			}
+		},
+		{ message: "Rerolls let you get different choices." },
+		{
+			message: "I spawned some. Pick them up!",
+			action() {
+				for (let i = 0; i < 5; i++) {
+					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.reroll)
+				}
+			},
+			validate() {
+				return powerUps.list.every(p => { p.name != 'reroll' })
+			}
+		},
+		{ message: 'Next is the upgrade. It lets you choose an upgrade to get.' },
+		{
+			message: 'It\'s this blue-ish power-up in the corner. Get it!',
+			action() {
+				powerUps.spawn(60, 60, powerUps.upgrade)
+			},
+			validate() {
+				return powerUps.list.every(p => { p.name != 'upgrade' })
+			}
+		},
+		{ message: 'Ammo power-ups are dark blue, and give you guns more ammo.' },
+		{
+			message: 'I spawned a few ammo power-ups. Pick them up!',
+			action() {
+				for (let i = 0; i < 5; i++) {
+					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.ammo)
+				}
+			},
+			validate() {
+				return powerUps.list.every(p => { p.name != 'ammo' })
+			}
+		},
+		{ message: 'Invincibility power-ups make you immune to damage for 3 seconds.' },
+		{
+			message: 'Pick up the one I spawned.',
+			action() {
+				for (let i = 0; i < 5; i++) {
+					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.invincibility)
+				}
+			},
+			validate() {
+				return powerUps.list.every(p => { p.name != 'invincibility' })
+			}
+		},
+		{ message: 'Overdrive power-ups make you fast for 8 seconds.' },
+		{
+			message: 'Pick up the ones I spawned!',
+			action() {
+				for (let i = 0; i < 5; i++) {
+					powerUps.spawn(rand(0, simulation.world.width), rand(0, simulation.world.height), powerUps.overdrive)
+				}
+			},
+			validate() {
+				return powerUps.list.every(p => { p.name != 'overdrive' })
+			}
+		},
+		{ message: 'Great! Now, onto shooting!' },
+		{
+			message: `Press Left-Click or ${processKeybinds(input.keybinds.fire)} to shoot.`,
 			validate() {
 				return bullets.list.length > 0
 			}
 		},
+		{ message: 'Now, onto Enemies!' },
+		{ message: 'Enemies are the shapes that attack you.' },
+		{ message: 'They usually have a red health bar above them.' },
 		{
-			message: 'Defeat the incoming targets!',
+			message: 'Defeat the incoming enemies!',
 			action() {
 				spawn.default(this.pos.x - 200, this.pos.y - 200)
 				spawn.default(this.pos.x + 200, this.pos.y - 200)
@@ -170,12 +249,26 @@ var simulation = {
 				return mobs.list.filter(m => m.class !== 'projectile' && m.type !== 'tutorial').length === 0
 			}
 		},
+		{ message: 'Now, onto bosses!' },
+		{ message: 'Bosses are really strong/special enemies that you have to defeat to advance to the next level.' },
+		{
+			message: 'Defeat the boss!',
+			action() {
+				spawn.randomBoss(
+					rand(0, simulation.world.width),
+					rand(0, simulation.world.height)
+				)
+			},
+			validate() {
+				return mobs.list.every(m => m.class !== 'boss')
+			}
+		},
 		{ message: 'Good luck!' },
 		{
 			action() {
 				simulation.isTutorialComplete = true
 				this.health = 0
-
+				simulation.gamemode = 'standard'
 				level.next()
 				level.make()
 			}
@@ -527,8 +620,10 @@ var simulation = {
 		if (state.player.health <= 0) {
 			state.player.kill()
 			this.isDead = true
-			draw.restore()
 			main.style.cursor = 'default'
+			hud.Obj.style.display = 'none'
+			pauseScreen.style.display = 'none'
+			draw.restore()
 			return undefined
 		}
 
@@ -620,18 +715,18 @@ var simulation = {
 		this.isPaused = false
 		this.isDead = false
 		this.collisions.grid.init()
-		
+
 		// Set the correct mode rules
 		if (this.gamemode === 'tutorial') {
-			level.current = 0;
+			level.current = 0
 		} else {
-			level.current = 1;
+			level.current = 1
 		}
 
 		// Trigger asset load, then manually build the initial map layout
 		level.init().then(() => {
-			level.make();
-		});
+			level.make()
+		})
 
 		this._lastFrameTime = performance.now()
 		this._isLooping = true

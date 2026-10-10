@@ -194,44 +194,34 @@ class Player extends Entity {
 		let message = ""
 		const killer = this._killer
 
-		if (killer && killer.class === 'boss') {
-			const bossMessages = [
-				`Boss's brutal blow, your battle's been brought low.`,
-				`Felled by a foe, your final flow.`,
-				`The ${killer.type} triumphs, your time is now through.`,
-				`A boss's big bash, your body's a dash.`
-			]
-			message = bossMessages[Math.floor(Math.random() * bossMessages.length)]
-		} else {
-			const genericMessages = [
-				"Try dodging next time!",
-				"Womp womp.",
-				"Skill issue?",
-				"That's gotta hurt.",
-				"F in the chat.",
-				"Better luck next time!",
-				"Geometric failure.",
-				"You were doing so well...",
-				"Get good.",
-				"Square up next time.",
-				"Albert Epstein better than bro",
-			]
+		let messageStart
+		const genericMessages = [
+			"Try dodging next time!",
+			"Womp womp.",
+			"Skill issue?",
+			"That's gotta hurt.",
+			"F in the chat.",
+			"Better luck next time!",
+			"Geometric failure.",
+			"You were doing so well...",
+			"Get good.",
+			"Square up next time.",
+			"Albert Epstein would do better",
+			"Clipped",
+			"I'm not mad, I'm just disappointed.",
+			"Lock in.",
+			"Ich spreche kein Englisch"
+		]
 
-			if (killer && Math.random() < 0.4) {
-				const imagineMessages = [
-					`Imagine dying to a ${killer.type}, what a tragic tale!`,
-					`Picture perishing to a ${killer.type}, a pitiful plight!`,
-					`Conceive collapsing to a ${killer.type}, quite the cruel caper!`,
-					`Fancy falling to a ${killer.type}, a foolish, final feat!`,
-					`Dream of demise by a ${killer.type}, a dreadful, dire deed!`,
-					`Envision ending by a ${killer.type}, an embarrassing exit!`,
-					`Consider crumbling to a ${killer.type}, a calamitous conclusion!`,
-					`Reflect on ruin by a ${killer.type}, a regrettable, rapid rest!`
-				]
-				message = imagineMessages[Math.floor(Math.random() * imagineMessages.length)]
-			} else {
-				message = genericMessages[Math.floor(Math.random() * genericMessages.length)]
-			}
+		if (killer && Math.random() < 0.4) {
+			const messageStarters = [
+				`Bro you got killed by a ${killer.type}?`,
+				`You really let a ${killer.type} get you?`
+				``
+			]
+			messageStart = messageStarters[Math.round(Math.random() * genericMessages.length)]
+		} else {
+			message = `${messageStart} ${genericMessages[Math.round(Math.random() * genericMessages.length)]}`
 		}
 
 		this.state.simulation.deathMessage = message
@@ -298,10 +288,13 @@ class Player extends Entity {
 		Object.assign(this, d)
 		this.pos = { ...d.pos }
 
-		// Apply Gamemode Overrides
 		if (this.state.simulation.gamemode === 'hardcore') {
 			this.maxHealth = 30
 			this.health = 30
+		}
+
+		if (this.state.simulation.gamemode === 'tutorial') {
+			this.health = 10
 		}
 	}
 }

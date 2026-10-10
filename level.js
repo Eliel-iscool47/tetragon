@@ -45,22 +45,22 @@ var level = {
 
 	make() {
 		// 1. Halt execution if assets are missing
-		if (!this.levels || this.levels.length === 0) return;
+		if (!this.levels || this.levels.length === 0) return
 
 		// 2. Strict gamemode boundary tracking
 		if (simulation.gamemode === 'tutorial') {
-			this.current = 0;
+			this.current = 0
 		} else {
-			if (this.current < 1) this.current = 1;
+			if (this.current < 1) this.current = 1
 		}
 
 		// 3. Safe lookup using slice to prevent array mutation
 		this.config = this.levels
 			.slice()
 			.reverse()
-			.find(l => this.current >= l.threshold);
+			.find(l => this.current >= l.threshold)
 
-		if (!this.config) return;
+		if (!this.config) return
 
 		if (this.config.isBoss) spawn.randomBoss(
 			randInt(collisions.border.left, collisions.border.right),
@@ -68,22 +68,16 @@ var level = {
 		)
 		this.time = simulation.time
 		document.title = `Tetragon: level ${this.current}`
-		
-		if (guns.inventory.length <= 0) powerUps.spawn(
+
+		if (guns.inventory.length <= 0 && simulation.gamemode != 'tutorial') powerUps.spawn(
 			randInt(collisions.border.left, collisions.border.right),
 			randInt(collisions.border.top, collisions.border.bottom),
 			powerUps.gun
 		)
-        
-		// ... rest of your parseCount, spawn loop, and powerUp loops stay the same
 
-
-
-		// Helper to parse count as a number, function, or formula string
 		const parseCount = (val) => {
 			if (typeof val === 'string') {
 				try {
-					// Replace 'c' (case-insensitive) with the current level and evaluate
 					return eval(val.replace(/c/gi, this.current))
 				} catch (e) {
 					console.warn(`Failed to parse formula: ${val}`, e)
@@ -98,7 +92,10 @@ var level = {
 				const rawCount = parseCount(s.count) * state.difficultyScale
 				const count = Math.floor(rawCount) + (percentChance(rawCount % 1) ? 1 : 0)
 				repeat(() => {
-					if (spawn[s.type]) {
+					if (s.type === 'tutorial') {
+						spawn.tutorial(collisions.center.x - 200, collisions.center.y)
+					}
+					else if (spawn[s.type]) {
 						spawn[s.type](
 							randInt(collisions.border.left, collisions.border.right),
 							randInt(collisions.border.top, collisions.border.bottom)
@@ -278,7 +275,7 @@ var level = {
 
 	isWon() {
 		// FIX: If the levels haven't loaded from the JSON file yet, freeze progression!
-		if (!this.levels || this.levels.length === 0) return false;
+		if (!this.levels || this.levels.length === 0) return false
 
 		const levelConfig = this.levels
 			.slice()

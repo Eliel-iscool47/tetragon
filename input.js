@@ -5,7 +5,6 @@ var input = {
 		"ArrowDown",
 		"ArrowLeft",
 		"ArrowRight",
-		"Tab",
 		"Escape",
 		"Slash",
 	],

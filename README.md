@@ -17,10 +17,12 @@ The game's controls are the following:
 * **Restart**: `R` 
 * **Main Menu**: `M` 
 
-# Recent Updates (v1.16: How to play!)
+They can be changed in the settings
+
+# Recent Updates (v1.16: How to play! (part 2))
 ## 1: Bug Fixes
 ## 2: Additions
-* **Tutorial**: Players can now get a basic grasp on the gameplay before playing
+* **Tutorial Update**: Tutorial teaches *more* than before, like which power-ups do what, and how to beat levels.
 ---
 
 # Technical Overview
@@ -33,7 +35,7 @@ The project utilizes a centralized `state` object (defined in `main.js`) to mana
 - **Constructor Encapsulation**: All game entities (Players, Mobs, Bullets) receive the `state` reference in their constructor, allowing them to interact with other systems (like `simulation` or `upgrades`) safely.
 
 ### b: Delta-Time Implementation
-The simulation now calculates `dt` using high-resolution timestamps from `requestAnimationFrame`. This `dt` is normalized into a `timeScale` factor (target 1.0 @ 60fps) that is passed to every `update()` call in the game. This ensures that a projectile moving at speed `X` covers the same physical distance per second, whether the game is rendering 30 or 300 frames per second.
+The simulation calculates `dt` using high-resolution timestamps from `requestAnimationFrame`. This `dt` is normalized into a `timeScale` factor (target 1.0 @ 60fps) that is passed to every `update()` call in the game. This ensures that a projectile moving at speed `X` covers the same physical distance per second, whether the game is rendering 30 or 300 frames per second.
 
 ### c: Global Leaderboard & Persistence
 - **Supabase Integration**: The game communicates with a Supabase backend to store and retrieve high scores.
@@ -70,7 +72,6 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 - **Cluster Bombs**: Explosive weapons trigger secondary sub-explosions.
 - **Incendiary Munitions**: Standard bullets gain explosive properties upon contact.
 - **Iron Will**: Multiplies the base duration of invulnerability power-ups.
-- **Reinforced Shields**: Increases the effectiveness/magnitude of shield power-ups.
 
 ## 4: Enemy Types
 
@@ -88,9 +89,8 @@ The upgrade system supports prerequisites via a `requirements` property. Notable
 - **Performance Optimization**: Beyond the grid, the engine utilizes **Squared Distance** checks (`dx*dx + dy*dy <= r*r`) for most proximity logic, avoiding the computational cost of `Math.sqrt()` millions of times per minute.
 - **Visual Polish**:
   - **Geometric Background**: A low-opacity grid rendered in the simulation background to provide a frame of reference for player movement.
-  - **Muzzle Flashes**: Triggered on weapon fire.
+  - **Muzzle Flashes**: Triggered on weapon fire (only some weapons).
   - **Particle System**: Manages lifesteal tracers, smoke trails for missiles, particle ribbons for bouncy balls, and more.
-  - **Shadow Glow**: Used on projectiles and the player for a "bullet-hell" aesthetic, with color shifting based on projectile speed.
 - **Persistence**: Settings are automatically saved to `localStorage` and persist across sessions.
 
 ---

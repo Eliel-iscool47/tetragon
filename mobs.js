@@ -26,7 +26,6 @@ var mobs = {
 			this.lastDamageTime = 0
 			this.maxHealth = config.maxHealth || this.health
 
-			// Apply Hardcore Difficulty Scaling
 			if (this.state.simulation.gamemode === 'hardcore') {
 				this.speed *= 1.35
 				this.damage *= 2
