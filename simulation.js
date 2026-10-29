@@ -566,27 +566,16 @@ var simulation = {
 		powerUps.draw()
 		powerUps.logic(this.timeScale)
 
-		// LEVEL LOGIC
 		if (level.isWon()) {
-			// If we are in standard play, wipe monsters and respect intermission clocks
 			if (this.gamemode !== 'tutorial') {
 				mobs.list = []
 				if (this.time - level.time >= level.intermission) {
 					level.next()
 					level.make()
-					level.time = this.time
 				}
-			} else {
-				// In tutorial mode, progression is managed strictly by tutorialActions, 
-				// so we completely skip automatic engine jumps.
-				level.time = this.time
 			}
-		} else {
-			level.time = this.time
 		}
-
-
-		// Shotgun aim arc
+		level.time = this.time
 
 		if (guns.equippedGun == guns.shotgun) {
 			draw.beginPath()
@@ -672,8 +661,6 @@ var simulation = {
 		}
 	},
 	respawn() {
-		// Full restart (like fresh from main menu) but keeping the same page load.
-		// This resets BOTH runtime state and run progression state.
 		this.wipe()
 
 		this.isMainMenu = false
@@ -695,11 +682,17 @@ var simulation = {
 		particles.list = []
 		particles.pool = []
 
-		// Reset grids / level state.
 		this.collisions.grid.init()
-		level.init() // reload level config (async but safe)
+		level.init().then(() => {
+			level.make()
+		})
 
-		// Ensure run-scoped HUD/status values start fresh.
+		if (this.gamemode === 'tutorial') {
+			level.current = 0
+		} else {
+			level.current = 1
+		}
+		
 		this.shake = 0
 		this.scoreStatus = ''
 		this.deathMessage = ''
@@ -714,14 +707,12 @@ var simulation = {
 		this.isDead = false
 		this.collisions.grid.init()
 
-		// Set the correct mode rules
 		if (this.gamemode === 'tutorial') {
 			level.current = 0
 		} else {
 			level.current = 1
 		}
 
-		// Trigger asset load, then manually build the initial map layout
 		level.init().then(() => {
 			level.make()
 		})

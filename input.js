@@ -117,7 +117,7 @@ var input = {
 	},
 
 	get defaults() {
-		return { 
+		return {
 			pressedKeys: [],
 			joystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0, touchId: null },
 			aimJoystick: { active: false, moveX: 0, moveY: 0, visualX: 0, visualY: 0, touchId: null },
@@ -199,33 +199,29 @@ var input = {
 	keyLogic() {
 		this.gamepadLogic()
 		if (!(simulation.isPaused || simulation.isChoosing || simulation.isDead)) {
-			// Moving
+
 			let moveX = 0
 			let moveY = 0
 
-			// Keyboard
 			if (this.pressedKeys.includes(this.keybinds.up) || this.pressedKeys.includes("ArrowUp")) moveY--
 			if (this.pressedKeys.includes(this.keybinds.down) || this.pressedKeys.includes("ArrowDown")) moveY++
 			if (this.pressedKeys.includes(this.keybinds.left) || this.pressedKeys.includes("ArrowLeft")) moveX--
 			if (this.pressedKeys.includes(this.keybinds.right) || this.pressedKeys.includes("ArrowRight")) moveX++
 
-			// Gamepad
 			const gamepad = navigator.getGamepads()[0]
 			if (gamepad) {
 				if (Math.abs(gamepad.axes[0]) > 0.1) moveX += gamepad.axes[0]
 				if (Math.abs(gamepad.axes[1]) > 0.1) moveY += gamepad.axes[1]
 			}
 
-			// Joystick (Mobile)
 			if ((simulation.isMobile || this.showMobileControls) && this.joystick.active) {
 				moveX += this.joystick.moveX
 				moveY += this.joystick.moveY
 			}
 
-			// Normalize and apply movement
 			const magnitude = Math.sqrt(moveX * moveX + moveY * moveY)
 			if (magnitude > 0) {
-				// Use magnitude to prevent faster diagonal movement and allow for analog stick sensitivity
+
 				const normalizedX = moveX / magnitude
 				const normalizedY = moveY / magnitude
 				const ts = simulation.timeScale
@@ -233,9 +229,9 @@ var input = {
 				state.player.pos.y += normalizedY * state.player.velocity * Math.min(1, magnitude) * ts
 			}
 
-			// Aim Joystick (Mobile)
+
 			if ((simulation.isMobile || this.showMobileControls) && this.aimJoystick.active) {
-				// Directly set world coordinates for the cursor
+
 				this.cursor.x = state.player.pos.x + this.aimJoystick.moveX * 200
 				this.cursor.y = state.player.pos.y + this.aimJoystick.moveY * 200
 				this.cursor.angle = angle(
@@ -244,7 +240,7 @@ var input = {
 					state.player.pos.x,
 					state.player.pos.y,
 				)
-				
+
 				if (this.isAutoFire && Math.sqrt(this.aimJoystick.moveX ** 2 + this.aimJoystick.moveY ** 2) > 0.3) this.fire()
 			}
 		}
@@ -254,9 +250,9 @@ var input = {
 				case 'MobileFire':
 					this.fire()
 					break
-			case this.keybinds.respawn:
-				this.respawn()
-				break
+				case this.keybinds.respawn:
+					this.respawn()
+					break
 
 				case this.keybinds.mainMenu:
 					simulation.menuParticles = []

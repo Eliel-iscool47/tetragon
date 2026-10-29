@@ -21,6 +21,10 @@ class Player extends Entity {
 			color: localStorage.getItem('tetragon-player-color') || 'hsl(215, 100%, 45%)',
 		})
 	}
+	get killer() {
+		return this._killer
+	}
+
 
 	get defaults() {
 		return {
@@ -192,7 +196,7 @@ class Player extends Entity {
 		this.health = 0
 
 		let message = ""
-		const killer = this._killer
+		const killer = this.killer
 
 		let messageStart
 		const genericMessages = [
@@ -210,19 +214,9 @@ class Player extends Entity {
 			"Clipped",
 			"I'm not mad, I'm just disappointed.",
 			"Lock in.",
-			"Ich spreche kein Englisch"
 		]
 
-		if (killer && Math.random() < 0.4) {
-			const messageStarters = [
-				`Bro you got killed by a ${killer.type}?`,
-				`You really let a ${killer.type} get you?`
-				``
-			]
-			messageStart = messageStarters[Math.round(Math.random() * genericMessages.length)]
-		} else {
-			message = `${messageStart} ${genericMessages[Math.round(Math.random() * genericMessages.length)]}`
-		}
+		message = genericMessages[Math.round(Math.random() * genericMessages.length)]
 
 		this.state.simulation.deathMessage = message
 

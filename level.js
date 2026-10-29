@@ -44,17 +44,14 @@ var level = {
 	},
 
 	make() {
-		// 1. Halt execution if assets are missing
 		if (!this.levels || this.levels.length === 0) return
 
-		// 2. Strict gamemode boundary tracking
 		if (simulation.gamemode === 'tutorial') {
 			this.current = 0
 		} else {
 			if (this.current < 1) this.current = 1
 		}
 
-		// 3. Safe lookup using slice to prevent array mutation
 		this.config = this.levels
 			.slice()
 			.reverse()
@@ -119,8 +116,7 @@ var level = {
 					}
 				}, count)
 			})
-		} else repeat(function () {
-			// Spawn common power-ups for every level
+		} else repeat(() => {
 			powerUps.spawn(
 				randInt(collisions.border.left, collisions.border.right),
 				randInt(collisions.border.top, collisions.border.bottom),
