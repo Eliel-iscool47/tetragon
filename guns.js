@@ -353,7 +353,7 @@ guns.missiles = new guns.Gun({
 guns.bouncyBalls = new guns.Gun({
 	id: 'bouncyBalls',
 	name: 'bouncy balls',
-	description: `Shoot 5 ${text('bullets', 'bouncy balls')} that ${text('bounces', 'bounce')} off the borders of the map and mobs up to 3 times.<br>25 ${text('ammo', 'balls')} (5 shots)per ${text('ammo', 'magazine')}`,
+	description: `Shoot 5 ${text('bullets', 'bouncy balls')} that bounce off the borders of the map and mobs up to 3 times.<br>25 ${text('ammo', 'balls')} (5 shots)per ${text('ammo', 'magazine')}`,
 	defaultAmmo: 80,
 	magSize: 5,
 	magazines: 30,
@@ -396,7 +396,7 @@ guns.flamethrower = new guns.Gun({
 guns.laser = new guns.Gun({
 	id: 'laser',
 	name: 'Laser',
-	description: `Fire a beam of ${text('laser', 'light')} that travels instantly across the screen<br>Doesn't use ${text('ammo', 'ammo')}`,
+	description: `Fire a beam of ${text('laser', 'light')} that travels instantly across the screen<br>Infinite ${text('ammo', 'ammo')}`,
 	defaultAmmo: Infinity,
 	magSize: Infinity,
 	magazines: Infinity,
@@ -419,7 +419,7 @@ guns.laser = new guns.Gun({
 guns.knife = new guns.Gun({
 	id: 'knife',
 	name: 'Knife',
-	description: `Quickly stab enemies with a knife<br>Doesn't use ${text('ammo', 'ammo')}`,
+	description: `Quickly stab enemies with a knife<br>Infinite ${text('ammo', 'ammo')}`,
 	defaultAmmo: Infinity,
 	magSize: Infinity,
 	magazines: Infinity,

@@ -1,6 +1,6 @@
 var collisions = {
 	center: {
-		x: 0, 
+		x: 0,
 		y: 0,
 	},
 	border: {
@@ -79,7 +79,7 @@ var collisions = {
 		this.grid.clear()
 		bullets.list.forEach((b) => this.grid.add(b))
 		// Add mobs to the grid for separation force and proximity checks
-		mobs.list.forEach((m) => { m.isMob = true; this.grid.add(m); })
+		mobs.list.forEach((m) => { m.isMob = true; this.grid.add(m) })
 
 		const explosionsToUpdate = new Set()
 
@@ -87,7 +87,7 @@ var collisions = {
 			bullets.explosionList[i].isExplosion = true
 			this.grid.add(bullets.explosionList[i])
 		}
-		
+
 		const fireList = state.bullets.firePoolList ?? []
 		fireList.forEach((f) => {
 			f.isFirePool = true
@@ -110,11 +110,11 @@ var collisions = {
 
 			// Bullet/Explosion collision via grid
 			this.grid.query(mob.pos.x, mob.pos.y, (e) => {
-				if (mob.class === 'projectile') return 
+				if (mob.class === 'projectile') return
 
 				if (e.isExplosion) {
-					if (!e.targetsPlayerOnly && 
-						e.timeSinceLastAttack <= 
+					if (!e.targetsPlayerOnly &&
+						e.timeSinceLastAttack <=
 						simulation.time - 0.05 &&
 						mob.checkCollision(e)
 					) {
@@ -151,8 +151,6 @@ var collisions = {
 			return true
 		})
 
-		// Update explosion timers only after all mobs have been checked for this frame
-		// This ensures all mobs in the radius take damage before the cooldown starts
 		explosionsToUpdate.forEach(e => e.timeSinceLastAttack = simulation.time)
 
 		bullets.explosionList.forEach((xp) => {

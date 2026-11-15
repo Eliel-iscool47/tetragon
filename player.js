@@ -49,6 +49,22 @@ class Player extends Entity {
 
 	set defaults(val) { throw new Error('player.defaults is read-only') }
 
+	heal(amount) {
+		this.health += amount
+		let healText = '+0'
+		if (Math.round(amount) > 0) {
+			healText = '+' + Math.round(amount)
+		}
+		this.state.particles.spawn(this.pos.x, this.pos.y, {
+			...this.state.particles.textPopup,
+			text: healText,
+			color: 'hsl(120, 100%, 50%)',
+			size: 24,
+			vx: rand(-2, 2),
+			vy: rand(-5, -3)
+		})
+	}
+
 	takeDamage(amount, source) {
 		if (this.isInvulnerable) return
 		let damage = amount * this.damageTaken
@@ -67,23 +83,18 @@ class Player extends Entity {
 		if (source) this._killer = source
 		this.state.upgrades.lastHealthRegen = this.state.simulation.time
 
-		// Trigger a short window of i-frames after taking damage to prevent "shotgunning" from multiple enemies.
-		// This duration is scaled by the Iron Will upgrade.
 		this.setInvulnerable(0.08 * this.state.upgrades.invulnerabilityDuration)
 
-		// Knock back nearby enemies when taking damage to provide breathing room
 		const knockbackRadius = this.size * 2.5
 		const knockbackForce = 45
 		this.state.collisions.grid.query(this.pos.x, this.pos.y, (mob) => {
-			if (mob.isMob && mob.class !== 'projectile') {
-				const dx = mob.pos.x - this.pos.x
-				const dy = mob.pos.y - this.pos.y
-				const distSq = dx * dx + dy * dy
-				if (distSq < knockbackRadius * knockbackRadius && distSq > 0) {
-					const dist = Math.sqrt(distSq)
-					mob.pos.x += (dx / dist) * knockbackForce
-					mob.pos.y += (dy / dist) * knockbackForce
-				}
+			const dx = mob.pos.x - this.pos.x
+			const dy = mob.pos.y - this.pos.y
+			const distSq = dx * dx + dy * dy
+			if (distSq < knockbackRadius * knockbackRadius && distSq > 0) {
+				const dist = Math.sqrt(distSq)
+				mob.pos.x += (dx / dist) * knockbackForce
+				mob.pos.y += (dy / dist) * knockbackForce
 			}
 		})
 	}

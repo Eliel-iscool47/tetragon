@@ -70,6 +70,16 @@ var start, controls, controlDoc, settings, leaderboardButton, leaderboardModal, 
 var settingsMenu
 let remappingAction = null
 
+/**
+ * Returns a styled HTML span for game descriptions.
+ * @param {string} style The CSS class to apply (e.g., 'damage', 'health', 'ammo').
+ * @param {string} message The text to display inside the span.
+ * @returns {string} The HTML string.
+ */
+function text(style, message) {
+	return `<span class="styled-text ${style}">${message}</span>`
+}
+
 //mobile controls
 
 window.mobileControls = null
@@ -126,8 +136,8 @@ window.addEventListener('load', () => {
 	if (fireBtn) {
 		const startFire = (e) => {
 			e.preventDefault()
-			if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire') 
-			}
+			if (!input.pressedKeys.includes('MobileFire')) input.pressedKeys.push('MobileFire')
+		}
 		const stopFire = (e) => {
 			e.preventDefault()
 			input.pressedKeys = input.pressedKeys.filter(k => k !== 'MobileFire')
@@ -194,7 +204,7 @@ window.addEventListener('load', () => {
 		if (simulation.interval) clearInterval(simulation.interval)
 		simulation.selectGamemode()
 	}
-	
+
 
 
 

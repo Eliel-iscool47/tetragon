@@ -52,7 +52,6 @@ var hud = {
 	},
 	healthBar() {
 		const ts = simulation.timeScale
-		// Correct frame-independent lerp formula
 		this.displayHealth = lerp(this.displayHealth, state.player.health, 1 - Math.pow(1 - 0.1, ts))
 		this.displayMaxHealth = lerp(this.displayMaxHealth, state.player.maxHealth, 1 - Math.pow(1 - 0.1, ts))
 		this.health.style.width = `${this.displayHealth * 2}px`

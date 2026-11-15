@@ -1,5 +1,5 @@
 /**
- * Base class for all physical objects in the game world.
+ * Base class for every object
  */
 class Entity {
 	constructor(state, x, y, config) {
@@ -13,7 +13,7 @@ class Entity {
 	}
 
 	/**
-	 * Handles standard canvas transformations and styles.
+	 * Does standard canvas transformations and styles.
 	 * @param {Function} callback The specific drawing logic for the subclass.
 	 */
 	drawSelf(callback) {

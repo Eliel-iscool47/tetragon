@@ -87,7 +87,7 @@ var simulation = {
 						<div style="margin-bottom: 10px;">${text('health', 'Health')}: <span style="float: right;">${Math.round(state.player.health)} / ${Math.round(state.player.maxHealth)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage', 'Global Damage')}: <span style="float: right;">x${state.player.damageDone.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('damage-taken', 'Damage Taken')}: <span style="float: right;">x${state.player.damageTaken.toFixed(2)}</span></div>
-						<div style="margin-bottom: 10px;">${text('movement-speed', 'Speed')}: <span style="float: right;">${state.player.velocity.toFixed(2)}</span></div>
+						<div style="margin-bottom: 10px;">${text('speed', 'Speed')}: <span style="float: right;">${state.player.velocity.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('fire-rate', 'Fire Rate')}: <span style="float: right;">x${upgrades.fireRate.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('reload', 'Reload Speed')}: <span style="float: right;">x${upgrades.reloadSpeed.toFixed(2)}</span></div>
 						<div style="margin-bottom: 10px;">${text('magnet-range', 'Magnet Range')}: <span style="float: right;">${Math.round(upgrades.magnetRange)}px</span></div>
@@ -128,7 +128,7 @@ var simulation = {
 	get timeScale() { return this._timeScale },
 
 	get scoreMultiplier() {
-		return this.gamemode == 'hardcore' ? 3 : 1
+		return this.gamemode == 'hardcore' ? 2 : 1
 	},
 
 	shake: 0,
@@ -272,11 +272,6 @@ var simulation = {
 			}
 		},
 	],
-
-
-	_isTutorialWalk: false,
-	set isTutorialWalk(val) { this._isTutorialWalk = val },
-	get isTutorialWalk() { return this._isTutorialWalk },
 
 	_isTutorialComplete: false,
 	set isTutorialComplete(val) { this._isTutorialComplete = val },
@@ -574,8 +569,7 @@ var simulation = {
 					level.make()
 				}
 			}
-		}
-		level.time = this.time
+		} else level.time = this.time
 
 		if (guns.equippedGun == guns.shotgun) {
 			draw.beginPath()

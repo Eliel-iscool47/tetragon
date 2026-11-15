@@ -21,7 +21,7 @@ const default_mobSpawn = {
 			this[choice](x, y)
 		}
 	},
-		tutorial(x, y) {
+	tutorial(x, y) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'tutorial',
 			health: 1,
@@ -81,7 +81,7 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'default',
 			health: 10,
-			damage: 8,
+			damage: 12,
 			attackRate: 2,
 			color: 'hsl(120, 100%, 35%)',
 			draw: function () {
@@ -97,7 +97,7 @@ const default_mobSpawn = {
 			type: 'bullet',
 			class: 'projectile',
 			health: 1,
-			damage: 5,
+			damage: 15,
 			size: 10,
 			speed: 5,
 			dropChance: 0,
@@ -136,8 +136,8 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'tank',
 			health: 80,
-			damage: 20,
-			damageTaken: 0.7,
+			damage: 45,
+			damageTaken: 1,
 			size: 55,
 			speed: 2,
 			dropChance: 2,
@@ -157,12 +157,11 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'archer',
 			health: 10,
-			damage: 5,
+			damage: 16,
 			size: 30,
 			speed: 5,
 			dropChance: 0.8,
 			attackRate: 1.5,
-			attackType: 'ranged',
 			color: 'hsl(300, 100%, 50%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
@@ -190,7 +189,7 @@ const default_mobSpawn = {
 			type: 'arrow',
 			class: 'projectile',
 			health: 1,
-			damage: 5,
+			damage: 18,
 			size: 8,
 			speed: 12,
 			dropChance: 0,
@@ -214,7 +213,7 @@ const default_mobSpawn = {
 			type: 'grenade',
 			class: 'projectile',
 			health: 1,
-			damage: 5,
+			damage: 30,
 			size: 15,
 			speed: 5,
 			dropChance: 0,
@@ -243,20 +242,23 @@ const default_mobSpawn = {
 					draw.fillStyle = 'black'
 					draw.fillRect(-2, -this.size / 2 - 2, 4, 4)
 				}.bind(this))
-			}
+			},
+			die() {
+				bullets.explosion(this.pos.x, this.pos.y, 2.5, this.damage, true)
+				this.state.upgrades.lastKill = simulation.time
+			},
 		}))
 	},
 	grenadier(x, y) {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'grenadier',
-			health: 100,
+			health: 30,
 			damage: 20,
-			damageTaken: 1.2,
+			damageTaken: 1,
 			size: 40,
 			speed: 2,
 			dropChance: 1.1,
 			attackRate: 0.6,
-			attackType: 'ranged',
 			color: 'hsl(90, 100%, 50%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
@@ -285,12 +287,11 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'summoner boss',
 			class: 'boss',
-			health: 25,
-			damage: 15,
+			health: 40,
+			damage: 35,
 			size: 40,
 			speed: 3,
 			attackRate: 0.5,
-			attackType: 'summon',
 			color: 'hsl(0, 0%, 35%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
@@ -320,8 +321,8 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'pentagon boss',
 			class: 'boss',
-			health: 30,
-			damage: 10,
+			health: 55,
+			damage: 40,
 			size: 50,
 			speed: 2,
 			attackRate: 0.4,
@@ -388,7 +389,7 @@ const default_mobSpawn = {
 			type: 'pentagon laser',
 			class: 'projectile',
 			health: 1,
-			damage: 6,
+			damage: 24,
 			size: 1,
 			length: 2000,
 			speed: 0,
@@ -451,19 +452,18 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'hexagon boss',
 			class: 'boss',
-			health: 40,
-			damage: 30,
+			health: 60,
+			damage: 55,
 			size: 65,
 			speed: 3,
 			attackRate: 2,
-			attackType: 'summon',
 			color: 'hsl(25, 100%, 45%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
 				this.angle = angle(this.pos.x, this.pos.y, this.state.player.pos.x, this.state.player.pos.y)
 				if (this.state.simulation.time - this.timeSinceLastAttack > 1 / this.attackRate) {
 					for (let i = 0; i < 3; i++) {
-						const minionAngle = this.angle + (i - 1) * 0.4
+						const minionAngle = this.angle + (2 * Math.PI / i)
 						spawn.hexagonMinion(this.pos.x, this.pos.y, minionAngle)
 					}
 					this.timeSinceLastAttack = this.state.simulation.time
@@ -484,9 +484,9 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'hexagon minion',
 			class: 'projectile',
-			health: 5,
-			damage: 1,
-			damageTaken: 5,
+			health: 8,
+			damage: 6,
+			damageTaken: 1,
 			size: 10,
 			speed: 7,
 			dropChance: 0.3,
@@ -527,12 +527,11 @@ const default_mobSpawn = {
 			type: 'octagon boss',
 			class: 'boss',
 			health: 90,
-			damage: 30,
-			damageTaken: 0.8,
+			damage: 45,
+			damageTaken: 1,
 			size: 70,
 			speed: 3,
 			attackRate: 0.8,
-			attackType: 'ranged',
 			color: 'hsl(150, 100%, 45%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
@@ -560,8 +559,8 @@ const default_mobSpawn = {
 			type: 'octagon bullet',
 			class: 'projectile',
 			health: 5,
-			damage: 6,
-			damageTaken: 5,
+			damage: 13,
+			damageTaken: 1,
 			size: 10,
 			speed: 7,
 			dropChance: 0.3,
@@ -583,9 +582,9 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'triangle boss',
 			class: 'boss',
-			health: 30,
-			damage: 10,
-			damageTaken: 1.5,
+			health: 55,
+			damage: 15,
+			damageTaken: 1,
 			size: 60,
 			speed: 8,
 			attackRate: 5,
@@ -610,9 +609,9 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'void boss',
 			class: 'boss',
-			health: 115,
-			damage: 10,
-			size: 65,
+			health: 120,
+			damage: 27,
+			size: 80,
 			speed: 0.9,
 			attackRate: 0.5,
 			color: 'hsl(0, 0%, 10%)',
@@ -643,12 +642,11 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'sniper boss',
 			class: 'boss',
-			health: 40,
+			health: 45,
 			damage: 15,
 			size: 40,
 			speed: 3,
 			attackRate: 0.5,
-			attackType: 'ranged',
 			color: 'hsl(260, 100%, 30%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
@@ -674,9 +672,9 @@ const default_mobSpawn = {
 			type: 'sniper bullet',
 			class: 'projectile',
 			health: 1,
-			damage: 12,
+			damage: 22,
 			size: 12,
-			speed: 15,
+			speed: 45,
 			dropChance: 0,
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			attackRate: 5,
@@ -697,10 +695,10 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'twin boss',
 			class: 'boss',
-			health: 60,
-			damage: 12,
+			health: 75,
+			damage: 18,
 			size: 40,
-			speed: 4,
+			speed: 7,
 			attackRate: 0.8,
 			color: 'hsl(205, 100%, 35%)',
 			update(timeScale = 1) {
@@ -751,11 +749,11 @@ const default_mobSpawn = {
 		mobs.list.push(new mobs.Mob(state, x, y, {
 			type: 'minefield boss',
 			class: 'boss',
-			health: 30,
-			damage: 10,
+			health: 55,
+			damage: 16,
 			size: 35,
-			speed: 3,
-			attackRate: 0.5,
+			speed: 4,
+			attackRate: 0.8,
 			color: 'hsl(0, 42%, 36%)',
 			update: function (timeScale = 1) {
 				const ts = timeScale ?? this.state.simulation.timeScale
@@ -780,12 +778,12 @@ const default_mobSpawn = {
 			class: 'projectile',
 			health: 1,
 			damage: 20,
-			size: 20,
+			size: 25,
 			speed: 0,
 			dropChance: 0,
 			angle: angle(x, y, state.player.pos.x, state.player.pos.y),
 			attackRate: 5,
-			color: 'hsl(0, 100%, 25%)',
+			color: 'hsl(0, 0%, 0%)',
 			draw: function () {
 				this.drawSelf(function () {
 					draw.beginPath()
@@ -901,9 +899,8 @@ const default_mobSpawn = {
 			health: 40,
 			damage: 5,
 			size: 35,
-			speed: 0, /* Turrets are stationary */
+			speed: 0,
 			attackRate: 3,
-			attackType: 'ranged',
 			color: 'hsl(230, 100%, 30%)',
 			update: function (timeScale = 1) {
 				// timeScale not strictly needed for position (speed=0) but logic follows

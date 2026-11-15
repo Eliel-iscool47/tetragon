@@ -17,7 +17,6 @@ var mobs = {
 				isInvulnerable: false,
 				dropChance: 1,
 				attackRate: 1,
-				attackType: "melee",
 				color: "black",
 				...config
 			})
@@ -28,7 +27,7 @@ var mobs = {
 
 			if (this.state.simulation.gamemode === 'hardcore') {
 				this.speed *= 1.35
-				this.damage *= 2
+				this.damage *= 1.5
 			}
 		}
 		/**
@@ -90,7 +89,7 @@ var mobs = {
 		die() {
 			const { upgrades, powerUps, simulation } = this.state
 
-			if (upgrades.isKillDefense) upgrades.lastKill = simulation.time
+			upgrades.lastKill = simulation.time
 
 			if (this.class !== "projectile") {
 				const chance = upgrades.powerUpSpawnChance * this.dropChance
@@ -109,7 +108,6 @@ var mobs = {
 				}
 			}
 
-			// Trigger a small screen shake on mob death
 			if (this.class === "boss") simulation.shake = 10
 		}
 

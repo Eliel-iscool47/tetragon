@@ -7,7 +7,7 @@ A fast-paced geometric survival shooter built with a modular, data-driven archit
 
 The game's controls are the following:
 
----
+
 * **Move**: `W` (up), `A` (left), `S` (down), `D` (right) or arrow keys
 * **Fire**: `Left Click` or `F`
 * **Switch Equipped Gun**: `Q`for previous gun and `E` for next gun
@@ -17,13 +17,17 @@ The game's controls are the following:
 * **Restart**: `R` 
 * **Main Menu**: `M` 
 
+
 They can be changed in the settings
 
-# Recent Updates (v1.16: How to play! (part 2))
+# Recent Updates (v1.17: Ramping Up)
 ## 1: Bug Fixes
+- The heal particles work properly
+- Level advancement works properly
 ## 2: Additions
-* **Tutorial Update**: Tutorial teaches *more* than before, like which power-ups do what, and how to beat levels.
----
+- none
+## 3: Tweaks
+- Some mobs do more damage and have more health
 
 # Technical Overview
 

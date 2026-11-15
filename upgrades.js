@@ -367,7 +367,7 @@ upgrades.reactiveArmor = new upgrades.Upgrade({
 upgrades.liquidCooling = new upgrades.Upgrade({
 	id: 'liquidCooling',
 	name: 'Liquid Cooling',
-	description: `1.5x ${text('movement-speed', 'movement speed')}, 2x ${text('fire-rate', 'fire rate')}, and 1.3x ${text('magnet-range', 'magnet range')}`,
+	description: `1.5x ${text('speed', 'movement speed')}, 2x ${text('fire-rate', 'fire rate')}, and 1.3x ${text('magnet-range', 'magnet range')}`,
 	effect() {
 		state.player.velocity *= 1.5
 		upgrades.fireRate *= 2
@@ -527,7 +527,7 @@ upgrades.powerSurge = new upgrades.Upgrade({
 	id: 'powerSurge',
 	name: 'Power Surge',
 	stackSize: 3,
-	description: `1.2x ${text('fire-rate', 'fire rate')} and ${text('movement-speed', 'movement speed')}`,
+	description: `1.2x ${text('fire-rate', 'fire rate')} and ${text('speed', 'movement speed')}`,
 	effect() {
 		upgrades.fireRate *= 1.2
 		state.player.velocity *= 1.2
@@ -632,7 +632,7 @@ upgrades.superball = new upgrades.Upgrade({
 	id: 'superball',
 	name: 'Superball',
 	stackSize: 5,
-	description: `+3 ${text('bullets', 'bouncy ball')} ${text('bounces', 'bounces')}`,
+	description: `+3 ${text('bullets', 'bouncy ball')} bounces`,
 	requirements() { return upgrades.unlocked.includes('bouncy balls') },
 	effect() { guns.bouncyBalls.piercing += 3 }
 })
